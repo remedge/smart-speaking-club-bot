@@ -6,14 +6,13 @@ namespace App\Shared\Application\Command\GenericText;
 
 use App\Shared\Application\Clock;
 use App\Shared\Application\UuidProvider;
+use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
 use DateTimeImmutable;
-use Longman\TelegramBot\Telegram;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Longman\TelegramBot\Request;
 
 #[AsMessageHandler]
 class GenericTextCommandHandler
@@ -21,7 +20,7 @@ class GenericTextCommandHandler
     public function __construct(
         private UserRepository $userRepository,
         private SpeakingClubRepository $speakingClubRepository,
-        private Telegram $telegram,
+        private TelegramInterface $telegram,
         private UuidProvider $uuidProvider,
         private Clock $clock,
     )
@@ -40,10 +39,10 @@ class GenericTextCommandHandler
             $user->setActualSpeakingClubData($data);
             $this->userRepository->save($user);
 
-            Request::sendMessage([
-                'chat_id' => $command->chatId,
-                'text' => 'Введите описание клуба',
-            ]);
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: 'Введите описание клуба'
+            );
             return;
         }
 
@@ -55,19 +54,19 @@ class GenericTextCommandHandler
             $user->setActualSpeakingClubData($data);
             $this->userRepository->save($user);
 
-            Request::sendMessage([
-                'chat_id' => $command->chatId,
-                'text' => 'Введите максимальное количество участников',
-            ]);
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: 'Введите максимальное количество участников'
+            );
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION) {
             if (!is_int((int)$command->text)) {
-                Request::sendMessage([
-                    'chat_id' => $command->chatId,
-                    'text' => 'Введите число',
-                ]);
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Введите число'
+                );
             }
 
             $data = $user->getActualSpeakingClubData();
@@ -77,10 +76,10 @@ class GenericTextCommandHandler
             $user->setActualSpeakingClubData($data);
             $this->userRepository->save($user);
 
-            Request::sendMessage([
-                'chat_id' => $command->chatId,
-                'text' => 'Введите дату проведения в формате: 15-10-2023 10:00',
-            ]);
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: 'Введите дату проведения в формате: 15-10-2023 10:00'
+            );
             return;
         }
 
@@ -88,18 +87,18 @@ class GenericTextCommandHandler
             $date = DateTimeImmutable::createFromFormat('d-m-Y H:i', $command->text);
 
             if ($date < $this->clock->now()) {
-                Request::sendMessage([
-                    'chat_id' => $command->chatId,
-                    'text' => 'Дата не может быть в прошлом, попробуйте еще раз',
-                ]);
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Дата не может быть в прошлом, попробуйте еще раз'
+                );
                 return;
             }
 
             if ($date === false) {
-                Request::sendMessage([
-                    'chat_id' => $command->chatId,
-                    'text' => 'Введите дату в формате: 15-10-2023 10:00',
-                ]);
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Введите дату в формате: 15-10-2023 10:00'
+                );
                 return;
             }
 
@@ -117,11 +116,10 @@ class GenericTextCommandHandler
             $user->setActualSpeakingClubData([]);
             $this->userRepository->save($user);
 
-            Request::sendMessage([
-                'chat_id' => $command->chatId,
-                'text' => 'Клуб успешно создан',
-            ]);
-            return;
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: 'Клуб успешно создан'
+            );
         }
     }
 }

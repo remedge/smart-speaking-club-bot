@@ -6,11 +6,11 @@ namespace App\Shared\Presentation\Http;
 
 use App\Shared\Application\Command\GenericText\GenericTextCommand;
 use App\Shared\Application\Command\Start\StartCommand;
+use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Command\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
 use App\User\Application\Command\InitClubCreation\InitClubCreationCommand;
 use Longman\TelegramBot\Entities\Update;
-use Longman\TelegramBot\Telegram;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +21,7 @@ class WebhookController
 {
     public function __construct(
         private MessageBusInterface $commandBus,
-        private Telegram $telegram,
+        private TelegramInterface $telegram,
         private string $botUsername,
     )
     {
@@ -30,7 +30,7 @@ class WebhookController
     #[Route(path: '/webhook', methods: [Request::METHOD_POST])]
     public function __invoke(Request $request): Response
     {
-        $input = \Longman\TelegramBot\Request::getInput();
+        $input = $this->telegram->getInput();
         if ($input === '') {
             throw new BadRequestException('No input provided');
         }

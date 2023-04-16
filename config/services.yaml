@@ -44,10 +44,9 @@ services:
 
     App\Shared\Presentation\Http\SetWebhookController:
         tags: [ 'controller.service_arguments' ]
-        arguments:
-            $webhookUrl: '%env(TELEGRAM_WEBHOOK_URL)%'
 
-    Longman\TelegramBot\Telegram:
+    App\Shared\Infrastructure\Telegram\LongmanTelegram:
         arguments:
-            $api_key: '%env(TELEGRAM_BOT_API_KEY)%'
-            $bot_username: '%env(TELEGRAM_BOT_USERNAME)%'
+            $apiKey: '%env(TELEGRAM_BOT_API_KEY)%'
+            $botUsername: '%env(TELEGRAM_BOT_USERNAME)%'
+            $webhookUrl: '%env(TELEGRAM_WEBHOOK_URL)%'
