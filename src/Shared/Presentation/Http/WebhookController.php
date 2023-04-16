@@ -7,6 +7,7 @@ namespace App\Shared\Presentation\Http;
 use App\Shared\Application\Command\GenericText\GenericTextCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
+use App\Shared\Domain\UserRolesProvider;
 use App\SpeakingClub\Application\Command\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\ShowSpeakingClub\ShowSpeakingClubCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
@@ -24,6 +25,7 @@ class WebhookController
     public function __construct(
         private MessageBusInterface $commandBus,
         private TelegramInterface $telegram,
+        private UserRolesProvider $userRolesProvider,
         private string $botUsername,
     ) {
     }
@@ -36,6 +38,14 @@ class WebhookController
             throw new BadRequestException('No input provided');
         }
         $update = new Update(json_decode($input, true), $this->botUsername);
+
+        if (property_exists($update, 'callback_query') === true) {
+            $username = $update->getCallbackQuery()->getMessage()->getChat()->getUsername();
+        } else {
+            $username = $update->getMessage()->getChat()->getUsername();
+        }
+
+        $isAdmin = $this->userRolesProvider->isUserAdmin($username);
 
         if (property_exists($update, 'callback_query') === true) {
             $callbackRawData = $update->getCallbackQuery()->getData();

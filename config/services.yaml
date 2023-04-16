@@ -50,3 +50,7 @@ services:
             $apiKey: '%env(TELEGRAM_BOT_API_KEY)%'
             $botUsername: '%env(TELEGRAM_BOT_USERNAME)%'
             $webhookUrl: '%env(TELEGRAM_WEBHOOK_URL)%'
+
+    App\Shared\Infrastructure\EnvUserRoleProvider:
+        arguments:
+            $adminUsernames: '%env(json:ADMIN_USERNAMES)%'
