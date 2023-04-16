@@ -57,6 +57,19 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "phpstan": "vendor/bin/phpstan analyse -l 6 src tests",
+        "psalm": "vendor/bin/psalm --show-info=true",
+        "ecs": "vendor/bin/ecs check src tests --fix",
+        "tests": "vendor/bin/phpunit",
+        "code-style": [
+            "@phpstan",
+            "@psalm",
+            "@ecs"
+        ],
+        "check-all": [
+            "@code-style",
+            "@tests"
         ]
     },
     "conflict": {
@@ -70,10 +83,13 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "6.2.*",
         "symfony/css-selector": "6.2.*",
         "symfony/maker-bundle": "^1.48",
-        "symfony/phpunit-bridge": "^6.2"
+        "symfony/phpunit-bridge": "^6.2",
+        "symplify/easy-coding-standard": "^11.3",
+        "vimeo/psalm": "^5.9"
     }
 }

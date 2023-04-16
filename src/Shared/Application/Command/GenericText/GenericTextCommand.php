@@ -9,7 +9,6 @@ class GenericTextCommand
     public function __construct(
         public int $chatId,
         public string $text,
-    )
-    {
+    ) {
     }
 }

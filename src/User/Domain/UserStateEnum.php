@@ -12,11 +12,16 @@ enum UserStateEnum: string
     case RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION = 'RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION';
     case RECEIVING_DATE_FOR_CREATION = 'RECEIVING_DATE_FOR_CREATION';
 
+    /**
+     * @return array<string, string>
+     */
     public static function getAsArray(): array
     {
         return array_reduce(
             self::cases(),
-            static fn (array $choices, UserStateEnum $type) => $choices + [$type->name => $type->value],
+            static fn (array $choices, UserStateEnum $type) => $choices + [
+                $type->name => $type->value,
+            ],
             [],
         );
     }

@@ -9,6 +9,9 @@ use Ramsey\Uuid\UuidInterface;
 
 class User
 {
+    /**
+     * @param array<mixed> $actualSpeakingClubData
+     */
     public function __construct(
         private UuidInterface $id,
         private int $chatId,
@@ -18,8 +21,7 @@ class User
         private DateTimeImmutable $createdAt,
         private UserStateEnum $state = UserStateEnum::IDLE,
         private array $actualSpeakingClubData = [],
-    )
-    {
+    ) {
     }
 
     public function getId(): UuidInterface
@@ -57,11 +59,17 @@ class User
         $this->state = $state;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getActualSpeakingClubData(): array
     {
         return $this->actualSpeakingClubData;
     }
 
+    /**
+     * @param array<mixed> $actualSpeakingClubData
+     */
     public function setActualSpeakingClubData(array $actualSpeakingClubData): void
     {
         $this->actualSpeakingClubData = $actualSpeakingClubData;

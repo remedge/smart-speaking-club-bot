@@ -15,8 +15,7 @@ class InitClubCreationCommandHandler
     public function __construct(
         private UserRepository $userRepository,
         private TelegramInterface $telegram,
-    )
-    {
+    ) {
     }
 
     public function __invoke(InitClubCreationCommand $command): void

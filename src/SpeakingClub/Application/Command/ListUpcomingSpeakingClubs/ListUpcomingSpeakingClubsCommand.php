@@ -8,7 +8,6 @@ class ListUpcomingSpeakingClubsCommand
 {
     public function __construct(
         public int $chatId,
-    )
-    {
+    ) {
     }
 }

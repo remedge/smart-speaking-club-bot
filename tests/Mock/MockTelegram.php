@@ -15,7 +15,6 @@ class MockTelegram implements TelegramInterface
 
     public function sendMessage(int $chatId, string $text, ?array $replyMarkup = null): void
     {
-        // TODO: Implement sendMessage() method.
     }
 
     public function getInput(): string

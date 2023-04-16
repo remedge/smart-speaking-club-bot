@@ -15,8 +15,7 @@ class SpeakingClub
         private string $description,
         private int $maxParticipantsCount,
         private DateTimeImmutable $date,
-    )
-    {
+    ) {
     }
 
     public function getId(): UuidInterface

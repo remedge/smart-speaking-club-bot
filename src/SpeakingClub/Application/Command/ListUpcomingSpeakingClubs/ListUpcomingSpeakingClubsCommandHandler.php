@@ -16,8 +16,7 @@ class ListUpcomingSpeakingClubsCommandHandler
         private SpeakingClubRepository $speakingClubRepository,
         private Clock $clock,
         private TelegramInterface $telegram,
-    )
-    {
+    ) {
     }
 
     public function __invoke(ListUpcomingSpeakingClubsCommand $command): void
@@ -29,8 +28,8 @@ class ListUpcomingSpeakingClubsCommandHandler
             $buttons[] = [
                 [
                     'text' => sprintf('%s - %s', $speakingClub->getName(), $speakingClub->getDate()->format('d.m.Y H:i')),
-                    'callback_data' => 'identifier'
-                ]
+                    'callback_data' => 'identifier',
+                ],
             ];
         }
 

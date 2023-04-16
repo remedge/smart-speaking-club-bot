@@ -10,5 +10,8 @@ interface TelegramInterface
 
     public function setWebhook(): string;
 
+    /**
+     * @param array<mixed>|null $replyMarkup
+     */
     public function sendMessage(int $chatId, string $text, ?array $replyMarkup = null): void;
 }

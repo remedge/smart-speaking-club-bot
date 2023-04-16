@@ -12,15 +12,14 @@ class StartCommandHandler
 {
     public function __construct(
         private readonly TelegramInterface $telegram,
-    )
-    {
+    ) {
     }
 
     public function __invoke(StartCommand $command): void
     {
         $this->telegram->sendMessage(
             chatId: $command->chatId,
-            text:  'Hello world'
+            text: 'Hello world'
         );
     }
 }

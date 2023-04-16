@@ -8,7 +8,6 @@ class InitClubCreationCommand
 {
     public function __construct(
         public int $chatId,
-    )
-    {
+    ) {
     }
 }

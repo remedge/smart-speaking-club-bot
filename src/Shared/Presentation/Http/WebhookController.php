@@ -23,8 +23,7 @@ class WebhookController
         private MessageBusInterface $commandBus,
         private TelegramInterface $telegram,
         private string $botUsername,
-    )
-    {
+    ) {
     }
 
     #[Route(path: '/webhook', methods: [Request::METHOD_POST])]

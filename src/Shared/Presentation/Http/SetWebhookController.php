@@ -14,8 +14,7 @@ class SetWebhookController
 {
     public function __construct(
         private TelegramInterface $telegram,
-    )
-    {
+    ) {
     }
 
     #[Route(path: '/set-webhook', methods: [Request::METHOD_POST])]

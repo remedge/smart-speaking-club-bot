@@ -18,8 +18,7 @@ class LongmanTelegram implements TelegramInterface
         string $apiKey,
         string $botUsername,
         private readonly string $webhookUrl,
-    )
-    {
+    ) {
         $this->telegram = new Telegram(
             api_key: $apiKey,
             bot_username: $botUsername

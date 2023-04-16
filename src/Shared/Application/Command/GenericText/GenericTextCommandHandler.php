@@ -23,8 +23,7 @@ class GenericTextCommandHandler
         private TelegramInterface $telegram,
         private UuidProvider $uuidProvider,
         private Clock $clock,
-    )
-    {
+    ) {
     }
 
     public function __invoke(GenericTextCommand $command): void
@@ -62,7 +61,7 @@ class GenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION) {
-            if (!is_int((int)$command->text)) {
+            if (!is_int((int) $command->text)) {
                 $this->telegram->sendMessage(
                     chatId: $command->chatId,
                     text: 'Введите число'
@@ -70,7 +69,7 @@ class GenericTextCommandHandler
             }
 
             $data = $user->getActualSpeakingClubData();
-            $data['max_participants_count'] = (int)$command->text;
+            $data['max_participants_count'] = (int) $command->text;
 
             $user->setState(UserStateEnum::RECEIVING_DATE_FOR_CREATION);
             $user->setActualSpeakingClubData($data);
@@ -107,7 +106,7 @@ class GenericTextCommandHandler
                 id: $this->uuidProvider->provide(),
                 name: $data['name'],
                 description: $data['description'],
-                maxParticipantsCount: (int)$data['max_participants_count'],
+                maxParticipantsCount: (int) $data['max_participants_count'],
                 date: $date,
             );
             $this->speakingClubRepository->save($speakingClub);
