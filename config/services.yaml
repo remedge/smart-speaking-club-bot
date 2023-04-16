@@ -16,9 +16,38 @@ services:
     App\:
         resource: '../src/'
         exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
+#            - '../src/DependencyInjection/'
+#            - '../src/Entity/'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Doctrine
+    _instanceof:
+        App\Shared\Infrastructure\Doctrine\Mapping\DoctrineMapping:
+            tags: [ 'app.doctrine.class-mapping' ]
+
+    doctrine.orm.default_php_metadata_driver:
+        class: App\Shared\Infrastructure\Doctrine\Mapping\PhpMappingDriver
+        bind:
+            $mappings: !tagged_iterator app.doctrine.class-mapping
+
+    App\Shared\Presentation\Http\:
+        resource: '../src/Shared/Presentation/Http/**/*Controller.php'
+        tags: [ 'controller.service_arguments' ]
+
+    App\Shared\Presentation\Http\WebhookController:
+        tags: [ 'controller.service_arguments' ]
+        arguments:
+            $botUsername: '%env(TELEGRAM_BOT_USERNAME)%'
+
+    App\Shared\Presentation\Http\SetWebhookController:
+        tags: [ 'controller.service_arguments' ]
+        arguments:
+            $webhookUrl: '%env(TELEGRAM_WEBHOOK_URL)%'
+
+    Longman\TelegramBot\Telegram:
+        arguments:
+            $api_key: '%env(TELEGRAM_BOT_API_KEY)%'
+            $bot_username: '%env(TELEGRAM_BOT_USERNAME)%'
