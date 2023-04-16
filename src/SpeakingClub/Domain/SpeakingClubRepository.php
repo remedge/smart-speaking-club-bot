@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\SpeakingClub\Domain;
 
 use DateTimeImmutable;
+use Ramsey\Uuid\UuidInterface;
 
 interface SpeakingClubRepository
 {
@@ -14,4 +15,6 @@ interface SpeakingClubRepository
      * @return array<SpeakingClub>
      */
     public function findAllUpcoming(DateTimeImmutable $now): array;
+
+    public function findById(UuidInterface $id): ?SpeakingClub;
 }

@@ -8,9 +8,11 @@ use App\Shared\Application\Command\GenericText\GenericTextCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Command\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
+use App\SpeakingClub\Application\Command\ShowSpeakingClub\ShowSpeakingClubCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
 use App\User\Application\Command\InitClubCreation\InitClubCreationCommand;
 use Longman\TelegramBot\Entities\Update;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +36,26 @@ class WebhookController
             throw new BadRequestException('No input provided');
         }
         $update = new Update(json_decode($input, true), $this->botUsername);
+
+        if (property_exists($update, 'callback_query') === true) {
+            $callbackRawData = $update->getCallbackQuery()->getData();
+            $callbackData = explode(':', $callbackRawData);
+            $action = $callbackData[0];
+            $objectId = $callbackData[1];
+
+            $chatId = $update->getCallbackQuery()->getMessage()->getChat()->getId();
+            $messageId = $update->getCallbackQuery()->getMessage()->getMessageId();
+
+            match ($action) {
+                'show_speaking_club' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
+                    chatId: $chatId,
+                    speakingClubId: Uuid::fromString($objectId),
+                )),
+                default => throw new \Exception('Unknown action'),
+            };
+
+            return new Response();
+        }
 
         $chatId = $update->getMessage()->getChat()->getId();
         $firstName = $update->getMessage()->getChat()->getFirstName();

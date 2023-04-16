@@ -9,6 +9,7 @@ use App\SpeakingClub\Domain\SpeakingClubRepository;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * @extends ServiceEntityRepository<SpeakingClub>
@@ -34,5 +35,10 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
             ->orderBy('speaking_club.date', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findById(UuidInterface $id): ?SpeakingClub
+    {
+        return $this->find($id);
     }
 }

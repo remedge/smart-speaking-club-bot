@@ -28,7 +28,7 @@ class ListUpcomingSpeakingClubsCommandHandler
             $buttons[] = [
                 [
                     'text' => sprintf('%s - %s', $speakingClub->getName(), $speakingClub->getDate()->format('d.m.Y H:i')),
-                    'callback_data' => 'identifier',
+                    'callback_data' => sprintf('show_speaking_club:%s', $speakingClub->getId()->toString()),
                 ],
             ];
         }
