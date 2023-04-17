@@ -22,4 +22,9 @@ interface SpeakingClubRepository
      * @return array<SpeakingClub>
      */
     public function findUserUpcoming(UuidInterface $userId, DateTimeImmutable $now): array;
+
+    /**
+     * @return array<SpeakingClub>
+     */
+    public function findBetweenDates(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array;
 }

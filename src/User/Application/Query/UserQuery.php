@@ -7,6 +7,7 @@ namespace App\User\Application\Query;
 use App\User\Application\Dto\UserDTO;
 use App\User\Domain\Exception\UserNotFoundException;
 use App\User\Domain\UserRepository;
+use Ramsey\Uuid\UuidInterface;
 
 class UserQuery
 {
@@ -21,6 +22,23 @@ class UserQuery
 
         if ($user === null) {
             throw new UserNotFoundException($chatId);
+        }
+
+        return new UserDTO(
+            id: $user->getId(),
+            chatId: $user->getChatId(),
+            firstName: $user->getFirstName(),
+            lastName: $user->getLastName(),
+            username: $user->getUsername(),
+        );
+    }
+
+    public function findById(UuidInterface $id): ?UserDTO
+    {
+        $user = $this->userRepository->findById($id);
+
+        if ($user === null) {
+            return null;
         }
 
         return new UserDTO(

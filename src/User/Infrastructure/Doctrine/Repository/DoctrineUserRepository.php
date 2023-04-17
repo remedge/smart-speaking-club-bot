@@ -9,6 +9,7 @@ use App\User\Domain\User;
 use App\User\Domain\UserRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -42,5 +43,12 @@ class DoctrineUserRepository extends ServiceEntityRepository implements UserRepo
         }
 
         return $user;
+    }
+
+    public function findById(UuidInterface $id): ?User
+    {
+        return parent::findOneBy([
+            'id' => $id,
+        ]);
     }
 }

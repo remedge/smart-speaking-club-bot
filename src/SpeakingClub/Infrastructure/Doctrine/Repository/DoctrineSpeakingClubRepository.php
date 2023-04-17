@@ -55,4 +55,15 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
             ->getQuery()
             ->getResult();
     }
+
+    public function findBetweenDates(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('speaking_club')
+            ->andWhere('speaking_club.date BETWEEN :startDate AND :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->orderBy('speaking_club.date', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

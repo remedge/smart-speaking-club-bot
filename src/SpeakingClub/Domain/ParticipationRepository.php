@@ -17,4 +17,9 @@ interface ParticipationRepository
     public function findByUserIdAndSpeakingClubId(UuidInterface $userId, UuidInterface $speakingClubId): ?Participation;
 
     public function countByClubId(UuidInterface $speakingClubId): int;
+
+    /**
+     * @return array<Participation>
+     */
+    public function findBySpeakingClubId(UuidInterface $speakingClubId): array;
 }

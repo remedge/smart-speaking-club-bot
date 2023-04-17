@@ -72,4 +72,11 @@ class DoctrineParticipationRepository extends ServiceEntityRepository implements
 
         return $count;
     }
+
+    public function findBySpeakingClubId(UuidInterface $speakingClubId): array
+    {
+        return $this->findBy([
+            'speakingClubId' => $speakingClubId,
+        ]);
+    }
 }
