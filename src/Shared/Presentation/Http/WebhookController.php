@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Shared\Presentation\Http;
 
+use App\Shared\Application\CallbackResolver;
 use App\Shared\Application\Command\GenericText\GenericTextCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
 use App\Shared\Domain\UserRolesProvider;
-use App\SpeakingClub\Application\Command\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
-use App\SpeakingClub\Application\Command\ShowSpeakingClub\ShowSpeakingClubCommand;
+use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
+use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
 use App\User\Application\Command\InitClubCreation\InitClubCreationCommand;
 use Longman\TelegramBot\Entities\Update;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,6 +27,7 @@ class WebhookController
         private TelegramInterface $telegram,
         private UserRolesProvider $userRolesProvider,
         private string $botUsername,
+        private CallbackResolver $callbackResolver,
     ) {
     }
 
@@ -46,6 +47,7 @@ class WebhookController
         }
 
         $isAdmin = $this->userRolesProvider->isUserAdmin($username);
+        $this->telegram->setCommandsMenu($isAdmin);
 
         if (property_exists($update, 'callback_query') === true) {
             $callbackRawData = $update->getCallbackQuery()->getData();
@@ -56,13 +58,7 @@ class WebhookController
             $chatId = $update->getCallbackQuery()->getMessage()->getChat()->getId();
             $messageId = $update->getCallbackQuery()->getMessage()->getMessageId();
 
-            match ($action) {
-                'show_speaking_club' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
-                    chatId: $chatId,
-                    speakingClubId: Uuid::fromString($objectId),
-                )),
-                default => throw new \Exception('Unknown action'),
-            };
+            $this->callbackResolver->resolve($action, $chatId, $objectId);
 
             return new Response();
         }
@@ -80,12 +76,23 @@ class WebhookController
             userName: $username,
         ));
 
-        match ($text) {
-            '/start' => $this->commandBus->dispatch(new StartCommand($chatId)),
-            '/create_speaking_club' => $this->commandBus->dispatch(new InitClubCreationCommand($chatId)),
-            '/list_upcoming_speaking_clubs' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand($chatId)),
-            default => $this->commandBus->dispatch(new GenericTextCommand($chatId, $text)),
-        };
+        if ($isAdmin === false) {
+            match ($text) {
+                '/start' => $this->commandBus->dispatch(new StartCommand($chatId)),
+                '/upcoming_clubs' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand($chatId)),
+                '/user_upcoming_clubs' => $this->commandBus->dispatch(new ListUserUpcomingSpeakingClubsCommand($chatId)),
+                default => $this->commandBus->dispatch(new GenericTextCommand($chatId, $text)),
+            };
+
+            return new Response();
+        } else {
+            match ($text) {
+                '/start' => $this->commandBus->dispatch(new StartCommand($chatId)),
+                '/admin_create_speaking_club' => $this->commandBus->dispatch(new InitClubCreationCommand($chatId)),
+                '/admin_list_upcoming_speaking_clubs' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand($chatId)),
+                default => $this->commandBus->dispatch(new GenericTextCommand($chatId, $text)),
+            };
+        }
 
         return new Response();
     }

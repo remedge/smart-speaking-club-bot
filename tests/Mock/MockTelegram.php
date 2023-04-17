@@ -21,4 +21,8 @@ class MockTelegram implements TelegramInterface
     {
         return '';
     }
+
+    public function setCommandsMenu(bool $isAdmin): void
+    {
+    }
 }

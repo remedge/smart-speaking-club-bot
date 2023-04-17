@@ -2,26 +2,29 @@
 
 declare(strict_types=1);
 
-namespace App\SpeakingClub\Application\Command\ListUpcomingSpeakingClubs;
+namespace App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\User\Application\Query\UserQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class ListUpcomingSpeakingClubsCommandHandler
+class ListUserUpcomingSpeakingClubsCommandHandler
 {
     public function __construct(
         private SpeakingClubRepository $speakingClubRepository,
+        private UserQuery $userQuery,
         private Clock $clock,
         private TelegramInterface $telegram,
     ) {
     }
 
-    public function __invoke(ListUpcomingSpeakingClubsCommand $command): void
+    public function __invoke(ListUserUpcomingSpeakingClubsCommand $command): void
     {
-        $speakingClubs = $this->speakingClubRepository->findAllUpcoming($this->clock->now());
+        $user = $this->userQuery->getByChatId($command->chatId);
+        $speakingClubs = $this->speakingClubRepository->findUserUpcoming($user->id, $this->clock->now());
 
         $buttons = [];
         foreach ($speakingClubs as $speakingClub) {
@@ -35,7 +38,7 @@ class ListUpcomingSpeakingClubsCommandHandler
 
         $this->telegram->sendMessage(
             chatId: $command->chatId,
-            text: 'Список ближайших клубов',
+            text: 'Список ближайших клубов, куда вы записаны:',
             replyMarkup: $buttons
         );
     }

@@ -17,4 +17,9 @@ interface SpeakingClubRepository
     public function findAllUpcoming(DateTimeImmutable $now): array;
 
     public function findById(UuidInterface $id): ?SpeakingClub;
+
+    /**
+     * @return array<SpeakingClub>
+     */
+    public function findUserUpcoming(UuidInterface $userId, DateTimeImmutable $now): array;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\SpeakingClub\Infrastructure\Doctrine\Repository;
 
+use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use DateTimeImmutable;
@@ -40,5 +41,18 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
     public function findById(UuidInterface $id): ?SpeakingClub
     {
         return $this->find($id);
+    }
+
+    public function findUserUpcoming(UuidInterface $userId, DateTimeImmutable $now): array
+    {
+        return $this->createQueryBuilder('speaking_club')
+            ->innerJoin(Participation::class, 'participation', 'WITH', 'participation.speakingClubId = speaking_club.id')
+            ->andWhere('speaking_club.date > :now')
+            ->andWhere('participation.userId = :user')
+            ->setParameter('now', $now)
+            ->setParameter('user', $userId)
+            ->orderBy('speaking_club.date', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }

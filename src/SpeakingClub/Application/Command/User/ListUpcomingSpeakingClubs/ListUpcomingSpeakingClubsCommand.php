@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SpeakingClub\Application\Command\ListUpcomingSpeakingClubs;
+namespace App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs;
 
 class ListUpcomingSpeakingClubsCommand
 {
