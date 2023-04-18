@@ -33,18 +33,23 @@ class ListUpcomingSpeakingClubsCommandHandler
             ];
         }
 
+        if (count($speakingClubs) === 0) {
+            $text = 'Пока мы не запланировали ни одного клуба. Попробуйте позже.';
+        } else {
+            $text = 'Список ближайших клубов:';
+        }
+
         if ($command->messageId !== null) {
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Список ближайших клубов',
+                text: $text,
                 replyMarkup: $buttons
             );
-            return;
         } else {
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
-                text: 'Список ближайших клубов',
+                text: $text,
                 replyMarkup: $buttons
             );
         }

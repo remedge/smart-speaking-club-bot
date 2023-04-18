@@ -27,26 +27,47 @@ class RemovePlusOneCommandHandler
         $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId);
 
         if ($speakingClub === null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
+                messageId: $command->messageId,
                 text: 'Клуб не найден',
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
             return;
         }
 
         $participation = $this->participationRepository->findByUserIdAndSpeakingClubId($user->id, $command->speakingClubId);
         if ($participation === null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
+                messageId: $command->messageId,
                 text: 'Вы не записаны на клуб',
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
             return;
         }
 
         if ($participation->isPlusOne() === false) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
+                messageId: $command->messageId,
                 text: 'Вы не добавляли +1 собой',
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
             return;
         }
@@ -54,9 +75,16 @@ class RemovePlusOneCommandHandler
         $participation->setIsPlusOne(false);
         $this->participationRepository->save($participation);
 
-        $this->telegram->sendMessage(
+        $this->telegram->editMessageText(
             chatId: $command->chatId,
-            text: 'Вы успешно удалили +1 человека с собой',
+            messageId: $command->messageId,
+            text: 'Вы успешно убрали +1 человека с собой',
+            replyMarkup: [[
+                [
+                    'text' => 'Перейти к списку ваших клубов',
+                    'callback_data' => 'back_to_my_list',
+                ],
+            ]]
         );
     }
 }

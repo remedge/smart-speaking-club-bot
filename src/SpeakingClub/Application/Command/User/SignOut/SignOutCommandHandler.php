@@ -27,27 +27,48 @@ class SignOutCommandHandler
         $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId);
 
         if ($speakingClub === null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
+                messageId: $command->messageId,
                 text: 'Клуб не найден',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
             return;
         }
 
         $participation = $this->participationRepository->findByUserIdAndSpeakingClubId($user->id, $command->speakingClubId);
         if ($participation === null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
+                messageId: $command->messageId,
                 text: 'Вы не записаны на клуб',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
             return;
         }
 
         $this->participationRepository->remove($participation);
 
-        $this->telegram->sendMessage(
+        $this->telegram->editMessageText(
             chatId: $command->chatId,
+            messageId: $command->messageId,
             text: 'Вы успешно отписаны от разговорного клуба',
+            replyMarkup: [[
+                [
+                    'text' => '<< Перейти к списку ближайших клубов',
+                    'callback_data' => 'back_to_list',
+                ],
+            ]]
         );
     }
 }

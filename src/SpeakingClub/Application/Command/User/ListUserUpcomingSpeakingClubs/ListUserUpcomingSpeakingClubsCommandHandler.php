@@ -36,17 +36,29 @@ class ListUserUpcomingSpeakingClubsCommandHandler
             ];
         }
 
+        if (count($speakingClubs) === 0) {
+            $text = 'Вы не записаны ни на один клуб. Выберите клуб из списка, чтобы записаться.';
+            $buttons = [[
+                [
+                    'text' => 'Перейти к списку блжайших клубов',
+                    'callback_data' => 'back_to_list',
+                ],
+            ]];
+        } else {
+            $text = 'Список ближайших клубов, куда вы записаны:';
+        }
+
         if ($command->messageId !== null) {
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Список ближайших клубов, куда вы записаны:',
+                text: $text,
                 replyMarkup: $buttons
             );
         } else {
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
-                text: 'Список ближайших клубов, куда вы записаны:',
+                text: $text,
                 replyMarkup: $buttons
             );
         }

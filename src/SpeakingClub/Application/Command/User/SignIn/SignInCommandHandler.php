@@ -30,27 +30,48 @@ class SignInCommandHandler
         $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId);
 
         if ($speakingClub === null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
+                messageId: $command->messageId,
                 text: 'Разговорный клуб не найден',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
             return;
         }
 
         $participation = $this->participationRepository->findByUserIdAndSpeakingClubId($user->id, $command->speakingClubId);
         if ($participation !== null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
+                messageId: $command->messageId,
                 text: 'Вы уже записаны на этот разговорный клуб',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ваших клубов',
+                        'callback_data' => 'back_to_my_list',
+                    ],
+                ]]
             );
             return;
         }
 
         $participationCount = $this->participationRepository->countByClubId($command->speakingClubId);
         if ($participationCount >= $speakingClub->getMaxParticipantsCount()) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
-                text: 'Все места на данное мероприятие заняты',
+                messageId: $command->messageId,
+                text: 'К сожалению, все свободные места на данное мероприятие заняты',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
             return;
         }
@@ -62,9 +83,21 @@ class SignInCommandHandler
             isPlusOne: false,
         ));
 
-        $this->telegram->sendMessage(
+        $this->telegram->editMessageText(
             chatId: $command->chatId,
-            text: 'Вы успешно записаны на клуб',
+            messageId: $command->messageId,
+            text: sprintf(
+                '👌 Вы успешно записаны на разговорный клуб "%s", который состоится %s в %s',
+                $speakingClub->getName(),
+                $speakingClub->getDate()->format('d.m.Y'),
+                $speakingClub->getDate()->format('H:i'),
+            ),
+            replyMarkup: [[
+                [
+                    'text' => '<< Перейти к списку ваших клубов',
+                    'callback_data' => 'back_to_my_list',
+                ],
+            ]]
         );
     }
 }

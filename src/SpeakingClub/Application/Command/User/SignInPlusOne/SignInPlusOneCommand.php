@@ -13,6 +13,7 @@ class SignInPlusOneCommand
     public function __construct(
         public int $chatId,
         public UuidInterface $speakingClubId,
+        public int $messageId,
     ) {
     }
 }

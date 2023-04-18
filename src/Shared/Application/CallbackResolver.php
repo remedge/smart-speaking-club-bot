@@ -53,22 +53,27 @@ class CallbackResolver
             SignInCommand::CALLBACK_NAME => $this->commandBus->dispatch(new SignInCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
             )),
             SignInPlusOneCommand::CALLBACK_NAME => $this->commandBus->dispatch(new SignInPlusOneCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
             )),
             SignOutCommand::CALLBACK_NAME => $this->commandBus->dispatch(new SignOutCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
             )),
             AddPlusOneCommand::CALLBACK_NAME => $this->commandBus->dispatch(new AddPlusOneCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
             )),
             RemovePlusOneCommand::CALLBACK_NAME => $this->commandBus->dispatch(new RemovePlusOneCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
             )),
             'back_to_list' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand(
                 chatId: $chatId,
