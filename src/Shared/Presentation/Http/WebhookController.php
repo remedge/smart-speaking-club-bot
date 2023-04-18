@@ -103,11 +103,11 @@ class WebhookController
             return new Response();
         } else {
             match ($text) {
-                InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new InitClubCreationCommand($chatId)
-                ),
                 AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
                     new AdminListUpcomingSpeakingClubsCommand($chatId)
+                ),
+                InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                    new InitClubCreationCommand($chatId)
                 ),
                 default => $this->commandBus->dispatch(new GenericTextCommand($chatId, $text)),
             };

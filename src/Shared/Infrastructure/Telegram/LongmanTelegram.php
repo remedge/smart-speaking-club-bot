@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Telegram;
 
 use App\Shared\Application\Clock;
+use App\Shared\Application\Command\Help\HelpCommand;
+use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
-use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
-use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use Longman\TelegramBot\Entities\BotCommand;
 use Longman\TelegramBot\Entities\BotCommandScope\BotCommandScopeDefault;
 use Longman\TelegramBot\Entities\InlineKeyboard;
@@ -100,12 +100,12 @@ class LongmanTelegram implements TelegramInterface
             'scope' => new BotCommandScopeDefault(),
             'commands' => [
                 new BotCommand([
-                    'command' => InitClubCreationCommand::COMMAND_NAME,
-                    'description' => InitClubCreationCommand::COMMAND_DESCRIPTION,
+                    'command' => StartCommand::COMMAND_NAME,
+                    'description' => StartCommand::COMMAND_DESCRIPTION,
                 ]),
                 new BotCommand([
-                    'command' => AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME,
-                    'description' => AdminListUpcomingSpeakingClubsCommand::COMMAND_DESCRIPTION,
+                    'command' => HelpCommand::COMMAND_NAME,
+                    'description' => HelpCommand::COMMAND_DESCRIPTION,
                 ]),
             ],
         ]);
