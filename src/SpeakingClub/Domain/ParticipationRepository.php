@@ -19,7 +19,7 @@ interface ParticipationRepository
     public function countByClubId(UuidInterface $speakingClubId): int;
 
     /**
-     * @return array<Participation>
+     * @return array<array{id: UuidInterface, username: string, chatId: int, isPlusOne: bool}>
      */
     public function findBySpeakingClubId(UuidInterface $speakingClubId): array;
 }

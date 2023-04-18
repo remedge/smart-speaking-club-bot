@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Application;
 
+use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
+use App\SpeakingClub\Application\Command\Admin\AdminShowSpeakingClub\AdminShowSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\User\AddPlusOne\AddPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
@@ -26,15 +28,19 @@ class CallbackResolver
     public function resolve(string $action, int $chatId, ?string $objectId, int $messageId, bool $isAdmin): void
     {
         if ($isAdmin === true) {
-            //            match ($action) {
-            //                ShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
-            //                    chatId: $chatId,
-            //                    speakingClubId: Uuid::fromString($objectId),
-            //                    messageId: $messageId,
-            //                )),
-            //                default => throw new Exception('Unknown action'),
-            //            };
-            //            return;
+            match ($action) {
+                AdminShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new AdminShowSpeakingClubCommand(
+                    chatId: $chatId,
+                    speakingClubId: Uuid::fromString($objectId),
+                    messageId: $messageId,
+                )),
+                'back_to_admin_list' => $this->commandBus->dispatch(new AdminListUpcomingSpeakingClubsCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                )),
+                default => throw new Exception('Unknown action'),
+            };
+            return;
         }
 
         match ($action) {

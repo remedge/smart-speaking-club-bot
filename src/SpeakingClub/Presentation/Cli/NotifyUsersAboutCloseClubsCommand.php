@@ -8,7 +8,6 @@ use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
-use App\User\Application\Query\UserQuery;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,7 +19,6 @@ class NotifyUsersAboutCloseClubsCommand extends Command
     public function __construct(
         private SpeakingClubRepository $speakingClubRepository,
         private ParticipationRepository $participationRepository,
-        private UserQuery $userQuery,
         private Clock $clock,
         private TelegramInterface $telegram,
     ) {
@@ -41,10 +39,7 @@ class NotifyUsersAboutCloseClubsCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
 
             foreach ($participations as $participation) {
-                $user = $this->userQuery->findById($participation->getUserId());
-                if ($user !== null) {
-                    $this->telegram->sendMessage($user->chatId, sprintf('Разговорный клуб "%s" начнется через 24 часа', $speakingClub->getName()));
-                }
+                $this->telegram->sendMessage($participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 24 часа', $speakingClub->getName()));
             }
         }
 
@@ -60,10 +55,7 @@ class NotifyUsersAboutCloseClubsCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
 
             foreach ($participations as $participation) {
-                $user = $this->userQuery->findById($participation->getUserId());
-                if ($user !== null) {
-                    $this->telegram->sendMessage($user->chatId, sprintf('Разговорный клуб "%s" начнется через 2 часа', $speakingClub->getName()));
-                }
+                $this->telegram->sendMessage($participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 2 часа', $speakingClub->getName()));
             }
         }
 

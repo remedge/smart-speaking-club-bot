@@ -6,6 +6,7 @@ namespace App\SpeakingClub\Infrastructure\Doctrine\Repository;
 
 use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
+use App\User\Domain\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Ramsey\Uuid\UuidInterface;
@@ -75,8 +76,12 @@ class DoctrineParticipationRepository extends ServiceEntityRepository implements
 
     public function findBySpeakingClubId(UuidInterface $speakingClubId): array
     {
-        return $this->findBy([
-            'speakingClubId' => $speakingClubId,
-        ]);
+        return $this->createQueryBuilder('p')
+            ->select('p.id, u.username, u.chatId, p.isPlusOne')
+            ->join(User::class, 'u', 'WITH', 'p.userId = u.id')
+            ->where('p.speakingClubId = :speakingClubId')
+            ->setParameter('speakingClubId', $speakingClubId)
+            ->getQuery()
+            ->getArrayResult();
     }
 }
