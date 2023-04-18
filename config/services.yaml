@@ -54,4 +54,4 @@ services:
 
     App\Shared\Infrastructure\EnvUserRoleProvider:
         arguments:
-            $adminUsernames: '%env(json:ADMIN_USERNAMES)%'
+            $adminChatIds: '%env(json:ADMIN_CHAT_IDS)%'

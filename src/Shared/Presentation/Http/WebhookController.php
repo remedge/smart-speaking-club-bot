@@ -6,13 +6,15 @@ namespace App\Shared\Presentation\Http;
 
 use App\Shared\Application\CallbackResolver;
 use App\Shared\Application\Command\GenericText\GenericTextCommand;
+use App\Shared\Application\Command\Help\HelpCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
 use App\Shared\Domain\UserRolesProvider;
+use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
+use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
-use App\User\Application\Command\InitClubCreation\InitClubCreationCommand;
 use Longman\TelegramBot\Entities\Update;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,24 +43,24 @@ class WebhookController
         $update = new Update(json_decode($input, true), $this->botUsername);
 
         if (property_exists($update, 'callback_query') === true) {
-            $username = $update->getCallbackQuery()->getMessage()->getChat()->getUsername();
+            $chatId = $update->getCallbackQuery()->getMessage()->getChat()->getId();
         } else {
-            $username = $update->getMessage()->getChat()->getUsername();
+            $chatId = $update->getMessage()->getChat()->getId();
         }
 
-        $isAdmin = $this->userRolesProvider->isUserAdmin($username);
-        $this->telegram->setCommandsMenu($isAdmin);
+        $isAdmin = $this->userRolesProvider->isUserAdmin($chatId);
+        $this->telegram->setCommandsMenu();
 
         if (property_exists($update, 'callback_query') === true) {
             $callbackRawData = $update->getCallbackQuery()->getData();
             $callbackData = explode(':', $callbackRawData);
             $action = $callbackData[0];
-            $objectId = $callbackData[1];
+            $objectId = $callbackData[1] ?? null;
 
             $chatId = $update->getCallbackQuery()->getMessage()->getChat()->getId();
             $messageId = $update->getCallbackQuery()->getMessage()->getMessageId();
 
-            $this->callbackResolver->resolve($action, $chatId, $objectId);
+            $this->callbackResolver->resolve($action, $chatId, $objectId, $messageId, $isAdmin);
 
             return new Response();
         }
@@ -76,20 +78,37 @@ class WebhookController
             userName: $username,
         ));
 
+        # main commands
+        if ($text === '/start') {
+            $this->commandBus->dispatch(new StartCommand($chatId, $isAdmin));
+            return new Response();
+        }
+
+        if ($text === '/help') {
+            $this->commandBus->dispatch(new HelpCommand($chatId, $isAdmin));
+            return new Response();
+        }
+
         if ($isAdmin === false) {
             match ($text) {
-                '/start' => $this->commandBus->dispatch(new StartCommand($chatId)),
-                '/upcoming_clubs' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand($chatId)),
-                '/user_upcoming_clubs' => $this->commandBus->dispatch(new ListUserUpcomingSpeakingClubsCommand($chatId)),
-                default => $this->commandBus->dispatch(new GenericTextCommand($chatId, $text)),
+                ListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                    new ListUpcomingSpeakingClubsCommand($chatId)
+                ),
+                ListUserUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                    new ListUserUpcomingSpeakingClubsCommand($chatId)
+                ),
+                default => '',
             };
 
             return new Response();
         } else {
             match ($text) {
-                '/start' => $this->commandBus->dispatch(new StartCommand($chatId)),
-                '/admin_create_speaking_club' => $this->commandBus->dispatch(new InitClubCreationCommand($chatId)),
-                '/admin_list_upcoming_speaking_clubs' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand($chatId)),
+                InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                    new InitClubCreationCommand($chatId)
+                ),
+                AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                    new AdminListUpcomingSpeakingClubsCommand($chatId)
+                ),
                 default => $this->commandBus->dispatch(new GenericTextCommand($chatId, $text)),
             };
         }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\User\Application\Command\InitClubCreation;
+namespace App\User\Application\Command\Admin\InitClubCreation;
 
 use App\Shared\Domain\TelegramInterface;
 use App\User\Domain\UserRepository;

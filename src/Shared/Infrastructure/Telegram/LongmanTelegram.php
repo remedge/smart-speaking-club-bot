@@ -6,6 +6,8 @@ namespace App\Shared\Infrastructure\Telegram;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
+use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use Longman\TelegramBot\Entities\BotCommand;
 use Longman\TelegramBot\Entities\BotCommandScope\BotCommandScopeDefault;
 use Longman\TelegramBot\Entities\InlineKeyboard;
@@ -78,27 +80,34 @@ class LongmanTelegram implements TelegramInterface
         Request::sendMessage($data);
     }
 
-    public function setCommandsMenu(bool $isAdmin): void
+    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void
     {
-        $userCommandsList = [
-            new BotCommand([
-                'command' => '/start',
-                'description' => 'Начать работу с ботом',
-            ]),
-            new BotCommand([
-                'command' => '/upcoming_clubs',
-                'description' => 'Показать список ближайших разговорных клубов',
-            ]),
-            new BotCommand([
-                'command' => '/user_upcoming_clubs',
-                'description' => 'Показать список ближайших разговорных клубов, куда вы записаны',
-            ]),
+        $data = [
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'text' => $text,
         ];
-        $adminCommandsList = [];
+        if (count($replyMarkup) > 0) {
+            $data['reply_markup'] = new InlineKeyboard(...$replyMarkup);
+        }
 
+        Request::editMessageText($data);
+    }
+
+    public function setCommandsMenu(): void
+    {
         Request::setMyCommands([
             'scope' => new BotCommandScopeDefault(),
-            'commands' => $userCommandsList,
+            'commands' => [
+                new BotCommand([
+                    'command' => InitClubCreationCommand::COMMAND_NAME,
+                    'description' => InitClubCreationCommand::COMMAND_DESCRIPTION,
+                ]),
+                new BotCommand([
+                    'command' => AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME,
+                    'description' => AdminListUpcomingSpeakingClubsCommand::COMMAND_DESCRIPTION,
+                ]),
+            ],
         ]);
     }
 }

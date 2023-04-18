@@ -47,8 +47,9 @@ class ShowSpeakingClubCommandHandler
         );
         $totalParticipantsCount = $this->participationRepository->countByClubId($speakingClub->getId());
 
-        $this->telegram->sendMessage(
+        $this->telegram->editMessageText(
             chatId: $command->chatId,
+            messageId: $command->messageId,
             text: sprintf(
                 'Название: %s'
                 . PHP_EOL . 'Описание: %s'
@@ -143,6 +144,13 @@ class ShowSpeakingClubCommandHandler
                 ];
             }
         }
+
+        $buttons[] = [
+            [
+                'text' => '<< Вернуться к списку клубов',
+                'callback_data' => 'back_to_list',
+            ],
+        ];
 
         return $buttons;
     }

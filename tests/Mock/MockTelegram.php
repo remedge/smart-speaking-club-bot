@@ -22,7 +22,11 @@ class MockTelegram implements TelegramInterface
         return '';
     }
 
-    public function setCommandsMenu(bool $isAdmin): void
+    public function setCommandsMenu(): void
+    {
+    }
+
+    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void
     {
     }
 }

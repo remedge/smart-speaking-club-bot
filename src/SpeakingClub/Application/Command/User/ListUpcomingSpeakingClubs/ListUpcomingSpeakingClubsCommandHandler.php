@@ -27,16 +27,26 @@ class ListUpcomingSpeakingClubsCommandHandler
         foreach ($speakingClubs as $speakingClub) {
             $buttons[] = [
                 [
-                    'text' => sprintf('%s - %s', $speakingClub->getName(), $speakingClub->getDate()->format('d.m.Y H:i')),
+                    'text' => sprintf('%s - %s', $speakingClub->getDate()->format('d.m.Y H:i'), $speakingClub->getName()),
                     'callback_data' => sprintf('show_speaking_club:%s', $speakingClub->getId()->toString()),
                 ],
             ];
         }
 
-        $this->telegram->sendMessage(
-            chatId: $command->chatId,
-            text: 'Список ближайших клубов',
-            replyMarkup: $buttons
-        );
+        if ($command->messageId !== null) {
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: 'Список ближайших клубов',
+                replyMarkup: $buttons
+            );
+            return;
+        } else {
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: 'Список ближайших клубов',
+                replyMarkup: $buttons
+            );
+        }
     }
 }

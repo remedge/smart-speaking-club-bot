@@ -15,5 +15,10 @@ interface TelegramInterface
      */
     public function sendMessage(int $chatId, string $text, array $replyMarkup = []): void;
 
-    public function setCommandsMenu(bool $isAdmin): void;
+    /**
+     * @param  array<int, array<int, array<string, string>>> $replyMarkup
+     */
+    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void;
+
+    public function setCommandsMenu(): void;
 }

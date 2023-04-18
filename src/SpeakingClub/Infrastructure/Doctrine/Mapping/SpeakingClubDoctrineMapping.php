@@ -25,7 +25,7 @@ class SpeakingClubDoctrineMapping extends DoctrineMapping
             ->build();
 
         $builder->addField('name', 'string');
-        $builder->addField('description', 'string');
+        $builder->addField('description', 'text');
         $builder->addField('maxParticipantsCount', 'integer');
         $builder->addField('date', 'datetime_immutable');
     }
