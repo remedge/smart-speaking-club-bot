@@ -14,6 +14,7 @@ class ShowSpeakingClubCommand
         public int $chatId,
         public UuidInterface $speakingClubId,
         public int $messageId,
+        public string $backCallback,
     ) {
     }
 }

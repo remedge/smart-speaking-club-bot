@@ -8,6 +8,7 @@ use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
+use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -58,6 +59,11 @@ class HelpCommandHandler
                     '%s - %s',
                     ListUpcomingSpeakingClubsCommand::COMMAND_NAME,
                     ListUpcomingSpeakingClubsCommand::COMMAND_DESCRIPTION
+                ) . PHP_EOL
+                . sprintf(
+                    '%s - %s',
+                    ListUserUpcomingSpeakingClubsCommand::COMMAND_NAME,
+                    ListUserUpcomingSpeakingClubsCommand::COMMAND_DESCRIPTION
                 ) . PHP_EOL,
         };
 

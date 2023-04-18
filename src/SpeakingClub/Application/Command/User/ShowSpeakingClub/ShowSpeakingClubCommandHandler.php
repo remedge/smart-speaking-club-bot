@@ -67,9 +67,10 @@ class ShowSpeakingClubCommandHandler
                     : 'Вы записаны')
             ),
             replyMarkup: $this->chooseButtonsByParticipation(
-                $participation,
-                $speakingClub->getId(),
-                $speakingClub->getMaxParticipantsCount() - $totalParticipantsCount,
+                participation: $participation,
+                speakingClubId: $speakingClub->getId(),
+                availablePlacesCount: $speakingClub->getMaxParticipantsCount() - $totalParticipantsCount,
+                backCallback: $command->backCallback,
             )
         );
     }
@@ -81,6 +82,7 @@ class ShowSpeakingClubCommandHandler
         ?Participation $participation,
         UuidInterface $speakingClubId,
         int $availablePlacesCount,
+        string $backCallback,
     ): array {
         $buttons = [];
 
@@ -148,7 +150,7 @@ class ShowSpeakingClubCommandHandler
         $buttons[] = [
             [
                 'text' => '<< Вернуться к списку клубов',
-                'callback_data' => 'back_to_list',
+                'callback_data' => $backCallback,
             ],
         ];
 

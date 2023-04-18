@@ -6,6 +6,7 @@ namespace App\Shared\Application;
 
 use App\SpeakingClub\Application\Command\User\AddPlusOne\AddPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
+use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\RemovePlusOne\RemovePlusOneCommand;
 use App\SpeakingClub\Application\Command\User\ShowSpeakingClub\ShowSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\User\SignIn\SignInCommand;
@@ -25,22 +26,29 @@ class CallbackResolver
     public function resolve(string $action, int $chatId, ?string $objectId, int $messageId, bool $isAdmin): void
     {
         if ($isAdmin === true) {
-            match ($action) {
-                ShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
-                    chatId: $chatId,
-                    speakingClubId: Uuid::fromString($objectId),
-                    messageId: $messageId,
-                )),
-                default => throw new Exception('Unknown action'),
-            };
-            return;
+            //            match ($action) {
+            //                ShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
+            //                    chatId: $chatId,
+            //                    speakingClubId: Uuid::fromString($objectId),
+            //                    messageId: $messageId,
+            //                )),
+            //                default => throw new Exception('Unknown action'),
+            //            };
+            //            return;
         }
 
         match ($action) {
-            ShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
+            'show_speaking_club' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
                 messageId: $messageId,
+                backCallback: 'back_to_list',
+            )),
+            'show_my_speaking_club' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
+                chatId: $chatId,
+                speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
+                backCallback: 'back_to_my_list',
             )),
             SignInCommand::CALLBACK_NAME => $this->commandBus->dispatch(new SignInCommand(
                 chatId: $chatId,
@@ -63,6 +71,10 @@ class CallbackResolver
                 speakingClubId: Uuid::fromString($objectId),
             )),
             'back_to_list' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand(
+                chatId: $chatId,
+                messageId: $messageId,
+            )),
+            'back_to_my_list' => $this->commandBus->dispatch(new ListUserUpcomingSpeakingClubsCommand(
                 chatId: $chatId,
                 messageId: $messageId,
             )),
