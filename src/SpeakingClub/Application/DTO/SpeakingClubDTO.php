@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\SpeakingClub\Application\DTO;
 
+use DateTimeImmutable;
 use Ramsey\Uuid\UuidInterface;
 
-class ParticipationDTO
+class SpeakingClubDTO
 {
     public function __construct(
         public UuidInterface $id,
-        public string $username,
-        public int $chatId,
-        public bool $isPlusOne,
+        public string $name,
+        public DateTimeImmutable $date,
     ) {
     }
 }

@@ -59,14 +59,19 @@ class CallbackResolver
             'show_speaking_club' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
+                backCallback: 'back_to_list',
                 messageId: $messageId,
+            )),
+            'show_club_separated' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
+                chatId: $chatId,
+                speakingClubId: Uuid::fromString($objectId),
                 backCallback: 'back_to_list',
             )),
             'show_my_speaking_club' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
-                messageId: $messageId,
                 backCallback: 'back_to_my_list',
+                messageId: $messageId,
             )),
             SignInCommand::CALLBACK_NAME => $this->commandBus->dispatch(new SignInCommand(
                 chatId: $chatId,

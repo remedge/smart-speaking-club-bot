@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Doctrine\Repository;
 
-use App\User\Domain\Exception\UserNotFoundException;
 use App\User\Domain\User;
 use App\User\Domain\UserRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -32,17 +31,6 @@ class DoctrineUserRepository extends ServiceEntityRepository implements UserRepo
         return parent::findOneBy([
             'chatId' => $chatId,
         ]);
-    }
-
-    public function getByChatId(int $chatId): User
-    {
-        $user = $this->findByChatId($chatId);
-
-        if ($user === null) {
-            throw new UserNotFoundException($chatId);
-        }
-
-        return $user;
     }
 
     public function findById(UuidInterface $id): ?User

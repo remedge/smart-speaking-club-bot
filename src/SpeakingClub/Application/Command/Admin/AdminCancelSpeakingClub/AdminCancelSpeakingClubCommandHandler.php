@@ -61,6 +61,12 @@ class AdminCancelSpeakingClubCommandHandler
                     $speakingClub->getName(),
                     $speakingClub->getDate()->format('d.m.Y H:i')
                 ),
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
             );
         }
 

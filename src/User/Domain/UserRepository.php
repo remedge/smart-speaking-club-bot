@@ -13,6 +13,4 @@ interface UserRepository
     public function findByChatId(int $chatId): ?User;
 
     public function findById(UuidInterface $id): ?User;
-
-    public function getByChatId(int $chatId): User;
 }

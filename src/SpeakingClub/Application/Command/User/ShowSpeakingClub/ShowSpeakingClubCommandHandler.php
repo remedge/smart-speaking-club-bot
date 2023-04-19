@@ -54,32 +54,43 @@ class ShowSpeakingClubCommandHandler
         );
         $totalParticipantsCount = $this->participationRepository->countByClubId($speakingClub->getId());
 
-        $this->telegram->editMessageText(
-            chatId: $command->chatId,
-            messageId: $command->messageId,
-            text: sprintf(
-                'Название: %s'
-                . PHP_EOL . 'Описание: %s'
-                . PHP_EOL . 'Дата: %s'
-                . PHP_EOL . 'Максимальное количество участников: %s'
-                . PHP_EOL . 'Записалось участников: %s'
-                . PHP_EOL . '%s',
-                $speakingClub->getName(),
-                $speakingClub->getDescription(),
-                $speakingClub->getDate()->format('d.m.Y H:i'),
-                $speakingClub->getMaxParticipantsCount(),
-                $totalParticipantsCount,
-                ($participation === null) ? 'Вы не записаны' : (($participation->isPlusOne() === true)
-                    ? 'Вы записаны с +1 человеком'
-                    : 'Вы записаны')
-            ),
-            replyMarkup: $this->chooseButtonsByParticipation(
-                participation: $participation,
-                speakingClubId: $speakingClub->getId(),
-                availablePlacesCount: $speakingClub->getMaxParticipantsCount() - $totalParticipantsCount,
-                backCallback: $command->backCallback,
-            )
+        $text = sprintf(
+            'Название: %s'
+            . PHP_EOL . 'Описание: %s'
+            . PHP_EOL . 'Дата: %s'
+            . PHP_EOL . 'Максимальное количество участников: %s'
+            . PHP_EOL . 'Записалось участников: %s'
+            . PHP_EOL . '%s',
+            $speakingClub->getName(),
+            $speakingClub->getDescription(),
+            $speakingClub->getDate()->format('d.m.Y H:i'),
+            $speakingClub->getMaxParticipantsCount(),
+            $totalParticipantsCount,
+            ($participation === null) ? 'Вы не записаны' : (($participation->isPlusOne() === true)
+                ? 'Вы записаны с +1 человеком'
+                : 'Вы записаны')
         );
+        $replyMarkup = $this->chooseButtonsByParticipation(
+            participation: $participation,
+            speakingClubId: $speakingClub->getId(),
+            availablePlacesCount: $speakingClub->getMaxParticipantsCount() - $totalParticipantsCount,
+            backCallback: $command->backCallback,
+        );
+
+        if ($command->messageId !== null) {
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: $text,
+                replyMarkup: $replyMarkup
+            );
+        } else {
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: $text,
+                replyMarkup: $replyMarkup
+            );
+        }
     }
 
     /**

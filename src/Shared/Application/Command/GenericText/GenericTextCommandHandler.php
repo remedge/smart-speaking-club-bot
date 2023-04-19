@@ -7,6 +7,7 @@ namespace App\Shared\Application\Command\GenericText;
 use App\Shared\Application\Clock;
 use App\Shared\Application\UuidProvider;
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Event\SpeakingClubScheduleChangedEvent;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
@@ -14,6 +15,7 @@ use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -26,12 +28,16 @@ class GenericTextCommandHandler
         private UuidProvider $uuidProvider,
         private ParticipationRepository $participationRepository,
         private Clock $clock,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
     public function __invoke(GenericTextCommand $command): void
     {
-        $user = $this->userRepository->getByChatId($command->chatId);
+        $user = $this->userRepository->findByChatId($command->chatId);
+        if ($user === null) {
+            return;
+        }
 
         if ($user->getState() === UserStateEnum::RECEIVING_NAME_FOR_CREATING) {
             $data = [];
@@ -70,12 +76,12 @@ class GenericTextCommandHandler
             $user->setActualSpeakingClubData($data);
             $this->userRepository->save($user);
 
-            $this->telegram->sendMessage($command->chatId, 'Введите дату проведения в формате: 15-10-2023 10:00');
+            $this->telegram->sendMessage($command->chatId, 'Введите дату проведения в формате: 15.10.2023 10:00');
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_DATE_FOR_CREATION) {
-            $date = DateTimeImmutable::createFromFormat('d-m-Y H:i', $command->text);
+            $date = DateTimeImmutable::createFromFormat('d.m.Y H:i', $command->text);
 
             if ($date < $this->clock->now()) {
                 $this->telegram->sendMessage($command->chatId, 'Дата не может быть в прошлом, попробуйте еще раз');
@@ -83,7 +89,7 @@ class GenericTextCommandHandler
             }
 
             if ($date === false) {
-                $this->telegram->sendMessage($command->chatId, 'Введите дату в формате: 15-10-2023 10:00');
+                $this->telegram->sendMessage($command->chatId, 'Некорректная дата, попробуйте еще раз');
                 return;
             }
 
@@ -161,12 +167,12 @@ class GenericTextCommandHandler
             $user->setActualSpeakingClubData($data);
             $this->userRepository->save($user);
 
-            $this->telegram->sendMessage($command->chatId, 'Введите новую дату проведения в формате: 15-10-2023 10:00');
+            $this->telegram->sendMessage($command->chatId, 'Введите новую дату проведения в формате: 15.10.2023 10:00');
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_DATE_FOR_EDITING) {
-            $date = DateTimeImmutable::createFromFormat('d-m-Y H:i', $command->text);
+            $date = DateTimeImmutable::createFromFormat('d.m.Y H:i', $command->text);
 
             if ($date < $this->clock->now()) {
                 $this->telegram->sendMessage($command->chatId, 'Дата не может быть в прошлом, попробуйте еще раз');
@@ -174,7 +180,7 @@ class GenericTextCommandHandler
             }
 
             if ($date === false) {
-                $this->telegram->sendMessage($command->chatId, 'Введите дату в формате: 15-10-2023 10:00');
+                $this->telegram->sendMessage($command->chatId, 'Некорректная дата, попробуйте еще раз');
                 return;
             }
 
@@ -187,11 +193,13 @@ class GenericTextCommandHandler
             $speakingClub->setName($data['name']);
             $speakingClub->setDescription($data['description']);
             $speakingClub->setMaxParticipantsCount((int) $data['max_participants_count']);
+
+            if ($speakingClub->getDate() !== $date) {
+                $this->eventDispatcher->dispatch(new SpeakingClubScheduleChangedEvent($speakingClub->getId()));
+            }
             $speakingClub->setDate($date);
 
             $this->speakingClubRepository->save($speakingClub);
-
-            // TODO: generate event about schedule change
 
             // TODO: generate event for waiting list if max participants count was changed
 

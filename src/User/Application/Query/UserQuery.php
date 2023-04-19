@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\User\Application\Query;
 
 use App\User\Application\Dto\UserDTO;
-use App\User\Domain\Exception\UserNotFoundException;
+use App\User\Application\Exception\UserNotFoundException;
 use App\User\Domain\UserRepository;
 use Ramsey\Uuid\UuidInterface;
 

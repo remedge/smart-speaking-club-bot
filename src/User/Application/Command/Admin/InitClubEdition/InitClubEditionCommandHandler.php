@@ -20,7 +20,10 @@ class InitClubEditionCommandHandler
 
     public function __invoke(InitClubEditionCommand $command): void
     {
-        $user = $this->userRepository->getByChatId($command->chatId);
+        $user = $this->userRepository->findByChatId($command->chatId);
+        if ($user === null) {
+            return;
+        }
 
         $user->setState(UserStateEnum::RECEIVING_NAME_FOR_EDITING);
         $user->setActualSpeakingClubData([

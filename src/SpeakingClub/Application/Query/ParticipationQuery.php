@@ -26,6 +26,7 @@ class ParticipationQuery
             $participationDTOs[] = new ParticipationDTO(
                 id: $participation['id'],
                 username: $participation['username'],
+                chatId: $participation['chatId'],
                 isPlusOne: $participation['isPlusOne'],
             );
         }
