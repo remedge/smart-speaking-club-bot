@@ -23,9 +23,19 @@ class SpeakingClub
         return $this->id;
     }
 
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
     }
 
     public function getDescription(): string
@@ -33,9 +43,19 @@ class SpeakingClub
         return $this->description;
     }
 
+    public function setMaxParticipantsCount(int $maxParticipantsCount): void
+    {
+        $this->maxParticipantsCount = $maxParticipantsCount;
+    }
+
     public function getMaxParticipantsCount(): int
     {
         return $this->maxParticipantsCount;
+    }
+
+    public function setDate(DateTimeImmutable $date): void
+    {
+        $this->date = $date;
     }
 
     public function getDate(): DateTimeImmutable

@@ -14,6 +14,7 @@ use App\SpeakingClub\Application\Command\User\ShowSpeakingClub\ShowSpeakingClubC
 use App\SpeakingClub\Application\Command\User\SignIn\SignInCommand;
 use App\SpeakingClub\Application\Command\User\SignInPlusOne\SignInPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
+use App\User\Application\Command\Admin\InitClubEdition\InitClubEditionCommand;
 use Exception;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -36,6 +37,11 @@ class CallbackResolver
                 )),
                 'back_to_admin_list' => $this->commandBus->dispatch(new AdminListUpcomingSpeakingClubsCommand(
                     chatId: $chatId,
+                    messageId: $messageId,
+                )),
+                'edit_club' => $this->commandBus->dispatch(new InitClubEditionCommand(
+                    chatId: $chatId,
+                    speakingClubId: Uuid::fromString($objectId),
                     messageId: $messageId,
                 )),
                 default => throw new Exception('Unknown action'),

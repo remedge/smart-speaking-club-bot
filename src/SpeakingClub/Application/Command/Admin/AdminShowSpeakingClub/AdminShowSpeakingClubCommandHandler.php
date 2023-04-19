@@ -8,7 +8,6 @@ use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Query\ParticipationQuery;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
-use App\User\Application\Query\UserQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -19,7 +18,6 @@ class AdminShowSpeakingClubCommandHandler
         private SpeakingClubRepository $speakingClubRepository,
         private ParticipationRepository $participationRepository,
         private ParticipationQuery $participationQuery,
-        private UserQuery $userQuery,
     ) {
     }
 
@@ -41,7 +39,6 @@ class AdminShowSpeakingClubCommandHandler
             );
             return;
         }
-        $user = $this->userQuery->getByChatId($command->chatId);
 
         $participations = $this->participationQuery->findBySpeakingClubId($speakingClub->getId());
         $totalParticipantsCount = $this->participationRepository->countByClubId($speakingClub->getId());
@@ -60,7 +57,7 @@ class AdminShowSpeakingClubCommandHandler
                 . PHP_EOL . 'Дата: %s'
                 . PHP_EOL . 'Максимальное количество участников: %s'
                 . PHP_EOL . 'Записалось участников: %s'
-                . PHP_EOL . 'Список: %s',
+                . PHP_EOL . 'Список участников: %s',
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
                 $speakingClub->getDate()->format('d.m.Y H:i'),
@@ -68,12 +65,16 @@ class AdminShowSpeakingClubCommandHandler
                 $totalParticipantsCount,
                 $participants,
             ),
-            replyMarkup: [[
-                [
+            replyMarkup: [
+                [[
+                    'text' => 'Редактировать',
+                    'callback_data' => sprintf('edit_club:%s', $speakingClub->getId()->toString()),
+                ]],
+                [[
                     'text' => '<< Вернуться к списку клубов',
                     'callback_data' => 'back_to_admin_list',
-                ],
-            ]],
+                ]],
+            ],
         );
     }
 }
