@@ -10,7 +10,9 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
+use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
 class SignInCommandHandler
@@ -21,6 +23,7 @@ class SignInCommandHandler
         private SpeakingClubRepository $speakingClubRepository,
         private TelegramInterface $telegram,
         private UuidProvider $uuidProvider,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
@@ -99,5 +102,10 @@ class SignInCommandHandler
                 ],
             ]]
         );
+
+        $this->messageBus->dispatch(new LeaveWaitingListCommand(
+            chatId: $command->chatId,
+            speakingClubId: $command->speakingClubId,
+        ));
     }
 }

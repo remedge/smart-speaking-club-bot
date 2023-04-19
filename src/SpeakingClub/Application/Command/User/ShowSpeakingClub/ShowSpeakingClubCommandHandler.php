@@ -14,6 +14,8 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
+use App\WaitList\Application\DTO\WaitingUserDTO;
+use App\WaitList\Application\Query\WaitingUserQuery;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -25,6 +27,7 @@ class ShowSpeakingClubCommandHandler
         private SpeakingClubRepository $speakingClubRepository,
         private ParticipationRepository $participationRepository,
         private UserQuery $userQuery,
+        private WaitingUserQuery $waitingUserQuery,
     ) {
     }
 
@@ -53,6 +56,10 @@ class ShowSpeakingClubCommandHandler
             speakingClubId: $speakingClub->getId(),
         );
         $totalParticipantsCount = $this->participationRepository->countByClubId($speakingClub->getId());
+        $waitingUser = $this->waitingUserQuery->findByUserIdAndSpeakingClubId(
+            userId: $user->id,
+            speakingClubId: $speakingClub->getId(),
+        );
 
         $text = sprintf(
             'Название: %s'
@@ -60,6 +67,8 @@ class ShowSpeakingClubCommandHandler
             . PHP_EOL . 'Дата: %s'
             . PHP_EOL . 'Максимальное количество участников: %s'
             . PHP_EOL . 'Записалось участников: %s'
+            . PHP_EOL
+            . PHP_EOL . '%s'
             . PHP_EOL . '%s',
             $speakingClub->getName(),
             $speakingClub->getDescription(),
@@ -68,10 +77,12 @@ class ShowSpeakingClubCommandHandler
             $totalParticipantsCount,
             ($participation === null) ? 'Вы не записаны' : (($participation->isPlusOne() === true)
                 ? 'Вы записаны с +1 человеком'
-                : 'Вы записаны')
+                : 'Вы записаны'),
+            ($waitingUser === null) ? '' : 'Вы в списке ожидания',
         );
         $replyMarkup = $this->chooseButtonsByParticipation(
             participation: $participation,
+            waitingUser: $waitingUser,
             speakingClubId: $speakingClub->getId(),
             availablePlacesCount: $speakingClub->getMaxParticipantsCount() - $totalParticipantsCount,
             backCallback: $command->backCallback,
@@ -98,6 +109,7 @@ class ShowSpeakingClubCommandHandler
      */
     private function chooseButtonsByParticipation(
         ?Participation $participation,
+        ?WaitingUserDTO $waitingUser,
         UuidInterface $speakingClubId,
         int $availablePlacesCount,
         string $backCallback,
@@ -163,6 +175,24 @@ class ShowSpeakingClubCommandHandler
                     ],
                 ];
             }
+        }
+
+        if ($participation === null && $waitingUser === null && $availablePlacesCount === 0) {
+            $buttons[] = [
+                [
+                    'text' => 'Встать в лист ожидания',
+                    'callback_data' => 'join_waiting_list:' . $speakingClubId->toString(),
+                ],
+            ];
+        }
+
+        if ($waitingUser !== null) {
+            $buttons[] = [
+                [
+                    'text' => 'Выйти из листа ожидания',
+                    'callback_data' => 'leave_waiting_list:' . $speakingClubId->toString(),
+                ],
+            ];
         }
 
         $buttons[] = [

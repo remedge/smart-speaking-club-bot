@@ -16,6 +16,8 @@ use App\SpeakingClub\Application\Command\User\SignIn\SignInCommand;
 use App\SpeakingClub\Application\Command\User\SignInPlusOne\SignInPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
 use App\User\Application\Command\Admin\InitClubEdition\InitClubEditionCommand;
+use App\WaitList\Application\Command\JoinWaitingList\JoinWaitingListCommand;
+use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
 use Exception;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -94,6 +96,16 @@ class CallbackResolver
                 messageId: $messageId,
             )),
             RemovePlusOneCommand::CALLBACK_NAME => $this->commandBus->dispatch(new RemovePlusOneCommand(
+                chatId: $chatId,
+                speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
+            )),
+            'join_waiting_list' => $this->commandBus->dispatch(new JoinWaitingListCommand(
+                chatId: $chatId,
+                speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
+            )),
+            'leave_waiting_list' => $this->commandBus->dispatch(new LeaveWaitingListCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
                 messageId: $messageId,

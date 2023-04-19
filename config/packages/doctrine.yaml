@@ -23,6 +23,10 @@ doctrine:
                 type: php
                 dir: "%kernel.project_dir%/src/User/Infrastructure/Doctrine/Mapping"
                 prefix: App\User\Domain\User
+            App\WaitList\Domain\WaitingUser:
+                type: php
+                dir: "%kernel.project_dir%/src/WaitList/Infrastructure/Doctrine/Mapping"
+                prefix: App\WaitList\Domain\WaitingUser
 
 when@test:
     doctrine:
