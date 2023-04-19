@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application;
 
+use App\SpeakingClub\Application\Command\Admin\AdminCancelSpeakingClub\AdminCancelSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminShowSpeakingClub\AdminShowSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\User\AddPlusOne\AddPlusOneCommand;
@@ -40,6 +41,11 @@ class CallbackResolver
                     messageId: $messageId,
                 )),
                 'edit_club' => $this->commandBus->dispatch(new InitClubEditionCommand(
+                    chatId: $chatId,
+                    speakingClubId: Uuid::fromString($objectId),
+                    messageId: $messageId,
+                )),
+                'cancel_club' => $this->commandBus->dispatch(new AdminCancelSpeakingClubCommand(
                     chatId: $chatId,
                     speakingClubId: Uuid::fromString($objectId),
                     messageId: $messageId,

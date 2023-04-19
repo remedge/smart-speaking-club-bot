@@ -22,4 +22,6 @@ interface ParticipationRepository
      * @return array<array{id: UuidInterface, username: string, chatId: int, isPlusOne: bool}>
      */
     public function findBySpeakingClubId(UuidInterface $speakingClubId): array;
+
+    public function findById(UuidInterface $id): ?Participation;
 }

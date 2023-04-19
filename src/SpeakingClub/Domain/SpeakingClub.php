@@ -15,6 +15,7 @@ class SpeakingClub
         private string $description,
         private int $maxParticipantsCount,
         private DateTimeImmutable $date,
+        private bool $isCancelled = false,
     ) {
     }
 
@@ -61,5 +62,15 @@ class SpeakingClub
     public function getDate(): DateTimeImmutable
     {
         return $this->date;
+    }
+
+    public function cancel(): void
+    {
+        $this->isCancelled = true;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->isCancelled;
     }
 }

@@ -84,4 +84,9 @@ class DoctrineParticipationRepository extends ServiceEntityRepository implements
             ->getQuery()
             ->getArrayResult();
     }
+
+    public function findById(UuidInterface $id): ?Participation
+    {
+        return $this->find($id);
+    }
 }

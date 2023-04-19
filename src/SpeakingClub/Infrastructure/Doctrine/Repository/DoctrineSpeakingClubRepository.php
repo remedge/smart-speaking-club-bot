@@ -32,6 +32,7 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
     {
         return $this->createQueryBuilder('speaking_club')
             ->andWhere('speaking_club.date > :now')
+            ->andWhere('speaking_club.isCancelled = false')
             ->setParameter('now', $now)
             ->orderBy('speaking_club.date', 'ASC')
             ->getQuery()
@@ -40,7 +41,10 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
 
     public function findById(UuidInterface $id): ?SpeakingClub
     {
-        return $this->find($id);
+        return $this->findOneBy([
+            'id' => $id,
+            'isCancelled' => false,
+        ]);
     }
 
     public function findUserUpcoming(UuidInterface $userId, DateTimeImmutable $now): array
@@ -49,6 +53,7 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
             ->innerJoin(Participation::class, 'participation', 'WITH', 'participation.speakingClubId = speaking_club.id')
             ->andWhere('speaking_club.date > :now')
             ->andWhere('participation.userId = :user')
+            ->andWhere('speaking_club.isCancelled = false')
             ->setParameter('now', $now)
             ->setParameter('user', $userId)
             ->orderBy('speaking_club.date', 'ASC')
@@ -60,6 +65,7 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
     {
         return $this->createQueryBuilder('speaking_club')
             ->andWhere('speaking_club.date BETWEEN :startDate AND :endDate')
+            ->andWhere('speaking_club.isCancelled = false')
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
             ->orderBy('speaking_club.date', 'ASC')

@@ -28,5 +28,8 @@ class SpeakingClubDoctrineMapping extends DoctrineMapping
         $builder->addField('description', 'text');
         $builder->addField('maxParticipantsCount', 'integer');
         $builder->addField('date', 'datetime_immutable');
+        $builder->addField('isCancelled', 'boolean', [
+            'default' => false,
+        ]);
     }
 }
