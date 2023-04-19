@@ -39,4 +39,11 @@ class DoctrineWaitingUserRepository extends ServiceEntityRepository implements W
             'speakingClubId' => $speakingClubId,
         ]);
     }
+
+    public function findBySpeakingClubId(UuidInterface $speakingClubId): array
+    {
+        return $this->findBy([
+            'speakingClubId' => $speakingClubId,
+        ]);
+    }
 }

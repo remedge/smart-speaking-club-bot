@@ -29,4 +29,22 @@ class WaitingUserQuery
             speakingClubId: $waitingUser->getSpeakingClubId(),
         );
     }
+
+    /**
+     * @return array<WaitingUserDTO>
+     */
+    public function findBySpeakingClubId(UuidInterface $speakingClubId): array
+    {
+        $waitingUsers = $this->waitListRepository->findBySpeakingClubId($speakingClubId);
+        $waitingUsersDTO = [];
+        foreach ($waitingUsers as $waitingUser) {
+            $waitingUsersDTO[] = new WaitingUserDTO(
+                id: $waitingUser->getId(),
+                userId: $waitingUser->getUserId(),
+                speakingClubId: $waitingUser->getSpeakingClubId(),
+            );
+        }
+
+        return $waitingUsersDTO;
+    }
 }

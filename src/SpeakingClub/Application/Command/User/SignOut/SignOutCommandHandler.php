@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\SpeakingClub\Application\Command\User\SignOut;
 
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -18,6 +20,7 @@ class SignOutCommandHandler
         private ParticipationRepository $participationRepository,
         private SpeakingClubRepository $speakingClubRepository,
         private TelegramInterface $telegram,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -70,5 +73,7 @@ class SignOutCommandHandler
                 ],
             ]]
         );
+
+        $this->eventDispatcher->dispatch(new SpeakingClubFreeSpaceAvailableEvent($speakingClub->getId()));
     }
 }

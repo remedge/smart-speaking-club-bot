@@ -7,6 +7,7 @@ namespace App\Shared\Application\Command\GenericText;
 use App\Shared\Application\Clock;
 use App\Shared\Application\UuidProvider;
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
 use App\SpeakingClub\Application\Event\SpeakingClubScheduleChangedEvent;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
@@ -98,7 +99,7 @@ class GenericTextCommandHandler
                 id: $this->uuidProvider->provide(),
                 name: $data['name'],
                 description: $data['description'],
-                maxParticipantsCount: (int) $data['max_participants_count'],
+                maxParticipantsCount: $data['max_participants_count'],
                 date: $date,
             );
             $this->speakingClubRepository->save($speakingClub);
@@ -192,6 +193,11 @@ class GenericTextCommandHandler
             }
             $speakingClub->setName($data['name']);
             $speakingClub->setDescription($data['description']);
+
+            if ($speakingClub->getMaxParticipantsCount() < $data['max_participants_count']) {
+                $this->eventDispatcher->dispatch(new SpeakingClubFreeSpaceAvailableEvent($speakingClub->getId()));
+            }
+
             $speakingClub->setMaxParticipantsCount((int) $data['max_participants_count']);
 
             if ($speakingClub->getDate() !== $date) {
@@ -200,8 +206,6 @@ class GenericTextCommandHandler
             $speakingClub->setDate($date);
 
             $this->speakingClubRepository->save($speakingClub);
-
-            // TODO: generate event for waiting list if max participants count was changed
 
             $user->setState(UserStateEnum::IDLE);
             $user->setActualSpeakingClubData([]);

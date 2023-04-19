@@ -13,4 +13,9 @@ interface WaitingUserRepository
     public function remove(WaitingUser $waitingUser): void;
 
     public function findByUserIdAndSpeakingClubId(UuidInterface $userId, UuidInterface $speakingClubId): ?WaitingUser;
+
+    /**
+     * @return array<WaitingUser>
+     */
+    public function findBySpeakingClubId(UuidInterface $speakingClubId): array;
 }

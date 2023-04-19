@@ -13,7 +13,7 @@ class User
      * @param array<mixed> $actualSpeakingClubData
      */
     public function __construct(
-        private UuidInterface $id,
+        private UuidInterface $id, // TODO: remove, user only chatId
         private int $chatId,
         private string $firstName,
         private string $lastName,
