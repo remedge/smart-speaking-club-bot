@@ -80,7 +80,7 @@ class AdminCancelSpeakingClubCommandHandler
 
         $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($speakingClub->getId());
         foreach ($waitingUsers as $waitingUser) {
-            $user = $this->userQuery->findById($waitingUser->getUserId());
+            $user = $this->userQuery->findById($waitingUser['userId']); // TODO: rewrite it
             $this->telegram->sendMessage(
                 chatId: $user->chatId,
                 text: sprintf(
@@ -95,7 +95,8 @@ class AdminCancelSpeakingClubCommandHandler
                     ],
                 ]]
             );
-            $this->waitingUserRepository->remove($waitingUser);
+            $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']);
+            $this->waitingUserRepository->remove($waitingUserEntity);
         }
 
         $speakingClub->cancel();

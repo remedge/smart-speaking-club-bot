@@ -29,7 +29,7 @@ class SpeakingClubFreeSpaceAvailableEventListener
         $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($event->speakingClubId);
 
         foreach ($waitingUsers as $waitingUser) {
-            $user = $this->userQuery->findById($waitingUser->getUserId());
+            $user = $this->userQuery->findById($waitingUser['userId']); // TODO: rewrite it
 
             $this->telegram->sendMessage(
                 chatId: $user->chatId,

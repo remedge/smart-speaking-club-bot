@@ -25,7 +25,7 @@ class JoinWaitingListCommandHandler
     public function __invoke(JoinWaitingListCommand $command): void
     {
         $user = $this->userQuery->getByChatId($command->chatId);
-        $waitingUser = $this->waitingUserRepository->findByUserIdAndSpeakingClubId(
+        $waitingUser = $this->waitingUserRepository->findOneByUserIdAndSpeakingClubId(
             userId: $user->id,
             speakingClubId: $command->speakingClubId,
         );

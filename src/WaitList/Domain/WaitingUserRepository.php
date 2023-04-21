@@ -12,10 +12,15 @@ interface WaitingUserRepository
 
     public function remove(WaitingUser $waitingUser): void;
 
-    public function findByUserIdAndSpeakingClubId(UuidInterface $userId, UuidInterface $speakingClubId): ?WaitingUser;
+    public function findById(UuidInterface $id): ?WaitingUser;
 
     /**
-     * @return array<WaitingUser>
+     * @return array{id: UuidInterface, userId: UuidInterface, speakingClubId: UuidInterface, chatId: int}|null
+     */
+    public function findOneByUserIdAndSpeakingClubId(UuidInterface $userId, UuidInterface $speakingClubId): ?array;
+
+    /**
+     * @return array<array{id: UuidInterface, userId: UuidInterface, speakingClubId: UuidInterface, chatId: int}>
      */
     public function findBySpeakingClubId(UuidInterface $speakingClubId): array;
 }

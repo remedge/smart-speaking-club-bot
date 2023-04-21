@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\WaitList\Application\DTO;
+namespace App\SpeakingClub\Application\Command\Admin\AdminShowParticipants;
 
 use Ramsey\Uuid\UuidInterface;
 
-class WaitingUserDTO
+class AdminShowParticipantsCommand
 {
     public function __construct(
-        public UuidInterface $id,
-        public UuidInterface $userId,
         public int $chatId,
         public UuidInterface $speakingClubId,
+        public int $messageId,
     ) {
     }
 }

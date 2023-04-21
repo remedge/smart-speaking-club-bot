@@ -17,16 +17,17 @@ class WaitingUserQuery
 
     public function findByUserIdAndSpeakingClubId(UuidInterface $userId, UuidInterface $speakingClubId): ?WaitingUserDTO
     {
-        $waitingUser = $this->waitListRepository->findByUserIdAndSpeakingClubId($userId, $speakingClubId);
+        $waitingUser = $this->waitListRepository->findOneByUserIdAndSpeakingClubId($userId, $speakingClubId);
 
         if ($waitingUser === null) {
             return null;
         }
 
         return new WaitingUserDTO(
-            id: $waitingUser->getId(),
-            userId: $waitingUser->getUserId(),
-            speakingClubId: $waitingUser->getSpeakingClubId(),
+            id: $waitingUser['id'],
+            userId: $waitingUser['userId'],
+            chatId: $waitingUser['chatId'],
+            speakingClubId: $waitingUser['speakingClubId'],
         );
     }
 
@@ -39,9 +40,10 @@ class WaitingUserQuery
         $waitingUsersDTO = [];
         foreach ($waitingUsers as $waitingUser) {
             $waitingUsersDTO[] = new WaitingUserDTO(
-                id: $waitingUser->getId(),
-                userId: $waitingUser->getUserId(),
-                speakingClubId: $waitingUser->getSpeakingClubId(),
+                id: $waitingUser['id'],
+                userId: $waitingUser['userId'],
+                chatId: $waitingUser['chatId'],
+                speakingClubId: $waitingUser['speakingClubId'],
             );
         }
 

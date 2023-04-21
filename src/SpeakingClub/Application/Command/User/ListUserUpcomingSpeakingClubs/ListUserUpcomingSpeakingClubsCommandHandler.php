@@ -40,7 +40,7 @@ class ListUserUpcomingSpeakingClubsCommandHandler
             $text = 'Вы не записаны ни на один клуб. Выберите клуб из списка, чтобы записаться.';
             $buttons = [[
                 [
-                    'text' => 'Перейти к списку блжайших клубов',
+                    'text' => 'Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
                 ],
             ]];

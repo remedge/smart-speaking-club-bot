@@ -7,13 +7,16 @@ namespace App\Shared\Application\Command\GenericText;
 use App\Shared\Application\Clock;
 use App\Shared\Application\UuidProvider;
 use App\Shared\Domain\TelegramInterface;
+use App\Shared\Domain\UserRolesProvider;
 use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
 use App\SpeakingClub\Application\Event\SpeakingClubScheduleChangedEvent;
+use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
+use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -30,6 +33,8 @@ class GenericTextCommandHandler
         private ParticipationRepository $participationRepository,
         private Clock $clock,
         private EventDispatcherInterface $eventDispatcher,
+        private UserRolesProvider $userRolesProvider,
+        private WaitingUserRepository $waitingUserRepository,
     ) {
     }
 
@@ -221,6 +226,140 @@ class GenericTextCommandHandler
                     ],
                 ]],
             );
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_PARTICIPANT) {
+            $speakingClubId = Uuid::fromString($user->getActualSpeakingClubData()['participantSpeakingClubId']);
+
+            $speakingClub = $this->speakingClubRepository->findById($speakingClubId);
+            if ($speakingClub === null) {
+                $this->telegram->sendMessage($command->chatId, 'Клуб не найден');
+                return;
+            }
+
+            $availableSpaceCount = $speakingClub->getMaxParticipantsCount() -
+                $this->participationRepository->countByClubId($speakingClubId);
+            if ($availableSpaceCount <= 0) {
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'В клубе нет свободных мест',
+                    replyMarkup: [
+                        [[
+                            'text' => '<< Вернуться к списку участников',
+                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                        ]],
+                    ],
+                );
+                return;
+            }
+
+            $participantUser = $this->userRepository->findByUsername($command->text);
+            if ($participantUser === null) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Такого пользователя нет в базе бота',
+                    replyMarkup: [
+                        [[
+                            'text' => '<< Вернуться к списку участников',
+                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                        ]],
+                    ],
+                );
+                return;
+            }
+            if ($this->userRolesProvider->isUserAdmin($participantUser->getChatId())) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Нельзя добавить администратора в клуб',
+                    replyMarkup: [
+                        [[
+                            'text' => '<< Вернуться к списку участников',
+                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                        ]],
+                    ],
+                );
+                return;
+            }
+
+            $participation = $this->participationRepository->findByUserIdAndSpeakingClubId(
+                userId: $participantUser->getId(),
+                speakingClubId: $speakingClubId
+            );
+            if ($participation !== null) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Пользователь уже участвует в клубе',
+                    replyMarkup: [
+                        [[
+                            'text' => '<< Вернуться к списку участников',
+                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                        ]],
+                    ],
+                );
+                return;
+            }
+
+            $this->participationRepository->save(new Participation(
+                id: $this->uuidProvider->provide(),
+                userId: $participantUser->getId(),
+                speakingClubId: $speakingClubId,
+                isPlusOne: false,
+            ));
+
+            $user->setState(UserStateEnum::IDLE);
+            $user->setActualSpeakingClubData([]);
+            $this->userRepository->save($user);
+
+            // Notify admin
+            $this->telegram->sendMessage(
+                chatId: $user->getChatId(),
+                text: 'Пользователь успешно добавлен в клуб',
+                replyMarkup: [
+                    [[
+                        'text' => 'Перейти к списку участников',
+                        'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                    ]],
+                ],
+            );
+
+            // Notify user
+            $this->telegram->sendMessage(
+                chatId: $participantUser->getChatId(),
+                text: sprintf(
+                    'Администратор добавил вас в клуб "%s" %s',
+                    $speakingClub->getName(),
+                    $speakingClub->getDate()->format('d.m.Y H:i'),
+                ),
+                replyMarkup: [
+                    [[
+                        'text' => 'Перейти к описанию клуба',
+                        'callback_data' => sprintf('show_speaking_club:%s', $speakingClubId->toString()),
+                    ]],
+                ],
+            );
+
+            // Remove user from waiting list
+            $waitingUser = $this->waitingUserRepository->findOneByUserIdAndSpeakingClubId(
+                userId: $participantUser->getId(),
+                speakingClubId: $speakingClubId
+            );
+
+            if ($waitingUser !== null) {
+                $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']); // TODO: rewrite it
+                $this->waitingUserRepository->remove($waitingUserEntity);
+            }
         }
     }
 }

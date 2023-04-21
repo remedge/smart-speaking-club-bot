@@ -22,7 +22,7 @@ class LeaveWaitingListCommandHandler
     public function __invoke(LeaveWaitingListCommand $command): void
     {
         $user = $this->userQuery->getByChatId($command->chatId);
-        $waitingUser = $this->waitingUserRepository->findByUserIdAndSpeakingClubId(
+        $waitingUser = $this->waitingUserRepository->findOneByUserIdAndSpeakingClubId(
             userId: $user->id,
             speakingClubId: $command->speakingClubId,
         );
@@ -42,7 +42,9 @@ class LeaveWaitingListCommandHandler
             return;
         }
 
-        $this->waitingUserRepository->remove($waitingUser);
+        $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']);
+
+        $this->waitingUserRepository->remove($waitingUserEntity);
 
         if ($command->messageId === null) {
             return;

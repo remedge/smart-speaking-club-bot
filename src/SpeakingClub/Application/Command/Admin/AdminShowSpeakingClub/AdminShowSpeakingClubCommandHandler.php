@@ -67,8 +67,12 @@ class AdminShowSpeakingClubCommandHandler
             ),
             replyMarkup: [
                 [[
-                    'text' => 'Редактировать',
+                    'text' => 'Редактировать данные клуба',
                     'callback_data' => sprintf('edit_club:%s', $speakingClub->getId()->toString()),
+                ]],
+                [[
+                    'text' => 'Редактировать список участников клуба',
+                    'callback_data' => sprintf('show_participants:%s', $speakingClub->getId()->toString()),
                 ]],
                 [[
                     'text' => 'Отменить разговорный клуб',

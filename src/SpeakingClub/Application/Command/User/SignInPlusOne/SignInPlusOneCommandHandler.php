@@ -10,7 +10,9 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
+use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
 class SignInPlusOneCommandHandler
@@ -21,6 +23,7 @@ class SignInPlusOneCommandHandler
         private SpeakingClubRepository $speakingClubRepository,
         private TelegramInterface $telegram,
         private UuidProvider $uuidProvider,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
@@ -65,13 +68,19 @@ class SignInPlusOneCommandHandler
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
                 text: 'Все места на данное мероприятие заняты',
-                // TODO: добавить кнопку про лист ожидания
-                replyMarkup: [[
-                    [
+                replyMarkup: [
+                    [[
+                        'text' => 'Встать в лист ожидания',
+                        'callback_data' => sprintf(
+                            'join_waiting_list:%s',
+                            $command->speakingClubId->toString()
+                        ),
+                    ]],
+                    [[
                         'text' => '<< Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_list',
-                    ],
-                ]]
+                    ]],
+                ]
             );
             return;
         }
@@ -94,5 +103,10 @@ class SignInPlusOneCommandHandler
                 ],
             ]]
         );
+
+        $this->messageBus->dispatch(new LeaveWaitingListCommand(
+            chatId: $command->chatId,
+            speakingClubId: $command->speakingClubId,
+        ));
     }
 }

@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Shared\Application;
 
+use App\SpeakingClub\Application\Command\Admin\AdminAddParticipant\AdminAddParticipantCommand;
+use App\SpeakingClub\Application\Command\Admin\AdminAddPlusOneToParticipant\AdminAddPlusOneToParticipantCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminCancelSpeakingClub\AdminCancelSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
+use App\SpeakingClub\Application\Command\Admin\AdminRemoveParticipant\AdminRemoveParticipantCommand;
+use App\SpeakingClub\Application\Command\Admin\AdminRemovePlusOneToParticipant\AdminRemovePlusOneToParticipantCommand;
+use App\SpeakingClub\Application\Command\Admin\AdminShowParticipants\AdminShowParticipantsCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminShowSpeakingClub\AdminShowSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\User\AddPlusOne\AddPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
@@ -29,8 +34,13 @@ class CallbackResolver
     ) {
     }
 
-    public function resolve(string $action, int $chatId, ?string $objectId, int $messageId, bool $isAdmin): void
-    {
+    public function resolve(
+        string $action,
+        int $chatId,
+        ?string $objectId,
+        int $messageId,
+        bool $isAdmin
+    ): void {
         if ($isAdmin === true) {
             match ($action) {
                 AdminShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new AdminShowSpeakingClubCommand(
@@ -52,7 +62,32 @@ class CallbackResolver
                     speakingClubId: Uuid::fromString($objectId),
                     messageId: $messageId,
                 )),
-                default => throw new Exception('Unknown action'),
+                'show_participants' => $this->commandBus->dispatch(new AdminShowParticipantsCommand(
+                    chatId: $chatId,
+                    speakingClubId: Uuid::fromString($objectId),
+                    messageId: $messageId,
+                )),
+                'admin_add_plus_one' => $this->commandBus->dispatch(new AdminAddPlusOneToParticipantCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                    participationId: Uuid::fromString($objectId),
+                )),
+                'admin_remove_plus_one' => $this->commandBus->dispatch(new AdminRemovePlusOneToParticipantCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                    participationId: Uuid::fromString($objectId),
+                )),
+                'remove_participant' => $this->commandBus->dispatch(new AdminRemoveParticipantCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                    participationId: Uuid::fromString($objectId),
+                )),
+                'admin_add_participant' => $this->commandBus->dispatch(new AdminAddParticipantCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                    speakingClubId: Uuid::fromString($objectId),
+                )),
+                default => throw new Exception(sprintf('Unknown admin callback "%s', $action)),
             };
             return;
         }
@@ -118,7 +153,7 @@ class CallbackResolver
                 chatId: $chatId,
                 messageId: $messageId,
             )),
-            default => throw new Exception('Unknown action'),
+            default => throw new Exception(sprintf('Unknown user callback "%s"', $action)),
         };
     }
 }

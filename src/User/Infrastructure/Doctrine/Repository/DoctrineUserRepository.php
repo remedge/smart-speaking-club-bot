@@ -39,4 +39,11 @@ class DoctrineUserRepository extends ServiceEntityRepository implements UserRepo
             'id' => $id,
         ]);
     }
+
+    public function findByUsername(string $username): ?User
+    {
+        return parent::findOneBy([
+            'username' => $username,
+        ]);
+    }
 }
