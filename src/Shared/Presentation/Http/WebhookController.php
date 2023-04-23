@@ -40,7 +40,7 @@ class WebhookController
         $text = $this->telegram->getText();
 
         $isAdmin = $this->userRolesProvider->isUserAdmin($chatId);
-        //        $this->telegram->setCommandsMenu();
+        $this->telegram->setCommandsMenu();
 
         if ($this->telegram->isCallbackQuery() === true) {
             $callbackData = explode(':', $text);
