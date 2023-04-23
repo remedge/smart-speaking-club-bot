@@ -12,10 +12,11 @@ use Longman\TelegramBot\Entities\BotCommand;
 use Longman\TelegramBot\Entities\BotCommandScope\BotCommandScopeDefault;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Exception\TelegramException;
-use Longman\TelegramBot\Request;
+use Longman\TelegramBot\Request as TelegramRequest;
 use Longman\TelegramBot\Telegram;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
+use Symfony\Component\HttpFoundation\Request;
 
 class LongmanTelegram implements TelegramInterface
 {
@@ -34,9 +35,9 @@ class LongmanTelegram implements TelegramInterface
         );
     }
 
-    public function getInput(): string
+    public function getInput(Request $request): string
     {
-        $input = Request::getInput();
+        $input = TelegramRequest::getInput();
 
         if ($this->loggingInput === true) {
             $filesystem = new Filesystem();
@@ -77,7 +78,7 @@ class LongmanTelegram implements TelegramInterface
             $data['reply_markup'] = new InlineKeyboard(...$replyMarkup);
         }
 
-        Request::sendMessage($data);
+        TelegramRequest::sendMessage($data);
     }
 
     public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void
@@ -91,12 +92,12 @@ class LongmanTelegram implements TelegramInterface
             $data['reply_markup'] = new InlineKeyboard(...$replyMarkup);
         }
 
-        Request::editMessageText($data);
+        TelegramRequest::editMessageText($data);
     }
 
     public function setCommandsMenu(): void
     {
-        Request::setMyCommands([
+        TelegramRequest::setMyCommands([
             'scope' => new BotCommandScopeDefault(),
             'commands' => [
                 new BotCommand([

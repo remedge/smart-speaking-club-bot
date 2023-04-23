@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain;
 
+use Symfony\Component\HttpFoundation\Request;
+
 interface TelegramInterface
 {
-    public function getInput(): string;
+    public function getInput(Request $request): string;
 
     public function setWebhook(): string;
 

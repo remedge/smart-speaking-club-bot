@@ -14,6 +14,6 @@ class MockClock implements Clock
 {
     public function now(): DateTimeImmutable
     {
-        return new DateTimeImmutable('2011-01-01 11:11:11');
+        return new DateTimeImmutable('2000-01-01 00:00:00');
     }
 }

@@ -55,3 +55,8 @@ services:
     App\Shared\Infrastructure\EnvUserRoleProvider:
         arguments:
             $adminChatIds: '%env(json:ADMIN_CHAT_IDS)%'
+
+    # Miscellaneous
+    App\Shared\Infrastructure\Symfony\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }

@@ -36,7 +36,7 @@ class WebhookController
     #[Route(path: '/webhook', methods: [Request::METHOD_POST])]
     public function __invoke(Request $request): Response
     {
-        $input = $this->telegram->getInput();
+        $input = $this->telegram->getInput($request);
         if ($input === '') {
             throw new BadRequestException('No input provided');
         }
