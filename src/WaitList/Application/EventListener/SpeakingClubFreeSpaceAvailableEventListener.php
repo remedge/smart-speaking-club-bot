@@ -31,6 +31,10 @@ class SpeakingClubFreeSpaceAvailableEventListener
         foreach ($waitingUsers as $waitingUser) {
             $user = $this->userQuery->findById($waitingUser['userId']); // TODO: rewrite it
 
+            if ($user === null) {
+                continue;
+            }
+
             $this->telegram->sendMessage(
                 chatId: $user->chatId,
                 text: sprintf(
@@ -41,7 +45,7 @@ class SpeakingClubFreeSpaceAvailableEventListener
                 replyMarkup: [[
                     [
                         'text' => 'Перейти к описанию клуба',
-                        'callback_data' => sprintf('show_speaking_club:%s', $speakingClub->id),
+                        'callback_data' => sprintf('show_speaking_club:%s', $speakingClub->id->toString()),
                     ],
                 ]]
             );

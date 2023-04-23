@@ -37,6 +37,7 @@ class AdminRemovePlusOneToParticipantCommandHandler
                     ]],
                 ]
             );
+            return;
         }
 
         $speakingClub = $this->speakingClubRepository->findById($participation->getSpeakingClubId());
@@ -51,15 +52,16 @@ class AdminRemovePlusOneToParticipantCommandHandler
                     ]],
                 ]
             );
+            return;
         }
 
         $user = $this->userQuery->findById($participation->getUserId());
 
         if ($participation->isPlusOne() === false) {
             $this->telegram->editMessageText(
-                $command->chatId,
-                $command->messageId,
-                'У участника уже нет +1',
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: 'У участника уже нет +1',
                 replyMarkup: [
                     [[
                         'text' => '<< Вернуться к списку участников',
@@ -95,23 +97,25 @@ class AdminRemovePlusOneToParticipantCommandHandler
 
         // Notify user
 
-        $this->telegram->sendMessage(
-            chatId: $user->chatId,
-            text: sprintf(
-                'Администратор убрал вам +1 к участию в клубе "%s" %s',
-                $speakingClub->getName(),
-                $speakingClub->getDate()->format('d.m.Y H:i')
-            ),
-            replyMarkup: [
-                [[
-                    'text' => 'Посмотреть информацию о клубе',
-                    'callback_data' => sprintf(
-                        'show_speaking_club:%s',
-                        $speakingClub->getId()->toString()
-                    ),
-                ]],
-            ]
-        );
+        if ($user !== null) {
+            $this->telegram->sendMessage(
+                chatId: $user->chatId,
+                text: sprintf(
+                    'Администратор убрал вам +1 к участию в клубе "%s" %s',
+                    $speakingClub->getName(),
+                    $speakingClub->getDate()->format('d.m.Y H:i')
+                ),
+                replyMarkup: [
+                    [[
+                        'text' => 'Посмотреть информацию о клубе',
+                        'callback_data' => sprintf(
+                            'show_speaking_club:%s',
+                            $speakingClub->getId()->toString()
+                        ),
+                    ]],
+                ]
+            );
+        }
 
         // Notify waiting users
 

@@ -28,6 +28,18 @@ class LeaveWaitingListCommandHandler
         );
 
         if ($waitingUser === null) {
+            return;
+        }
+
+        $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']);
+
+        if ($waitingUserEntity === null) {
+            return;
+        }
+
+        $this->waitingUserRepository->remove($waitingUserEntity);
+
+        if ($command->messageId !== null) {
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
@@ -39,27 +51,6 @@ class LeaveWaitingListCommandHandler
                     ],
                 ]],
             );
-            return;
         }
-
-        $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']);
-
-        $this->waitingUserRepository->remove($waitingUserEntity);
-
-        if ($command->messageId === null) {
-            return;
-        }
-
-        $this->telegram->editMessageText(
-            chatId: $command->chatId,
-            messageId: $command->messageId,
-            text: 'Вы успешно вышли из списка ожидания',
-            replyMarkup: [[
-                [
-                    'text' => 'Перейти к списку ближайших клубов',
-                    'callback_data' => 'back_to_list',
-                ],
-            ]],
-        );
     }
 }

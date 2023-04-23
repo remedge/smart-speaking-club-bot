@@ -36,18 +36,32 @@ class ShowSpeakingClubCommandHandler
         $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId);
 
         if ($speakingClub === null) {
-            $this->telegram->editMessageText(
-                chatId: $command->chatId,
-                messageId: $command->messageId,
-                text: 'Такого клуба не существует',
-                replyMarkup: [[
-                    [
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => $command->backCallback,
-                    ],
-                ]]
-            );
-            return;
+            if ($command->messageId !== null) {
+                $this->telegram->editMessageText(
+                    chatId: $command->chatId,
+                    messageId: $command->messageId,
+                    text: 'Такого клуба не существует',
+                    replyMarkup: [[
+                        [
+                            'text' => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => $command->backCallback,
+                        ],
+                    ]]
+                );
+                return;
+            } else {
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Такого клуба не существует',
+                    replyMarkup: [[
+                        [
+                            'text' => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => $command->backCallback,
+                        ],
+                    ]]
+                );
+                return;
+            }
         }
 
         $user = $this->userQuery->getByChatId($command->chatId);

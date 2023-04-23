@@ -8,9 +8,23 @@ use Symfony\Component\HttpFoundation\Request;
 
 interface TelegramInterface
 {
-    public function getInput(Request $request): string;
-
     public function setWebhook(): string;
+
+    public function parseUpdateFromRequest(Request $request): void;
+
+    public function isCallbackQuery(): bool;
+
+    public function getChatId(): int;
+
+    public function getMessageId(): int;
+
+    public function getText(): string;
+
+    public function getFirstName(): string;
+
+    public function getLastName(): string;
+
+    public function getUsername(): string;
 
     /**
      * @param  array<int, array<int, array<string, string>>> $replyMarkup

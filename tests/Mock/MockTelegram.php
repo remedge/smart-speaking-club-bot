@@ -14,6 +14,11 @@ class MockTelegram implements TelegramInterface
      */
     public static $messages = [];
 
+    /**
+     * @var array<mixed>
+     */
+    private array $request;
+
     public function setWebhook(): string
     {
         return 'ok';
@@ -38,5 +43,72 @@ class MockTelegram implements TelegramInterface
 
     public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void
     {
+    }
+
+    public function parseUpdateFromRequest(Request $request): void
+    {
+        $this->request = json_decode($request->getContent(), true);
+    }
+
+    public function isCallbackQuery(): bool
+    {
+        if (isset($this->request['callback_query'])) {
+            return true;
+        }
+        return false;
+    }
+
+    public function getChatId(): int
+    {
+        if (isset($this->request['callback_query'])) {
+            return $this->request['callback_query']['message']['chat']['id'];
+        } else {
+            return $this->request['message']['chat']['id'];
+        }
+    }
+
+    public function getMessageId(): int
+    {
+        if (isset($this->request['callback_query'])) {
+            return $this->request['callback_query']['message']['message_id'];
+        } else {
+            return $this->request['message']['message_id'];
+        }
+    }
+
+    public function getText(): string
+    {
+        if (isset($this->request['callback_query'])) {
+            return $this->request['callback_query']['data'];
+        } else {
+            return $this->request['message']['text'];
+        }
+    }
+
+    public function getFirstName(): string
+    {
+        if (isset($this->request['callback_query'])) {
+            return $this->request['callback_query']['message']['chat']['first_name'];
+        } else {
+            return $this->request['message']['chat']['first_name'];
+        }
+    }
+
+    public function getLastName(): string
+    {
+        if (isset($this->request['callback_query'])) {
+            return $this->request['callback_query']['message']['chat']['last_name'];
+        } else {
+            return $this->request['message']['chat']['last_name'];
+        }
+    }
+
+    public function getUsername(): string
+    {
+        if (isset($this->request['callback_query'])) {
+            return $this->request['callback_query']['message']['chat']['username'];
+        } else {
+            return $this->request['message']['chat']['username'];
+        }
     }
 }

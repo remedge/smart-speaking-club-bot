@@ -38,6 +38,7 @@ class AdminRemoveParticipantCommandHandler
                     ]],
                 ]
             );
+            return;
         }
 
         $speakingClub = $this->speakingClubRepository->findById($participation->getSpeakingClubId());
@@ -53,6 +54,7 @@ class AdminRemoveParticipantCommandHandler
                     ]],
                 ]
             );
+            return;
         }
 
         $user = $this->userQuery->findById($participation->getUserId());
@@ -78,20 +80,22 @@ class AdminRemoveParticipantCommandHandler
 
         // Notify user
 
-        $this->telegram->sendMessage(
-            chatId: $user->chatId,
-            text: sprintf(
-                'Администратор убрал вас из участников клуба "%s" %s',
-                $speakingClub->getName(),
-                $speakingClub->getDate()->format('d.m.Y H:i')
-            ),
-            replyMarkup: [
-                [[
-                    'text' => 'Посмотреть список ближайших клубов',
-                    'callback_data' => 'back_to_list',
-                ]],
-            ]
-        );
+        if ($user !== null) {
+            $this->telegram->sendMessage(
+                chatId: $user->chatId,
+                text: sprintf(
+                    'Администратор убрал вас из участников клуба "%s" %s',
+                    $speakingClub->getName(),
+                    $speakingClub->getDate()->format('d.m.Y H:i')
+                ),
+                replyMarkup: [
+                    [[
+                        'text' => 'Посмотреть список ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ]],
+                ]
+            );
+        }
 
         // Notify waiting users
 

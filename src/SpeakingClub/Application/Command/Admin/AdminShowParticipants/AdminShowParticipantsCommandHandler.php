@@ -21,7 +21,12 @@ class AdminShowParticipantsCommandHandler
 
     public function __invoke(AdminShowParticipantsCommand $command): void
     {
-        $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId);
+        $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId); // TODO: rewrite it
+
+        if ($speakingClub === null) {
+            return;
+        }
+
         $participants = $this->participationQuery->findBySpeakingClubId($speakingClub->getId());
 
         $buttons = [];

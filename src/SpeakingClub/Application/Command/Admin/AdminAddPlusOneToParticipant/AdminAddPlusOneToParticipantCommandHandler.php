@@ -35,6 +35,7 @@ class AdminAddPlusOneToParticipantCommandHandler
                     ]],
                 ]
             );
+            return;
         }
 
         $speakingClub = $this->speakingClubRepository->findById($participation->getSpeakingClubId());
@@ -49,6 +50,7 @@ class AdminAddPlusOneToParticipantCommandHandler
                     ]],
                 ]
             );
+            return;
         }
 
         $availablePlacesCount = $speakingClub->getMaxParticipantsCount() -
@@ -111,22 +113,24 @@ class AdminAddPlusOneToParticipantCommandHandler
 
         // Notify user
 
-        $this->telegram->sendMessage(
-            chatId: $user->chatId,
-            text: sprintf(
-                'Администратор добавил вам +1 к участию в клубе "%s" %s',
-                $speakingClub->getName(),
-                $speakingClub->getDate()->format('d.m.Y H:i')
-            ),
-            replyMarkup: [
-                [[
-                    'text' => 'Посмотреть информацию о клубе',
-                    'callback_data' => sprintf(
-                        'show_speaking_club:%s',
-                        $speakingClub->getId()->toString()
-                    ),
-                ]],
-            ]
-        );
+        if ($user !== null) {
+            $this->telegram->sendMessage(
+                chatId: $user->chatId,
+                text: sprintf(
+                    'Администратор добавил вам +1 к участию в клубе "%s" %s',
+                    $speakingClub->getName(),
+                    $speakingClub->getDate()->format('d.m.Y H:i')
+                ),
+                replyMarkup: [
+                    [[
+                        'text' => 'Посмотреть информацию о клубе',
+                        'callback_data' => sprintf(
+                            'show_speaking_club:%s',
+                            $speakingClub->getId()->toString()
+                        ),
+                    ]],
+                ]
+            );
+        }
     }
 }

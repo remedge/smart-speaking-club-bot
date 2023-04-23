@@ -81,22 +81,27 @@ class AdminCancelSpeakingClubCommandHandler
         $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($speakingClub->getId());
         foreach ($waitingUsers as $waitingUser) {
             $user = $this->userQuery->findById($waitingUser['userId']); // TODO: rewrite it
-            $this->telegram->sendMessage(
-                chatId: $user->chatId,
-                text: sprintf(
-                    'К сожалению, клуб "%s" %s отменен',
-                    $speakingClub->getName(),
-                    $speakingClub->getDate()->format('d.m.Y H:i')
-                ),
-                replyMarkup: [[
-                    [
-                        'text' => 'Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_list',
-                    ],
-                ]]
-            );
+            if ($user !== null) {
+                $this->telegram->sendMessage(
+                    chatId: $user->chatId,
+                    text: sprintf(
+                        'К сожалению, клуб "%s" %s отменен',
+                        $speakingClub->getName(),
+                        $speakingClub->getDate()->format('d.m.Y H:i')
+                    ),
+                    replyMarkup: [[
+                        [
+                            'text' => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]]
+                );
+            }
+
             $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']);
-            $this->waitingUserRepository->remove($waitingUserEntity);
+            if ($waitingUserEntity !== null) {
+                $this->waitingUserRepository->remove($waitingUserEntity);
+            }
         }
 
         $speakingClub->cancel();

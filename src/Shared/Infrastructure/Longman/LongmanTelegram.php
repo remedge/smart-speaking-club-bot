@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Telegram;
+namespace App\Shared\Infrastructure\Longman;
 
 use App\Shared\Application\Clock;
 use App\Shared\Application\Command\Help\HelpCommand;
@@ -11,6 +11,7 @@ use App\Shared\Domain\TelegramInterface;
 use Longman\TelegramBot\Entities\BotCommand;
 use Longman\TelegramBot\Entities\BotCommandScope\BotCommandScopeDefault;
 use Longman\TelegramBot\Entities\InlineKeyboard;
+use Longman\TelegramBot\Entities\Update;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request as TelegramRequest;
 use Longman\TelegramBot\Telegram;
@@ -22,9 +23,11 @@ class LongmanTelegram implements TelegramInterface
 {
     private Telegram $telegram;
 
+    private ?Update $update;
+
     public function __construct(
         string $apiKey,
-        string $botUsername,
+        private readonly string $botUsername,
         private readonly string $webhookUrl,
         private bool $loggingInput,
         private Clock $clock,
@@ -33,9 +36,10 @@ class LongmanTelegram implements TelegramInterface
             api_key: $apiKey,
             bot_username: $botUsername
         );
+        $this->update = null;
     }
 
-    public function getInput(Request $request): string
+    public function parseUpdateFromRequest(Request $request): void
     {
         $input = TelegramRequest::getInput();
 
@@ -48,7 +52,70 @@ class LongmanTelegram implements TelegramInterface
             $filesystem->dumpFile(Path::normalize($dir . '/' . ($this->clock->now())->format('Y-m-d_H:i:s') . '.json'), $data);
         }
 
-        return $input;
+        $this->update = new Update(json_decode($input, true), $this->botUsername);
+    }
+
+    public function isCallbackQuery(): bool
+    {
+        if ($this->update === null) {
+            $this->update = new Update(json_decode(TelegramRequest::getInput(), true), $this->botUsername);
+        }
+
+        return property_exists($this->update, 'callback_query');
+    }
+
+    public function getChatId(): int
+    {
+        if ($this->isCallbackQuery() === true) {
+            return $this->update->getCallbackQuery()->getMessage()->getChat()->getId();
+        } else {
+            return $this->update->getMessage()->getChat()->getId();
+        }
+    }
+
+    public function getText(): string
+    {
+        if ($this->isCallbackQuery() === true) {
+            return $this->update->getCallbackQuery()->getData();
+        } else {
+            return $this->update->getMessage()->getText();
+        }
+    }
+
+    public function getFirstName(): string
+    {
+        if ($this->isCallbackQuery() === true) {
+            return $this->update->getCallbackQuery()->getFrom()->getFirstName();
+        } else {
+            return $this->update->getMessage()->getFrom()->getFirstName();
+        }
+    }
+
+    public function getLastName(): string
+    {
+        if ($this->isCallbackQuery() === true) {
+            return $this->update->getCallbackQuery()->getFrom()->getLastName();
+        } else {
+            return $this->update->getMessage()->getFrom()->getLastName();
+        }
+    }
+
+    public function getUsername(): string
+    {
+        if ($this->isCallbackQuery() === true) {
+            return $this->update->getCallbackQuery()->getFrom()->getUsername();
+        } else {
+            return $this->update->getMessage()->getFrom()->getUsername();
+        }
+    }
+
+    public function getMessageId(): int
+    {
+        if ($this->isCallbackQuery() === true) {
+            return $this->update->getCallbackQuery()->getMessage()->getMessageId();
+        } else {
+            return $this->update->getMessage()->getMessageId();
+        }
     }
 
     public function setWebhook(): string
@@ -89,6 +156,9 @@ class LongmanTelegram implements TelegramInterface
             'text' => $text,
         ];
         if (count($replyMarkup) > 0) {
+            /**
+             * @psalm-suppress TooManyArguments
+             */
             $data['reply_markup'] = new InlineKeyboard(...$replyMarkup);
         }
 

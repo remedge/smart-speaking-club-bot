@@ -15,8 +15,6 @@ use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpco
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
-use Longman\TelegramBot\Entities\Update;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -28,7 +26,6 @@ class WebhookController
         private MessageBusInterface $commandBus,
         private TelegramInterface $telegram,
         private UserRolesProvider $userRolesProvider,
-        private string $botUsername,
         private CallbackResolver $callbackResolver,
     ) {
     }
@@ -36,40 +33,29 @@ class WebhookController
     #[Route(path: '/webhook', methods: [Request::METHOD_POST])]
     public function __invoke(Request $request): Response
     {
-        $input = $this->telegram->getInput($request);
-        if ($input === '') {
-            throw new BadRequestException('No input provided');
-        }
-        $update = new Update(json_decode($input, true), $this->botUsername);
+        $this->telegram->parseUpdateFromRequest($request);
 
-        if (property_exists($update, 'callback_query') === true) {
-            $chatId = $update->getCallbackQuery()->getMessage()->getChat()->getId();
-        } else {
-            $chatId = $update->getMessage()->getChat()->getId();
-        }
+        $chatId = $this->telegram->getChatId();
+        $messageId = $this->telegram->getMessageId();
+        $text = $this->telegram->getText();
 
         $isAdmin = $this->userRolesProvider->isUserAdmin($chatId);
-        $this->telegram->setCommandsMenu();
+        //        $this->telegram->setCommandsMenu();
 
-        if (property_exists($update, 'callback_query') === true) {
-            $callbackRawData = $update->getCallbackQuery()->getData();
-            $callbackData = explode(':', $callbackRawData);
+        if ($this->telegram->isCallbackQuery() === true) {
+            $callbackData = explode(':', $text);
+
             $action = $callbackData[0];
             $objectId = $callbackData[1] ?? null;
-
-            $chatId = $update->getCallbackQuery()->getMessage()->getChat()->getId();
-            $messageId = $update->getCallbackQuery()->getMessage()->getMessageId();
 
             $this->callbackResolver->resolve($action, $chatId, $objectId, $messageId, $isAdmin);
 
             return new Response();
         }
 
-        $chatId = $update->getMessage()->getChat()->getId();
-        $firstName = $update->getMessage()->getChat()->getFirstName();
-        $lastName = $update->getMessage()->getChat()->getLastName();
-        $username = $update->getMessage()->getChat()->getUsername();
-        $text = $update->getMessage()->getText();
+        $firstName = $this->telegram->getFirstName();
+        $lastName = $this->telegram->getLastName();
+        $username = $this->telegram->getUsername();
 
         $this->commandBus->dispatch(new CreateUserIfNotExistCommand(
             chatId: $chatId,
