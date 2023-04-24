@@ -21,11 +21,10 @@ abstract class BaseApplicationTest extends WebTestCase
         ]);
     }
 
-    /**
-     * @return array<mixed>
-     */
-    protected function buildCommandObject(int $chatId, string $commandName): array
+    protected function sendWebhookCommand(int $chatId, string $commandName): void
     {
+        MockTelegram::$messages = [];
+
         if ($chatId === 666666) {
             $firstName = 'Kyle';
             $lastName = 'Reese';
@@ -36,7 +35,7 @@ abstract class BaseApplicationTest extends WebTestCase
             $username = 'connor_user';
         }
 
-        return [
+        $body = [
             'update_id' => 476767316,
             'message' => [
                 'message_id' => 111,
@@ -66,18 +65,85 @@ abstract class BaseApplicationTest extends WebTestCase
                 ],
             ],
         ];
-    }
 
-    protected function sendWebhookRequest(int $chatId, string $commandName): void
-    {
-        MockTelegram::$messages = [];
         $this->client->request(
             method: 'POST',
             uri: '/webhook',
             server: [
                 'CONTENT_TYPE' => 'application/json',
             ],
-            content: json_encode($this->buildCommandObject($chatId, $commandName)),
+            content: json_encode($body),
+        );
+    }
+
+    protected function sendWebhookCallbackQuery(int $chatId, int $messageId, string $callbackData): void
+    {
+        MockTelegram::$messages = [];
+
+        if ($chatId === 666666) {
+            $firstName = 'Kyle';
+            $lastName = 'Reese';
+            $username = 'reese_admin';
+        } else {
+            $firstName = 'John';
+            $lastName = 'Connor';
+            $username = 'connor_user';
+        }
+
+        $body = [
+            "update_id" => 156705969,
+            "callback_query" => [
+                "id" => "4210226841674178",
+                "from" => [
+                    "id" => $chatId,
+                    "is_bot" => false,
+                    "first_name" => $firstName,
+                    "last_name" => $lastName,
+                    "username" => $username,
+                    "language_code" => "ru",
+                    "is_premium" => true
+                ],
+                "message" => [
+                    "message_id" => $messageId,
+                    "from" => [
+                        "id" => 5951631065,
+                        "is_bot" => true,
+                        "first_name" => "bot_first_name",
+                        "username" => "bot_name"
+                    ],
+                    "chat" => [
+                        "id" => $chatId,
+                        "first_name" => $firstName,
+                        "last_name" => $lastName,
+                        "username" => $username,
+                        "type" => "private"
+                    ],
+                    "date" => 1682265056,
+                    "edit_date" => 1682265062,
+                    "text" => "initial_text",
+                    "reply_markup" => [
+                        "inline_keyboard" => [
+                            [
+                                [
+                                    "text" => "initial_text",
+                                    "callback_data" => $callbackData,
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "chat_instance" => "1357108034902232118",
+                "data" => $callbackData,
+            ]
+        ];
+
+        $this->client->request(
+            method: 'POST',
+            uri: '/webhook',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: json_encode($body),
         );
     }
 
@@ -87,5 +153,13 @@ abstract class BaseApplicationTest extends WebTestCase
     public function getFirstMessage(int $chatId): array
     {
         return MockTelegram::$messages[$chatId][0];
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function getMessage(int $chatId, int $messageId): array
+    {
+        return MockTelegram::$messages[$chatId][$messageId];
     }
 }

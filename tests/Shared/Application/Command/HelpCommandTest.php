@@ -10,7 +10,7 @@ class HelpCommandTest extends BaseApplicationTest
 {
     public function testUser(): void
     {
-        $this->sendWebhookRequest(111111, 'help');
+        $this->sendWebhookCommand(111111, 'help');
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(111111);
 
@@ -28,7 +28,7 @@ HEREDOC, $message['text']);
 
     public function testAdmin(): void
     {
-        $this->sendWebhookRequest(666666, 'help');
+        $this->sendWebhookCommand(666666, 'help');
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(666666);
 

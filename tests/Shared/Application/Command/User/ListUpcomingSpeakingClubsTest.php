@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Shared\Application\Command;
+namespace App\Tests\Shared\Application\Command\User;
 
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
@@ -10,11 +10,11 @@ use App\Tests\Shared\BaseApplicationTest;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
-class UpcomingClubsCommandTest extends BaseApplicationTest
+class ListUpcomingSpeakingClubsTest extends BaseApplicationTest
 {
     public function testEmpty(): void
     {
-        $this->sendWebhookRequest(111111, 'upcoming_clubs');
+        $this->sendWebhookCommand(111111, 'upcoming_clubs');
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(111111);
 
@@ -41,7 +41,7 @@ class UpcomingClubsCommandTest extends BaseApplicationTest
             date: new DateTimeImmutable('2000-01-02 22:22'),
         ));
 
-        $this->sendWebhookRequest(111111, 'upcoming_clubs');
+        $this->sendWebhookCommand(111111, 'upcoming_clubs');
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(111111);
 
