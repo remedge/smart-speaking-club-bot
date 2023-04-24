@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Shared\Application\Command\User;
+namespace App\Tests\Shared\Application\Command\Admin;
 
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
@@ -10,15 +10,15 @@ use App\Tests\Shared\BaseApplicationTest;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
-class ListUpcomingSpeakingClubsTest extends BaseApplicationTest
+class AdminListUpcomingSpeakingClubsTest extends BaseApplicationTest
 {
     public function testEmpty(): void
     {
-        $this->sendWebhookCommand(111111, 'upcoming_clubs');
+        $this->sendWebhookCommand(666666, 'admin_upcoming_clubs');
         $this->assertResponseIsSuccessful();
-        $message = $this->getFirstMessage(111111);
+        $message = $this->getFirstMessage(666666);
 
-        self::assertEquals('Пока мы не запланировали ни одного клуба. Попробуйте позже.', $message['text']);
+        self::assertEquals('Пока мы не запланировано ни одного клуба', $message['text']);
         self::assertEquals([], $message['replyMarkup']);
     }
 
@@ -56,24 +56,20 @@ class ListUpcomingSpeakingClubsTest extends BaseApplicationTest
             date: new DateTimeImmutable('1999-01-04 04:04'),
         ));
 
-        $this->sendWebhookCommand(111111, 'upcoming_clubs');
+        $this->sendWebhookCommand(666666, 'admin_upcoming_clubs');
         $this->assertResponseIsSuccessful();
-        $message = $this->getFirstMessage(111111);
+        $message = $this->getFirstMessage(666666);
 
         self::assertEquals('Список ближайших клубов:', $message['text']);
         self::assertEquals([
-            [
-                [
-                    'text' => '01.01.2000 11:11 - Test club 1',
-                    'callback_data' => 'show_speaking_club:00000000-0000-0000-0000-000000000001',
-                ],
-            ],
-            [
-                [
-                    'text' => '02.01.2000 22:22 - Test club 2',
-                    'callback_data' => 'show_speaking_club:00000000-0000-0000-0000-000000000002',
-                ],
-            ],
+            [[
+                'text' => '01.01.2000 11:11 - Test club 1',
+                'callback_data' => 'admin_show_speaking_club:00000000-0000-0000-0000-000000000001',
+            ]],
+            [[
+                'text' => '02.01.2000 22:22 - Test club 2',
+                'callback_data' => 'admin_show_speaking_club:00000000-0000-0000-0000-000000000002',
+            ]],
         ], $message['replyMarkup']);
     }
 }

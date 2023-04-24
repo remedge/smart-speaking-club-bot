@@ -358,7 +358,9 @@ class GenericTextCommandHandler
 
             if ($waitingUser !== null) {
                 $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']); // TODO: rewrite it
-                $this->waitingUserRepository->remove($waitingUserEntity);
+                if ($waitingUserEntity !== null) {
+                    $this->waitingUserRepository->remove($waitingUserEntity);
+                }
             }
         }
     }

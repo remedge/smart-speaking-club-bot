@@ -25,9 +25,10 @@ class AdminAddPlusOneToParticipantCommandHandler
     {
         $participation = $this->participationRepository->findById($command->participationId);
         if ($participation === null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
-                text: 'Участник не найден',
+                messageId: $command->messageId,
+                text: '🤔 Участник не найден',
                 replyMarkup: [
                     [[
                         'text' => '<< Вернуться к списку клубов',
@@ -40,9 +41,10 @@ class AdminAddPlusOneToParticipantCommandHandler
 
         $speakingClub = $this->speakingClubRepository->findById($participation->getSpeakingClubId());
         if ($speakingClub === null) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
-                text: 'Клуб не найден',
+                messageId: $command->messageId,
+                text: '🤔 Разговорный клуб не найден',
                 replyMarkup: [
                     [[
                         'text' => '<< Вернуться к списку клубов',
@@ -55,10 +57,12 @@ class AdminAddPlusOneToParticipantCommandHandler
 
         $availablePlacesCount = $speakingClub->getMaxParticipantsCount() -
             $this->participationRepository->countByClubId($speakingClub->getId());
+
         if ($availablePlacesCount <= 0) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
-                text: 'Нет свободных мест',
+                messageId: $command->messageId,
+                text: 'В клубе нет свободных мест',
                 replyMarkup: [
                     [[
                         'text' => '<< Вернуться к списку участников',
@@ -69,9 +73,8 @@ class AdminAddPlusOneToParticipantCommandHandler
                     ]],
                 ]
             );
+            return;
         }
-
-        $user = $this->userQuery->findById($participation->getUserId());
 
         if ($participation->isPlusOne() === true) {
             $this->telegram->editMessageText(
@@ -112,6 +115,8 @@ class AdminAddPlusOneToParticipantCommandHandler
         );
 
         // Notify user
+
+        $user = $this->userQuery->findById($participation->getUserId());
 
         if ($user !== null) {
             $this->telegram->sendMessage(

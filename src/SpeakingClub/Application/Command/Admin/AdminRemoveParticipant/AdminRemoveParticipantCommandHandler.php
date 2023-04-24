@@ -57,8 +57,6 @@ class AdminRemoveParticipantCommandHandler
             return;
         }
 
-        $user = $this->userQuery->findById($participation->getUserId());
-
         $this->participationRepository->remove($participation);
 
         // Notify admin
@@ -66,7 +64,7 @@ class AdminRemoveParticipantCommandHandler
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: 'Участник убран из списка',
+            text: 'Пользователь успешно удален из списка участников',
             replyMarkup: [
                 [[
                     'text' => '<< Вернуться к списку участников',
@@ -79,6 +77,8 @@ class AdminRemoveParticipantCommandHandler
         );
 
         // Notify user
+
+        $user = $this->userQuery->findById($participation->getUserId());
 
         if ($user !== null) {
             $this->telegram->sendMessage(

@@ -34,7 +34,7 @@ class AdminListUpcomingSpeakingClubsCommandHandler
         }
 
         if (count($speakingClubs) === 0) {
-            $text = 'Пока мы не запланировали ни одного клуба. Попробуйте позже.';
+            $text = 'Пока мы не запланировано ни одного клуба';
         } else {
             $text = 'Список ближайших клубов:';
         }

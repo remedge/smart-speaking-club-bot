@@ -41,6 +41,14 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2000-01-01 11:11'),
         ));
+        $clubRepository->save(new SpeakingClub(
+            id: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
+            name: 'Test club 2',
+            description: 'Test description 2',
+            maxParticipantsCount: 10,
+            date: new DateTimeImmutable('2000-01-02 22:22'),
+            isCancelled: true
+        ));
 
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
@@ -48,6 +56,12 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             userId: Uuid::fromString(UserFixtures::USER_ID_1),
             speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+            isPlusOne: false,
+        ));
+        $participationRepository->save(new Participation(
+            id: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
+            userId: Uuid::fromString(UserFixtures::USER_ID_1),
+            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
             isPlusOne: false,
         ));
 

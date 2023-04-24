@@ -10,9 +10,8 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
-use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
+use App\WaitList\Domain\WaitingUserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
 class SignInCommandHandler
@@ -21,9 +20,9 @@ class SignInCommandHandler
         private UserQuery $userQuery,
         private ParticipationRepository $participationRepository,
         private SpeakingClubRepository $speakingClubRepository,
+        private WaitingUserRepository $waitingUserRepository,
         private TelegramInterface $telegram,
         private UuidProvider $uuidProvider,
-        private MessageBusInterface $messageBus,
     ) {
     }
 
@@ -107,9 +106,16 @@ class SignInCommandHandler
             ]]
         );
 
-        $this->messageBus->dispatch(new LeaveWaitingListCommand(
-            chatId: $command->chatId,
+        $waitUserArray = $this->waitingUserRepository->findOneByUserIdAndSpeakingClubId(
+            userId: $user->id,
             speakingClubId: $command->speakingClubId,
-        ));
+        );
+        if ($waitUserArray !== null) {
+            $waitUser = $this->waitingUserRepository->findById($waitUserArray['id']);
+
+            if ($waitUser !== null) {
+                $this->waitingUserRepository->remove($waitUser);
+            }
+        }
     }
 }

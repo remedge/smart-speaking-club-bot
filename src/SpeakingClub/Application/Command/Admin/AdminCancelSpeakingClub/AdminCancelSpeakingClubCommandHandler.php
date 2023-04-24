@@ -30,7 +30,7 @@ class AdminCancelSpeakingClubCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Такого клуба не существует',
+                text: 'Клуб не найден',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
@@ -56,14 +56,14 @@ class AdminCancelSpeakingClubCommandHandler
             return;
         }
 
-        // TODO: move  to participation domain
+        // TODO: move to participation domain
 
         $participants = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
         foreach ($participants as $participant) {
             $this->telegram->sendMessage(
                 chatId: $participant['chatId'],
                 text: sprintf(
-                    'К сожалению, клуб "%s" %s отменен',
+                    'К сожалению, клуб "%s" %s был отменен',
                     $speakingClub->getName(),
                     $speakingClub->getDate()->format('d.m.Y H:i')
                 ),
@@ -85,7 +85,7 @@ class AdminCancelSpeakingClubCommandHandler
                 $this->telegram->sendMessage(
                     chatId: $user->chatId,
                     text: sprintf(
-                        'К сожалению, клуб "%s" %s отменен',
+                        'К сожалению, клуб "%s" %s был отменен',
                         $speakingClub->getName(),
                         $speakingClub->getDate()->format('d.m.Y H:i')
                     ),

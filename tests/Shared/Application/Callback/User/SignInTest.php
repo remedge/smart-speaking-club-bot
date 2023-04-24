@@ -10,6 +10,8 @@ use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
+use App\WaitList\Domain\WaitingUser;
+use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
@@ -25,6 +27,14 @@ class SignInTest extends BaseApplicationTest
             description: 'Test Description',
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2021-01-01 12:00'),
+        ));
+
+        /** @var WaitingUserRepository $waitUserRepository */
+        $waitUserRepository = self::getContainer()->get(WaitingUserRepository::class);
+        $waitUserRepository->save(new WaitingUser(
+            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+            userId: Uuid::fromString(UserFixtures::USER_ID_1),
+            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
         ));
 
         $this->sendWebhookCallbackQuery(
@@ -45,6 +55,12 @@ HEREDOC, $message['text']);
                 'callback_data' => 'back_to_my_list',
             ]],
         ], $message['replyMarkup']);
+
+        $waitUser = $waitUserRepository->findOneByUserIdAndSpeakingClubId(
+            userId: Uuid::fromString(UserFixtures::USER_ID_1),
+            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+        );
+        self::assertNull($waitUser);
     }
 
     public function testClubNotFound(): void

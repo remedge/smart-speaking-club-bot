@@ -28,6 +28,17 @@ class LeaveWaitingListCommandHandler
         );
 
         if ($waitingUser === null) {
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: '🤔 Вы не находитесь в списке ожидания этого клуба',
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]],
+            );
             return;
         }
 
@@ -43,7 +54,7 @@ class LeaveWaitingListCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы не находитесь в списке ожидания',
+                text: '👌 Вы успешно вышли из списке ожидания',
                 replyMarkup: [[
                     [
                         'text' => 'Перейти к списку ближайших клубов',
