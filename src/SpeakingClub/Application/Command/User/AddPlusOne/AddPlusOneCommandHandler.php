@@ -30,10 +30,10 @@ class AddPlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Клуб не найден',
+                text: '🤔 Разговорный клуб не найден',
                 replyMarkup: [[
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
+                        'text' => '<< Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_list',
                     ],
                 ]]
@@ -46,7 +46,7 @@ class AddPlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы не записаны на клуб',
+                text: '🤔 Вы не записаны на этот клуб',
                 replyMarkup: [[
                     [
                         'text' => 'Перейти к списку ближайших клубов',
@@ -61,7 +61,7 @@ class AddPlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы уже добавили +1',
+                text: '🤔 Вы уже добавили +1 с собой на этот клуб',
                 replyMarkup: [[
                     [
                         'text' => 'Перейти к списку ближайших клубов',
@@ -72,19 +72,35 @@ class AddPlusOneCommandHandler
             return;
         }
 
+        $participationCount = $this->participationRepository->countByClubId($command->speakingClubId);
+        if ($participationCount >= $speakingClub->getMaxParticipantsCount()) {
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: '😔 К сожалению, все свободные места на данный клуб заняты и вы не можете добавить +1',
+                replyMarkup: [
+                    [[
+                        'text' => 'Перейти к списку ваших клубов',
+                        'callback_data' => 'back_to_my_list',
+                    ]],
+                ]
+            );
+            return;
+        }
+
         $participation->setIsPlusOne(true);
         $this->participationRepository->save($participation);
 
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: 'Вы успешно добавили +1 человека с собой',
-            replyMarkup: [[
-                [
+            text: '👌 Вы успешно добавили +1 человека с собой',
+            replyMarkup: [
+                [[
                     'text' => 'Перейти к списку ваших клубов',
                     'callback_data' => 'back_to_my_list',
-                ],
-            ]]
+                ]],
+            ]
         );
     }
 }

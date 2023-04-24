@@ -33,7 +33,7 @@ class SignOutCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Клуб не найден',
+                text: '🤔 Разговорный клуб не найден',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
@@ -49,7 +49,7 @@ class SignOutCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы не записаны на клуб',
+                text: '🤔 Вы не записаны на этот клуб',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
@@ -65,7 +65,7 @@ class SignOutCommandHandler
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: 'Вы успешно отписаны от разговорного клуба',
+            text: '👌 Вы успешно отписаны от разговорного клуба',
             replyMarkup: [[
                 [
                     'text' => '<< Перейти к списку ближайших клубов',

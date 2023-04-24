@@ -13,9 +13,9 @@ use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
-class ShowSpeakingClubTest extends BaseApplicationTest
+class SignInPlusOneTest extends BaseApplicationTest
 {
-    public function testShowClubWithNoParticipation(): void
+    public function testSuccess(): void
     {
         /** @var SpeakingClubRepository $clubRepository */
         $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
@@ -27,38 +27,49 @@ class ShowSpeakingClubTest extends BaseApplicationTest
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));
 
-        $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(
+            chatId: 111111,
+            messageId: 123,
+            callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
+        );
         $this->assertResponseIsSuccessful();
         $message = $this->getMessage(111111, 123);
 
         self::assertEquals(<<<HEREDOC
-Название: Test Club
-Описание: Test Description
-Дата: 01.01.2021 12:00
-Максимальное количество участников: 10
-Записалось участников: 0
-
-Вы не записаны
-
+👌 Вы успешно записаны на клуб c +1 человеком
 HEREDOC, $message['text']);
 
         self::assertEquals([
             [[
-                'text' => 'Записаться',
-                'callback_data' => 'sign_in:00000000-0000-0000-0000-000000000001',
+                'text' => '<< Перейти к списку ваших клубов',
+                'callback_data' => 'back_to_my_list',
             ]],
+        ], $message['replyMarkup']);
+    }
+
+    public function testClubNotFound(): void
+    {
+        $this->sendWebhookCallbackQuery(
+            chatId: 111111,
+            messageId: 123,
+            callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
+        );
+        $this->assertResponseIsSuccessful();
+        $message = $this->getMessage(111111, 123);
+
+        self::assertEquals(<<<HEREDOC
+🤔 Такой клуб не найден
+HEREDOC, $message['text']);
+
+        self::assertEquals([
             [[
-                'text' => 'Записаться с +1 человеком',
-                'callback_data' => 'sign_in_plus_one:00000000-0000-0000-0000-000000000001',
-            ]],
-            [[
-                'text' => '<< Вернуться к списку клубов',
+                'text' => '<< Перейти к списку ближайших клубов',
                 'callback_data' => 'back_to_list',
             ]],
         ], $message['replyMarkup']);
     }
 
-    public function testShowClubWithSingleParticipation(): void
+    public function testAlreadySigned(): void
     {
         /** @var SpeakingClubRepository $clubRepository */
         $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
@@ -79,38 +90,27 @@ HEREDOC, $message['text']);
             isPlusOne: false,
         ));
 
-        $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(
+            chatId: 111111,
+            messageId: 123,
+            callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
+        );
         $this->assertResponseIsSuccessful();
         $message = $this->getMessage(111111, 123);
 
         self::assertEquals(<<<HEREDOC
-Название: Test Club
-Описание: Test Description
-Дата: 01.01.2021 12:00
-Максимальное количество участников: 10
-Записалось участников: 1
-
-Вы записаны
-
+🤔 Вы уже записаны на этот разговорный клуб
 HEREDOC, $message['text']);
 
         self::assertEquals([
             [[
-                'text' => 'Отменить запись',
-                'callback_data' => 'sign_out:00000000-0000-0000-0000-000000000001',
-            ]],
-            [[
-                'text' => 'Добавить +1 человека с собой',
-                'callback_data' => 'add_plus_one:00000000-0000-0000-0000-000000000001',
-            ]],
-            [[
-                'text' => '<< Вернуться к списку клубов',
+                'text' => '<< Перейти к списку ближайших клубов',
                 'callback_data' => 'back_to_list',
             ]],
         ], $message['replyMarkup']);
     }
 
-    public function testShowClubWithPlusOneParticipation(): void
+    public function testNoFreeSpace(): void
     {
         /** @var SpeakingClubRepository $clubRepository */
         $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
@@ -118,7 +118,7 @@ HEREDOC, $message['text']);
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test Club',
             description: 'Test Description',
-            maxParticipantsCount: 10,
+            maxParticipantsCount: 1,
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));
 
@@ -126,37 +126,30 @@ HEREDOC, $message['text']);
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
         $participationRepository->save(new Participation(
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_1),
+            userId: Uuid::fromString(UserFixtures::USER_ID_2),
             speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: true,
+            isPlusOne: false,
         ));
 
-        $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(
+            chatId: 111111,
+            messageId: 123,
+            callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
+        );
         $this->assertResponseIsSuccessful();
         $message = $this->getMessage(111111, 123);
 
         self::assertEquals(<<<HEREDOC
-Название: Test Club
-Описание: Test Description
-Дата: 01.01.2021 12:00
-Максимальное количество участников: 10
-Записалось участников: 2
-
-Вы записаны с +1 человеком
-
+😔 К сожалению, все свободные места на данный клуб заняты
 HEREDOC, $message['text']);
 
         self::assertEquals([
             [[
-                'text' => 'Отменить запись',
-                'callback_data' => 'sign_out:00000000-0000-0000-0000-000000000001',
+                'text' => 'Встать в лист ожидания',
+                'callback_data' => 'join_waiting_list:00000000-0000-0000-0000-000000000001',
             ]],
             [[
-                'text' => 'Убрать +1 человека с собой',
-                'callback_data' => 'remove_plus_one:00000000-0000-0000-0000-000000000001',
-            ]],
-            [[
-                'text' => '<< Вернуться к списку клубов',
+                'text' => '<< Перейти к списку ближайших клубов',
                 'callback_data' => 'back_to_list',
             ]],
         ], $message['replyMarkup']);

@@ -33,7 +33,7 @@ class RemovePlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Клуб не найден',
+                text: '🤔 Разговорный клуб не найден',
                 replyMarkup: [[
                     [
                         'text' => 'Перейти к списку ближайших клубов',
@@ -49,7 +49,7 @@ class RemovePlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы не записаны на клуб',
+                text: '🤔 Вы не записаны на этот клуб',
                 replyMarkup: [[
                     [
                         'text' => 'Перейти к списку ближайших клубов',
@@ -64,7 +64,7 @@ class RemovePlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы не добавляли +1 собой',
+                text: '🤔 Вы не добавляли +1 с собой на этот клуб',
                 replyMarkup: [[
                     [
                         'text' => 'Перейти к списку ближайших клубов',
@@ -81,7 +81,7 @@ class RemovePlusOneCommandHandler
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: 'Вы успешно убрали +1 человека с собой',
+            text: '👌Вы успешно убрали +1 человека с собой',
             replyMarkup: [[
                 [
                     'text' => 'Перейти к списку ваших клубов',

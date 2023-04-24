@@ -91,50 +91,50 @@ abstract class BaseApplicationTest extends WebTestCase
         }
 
         $body = [
-            "update_id" => 156705969,
-            "callback_query" => [
-                "id" => "4210226841674178",
-                "from" => [
-                    "id" => $chatId,
-                    "is_bot" => false,
-                    "first_name" => $firstName,
-                    "last_name" => $lastName,
-                    "username" => $username,
-                    "language_code" => "ru",
-                    "is_premium" => true
+            'update_id' => 156705969,
+            'callback_query' => [
+                'id' => '4210226841674178',
+                'from' => [
+                    'id' => $chatId,
+                    'is_bot' => false,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'username' => $username,
+                    'language_code' => 'ru',
+                    'is_premium' => true,
                 ],
-                "message" => [
-                    "message_id" => $messageId,
-                    "from" => [
-                        "id" => 5951631065,
-                        "is_bot" => true,
-                        "first_name" => "bot_first_name",
-                        "username" => "bot_name"
+                'message' => [
+                    'message_id' => $messageId,
+                    'from' => [
+                        'id' => 5951631065,
+                        'is_bot' => true,
+                        'first_name' => 'bot_first_name',
+                        'username' => 'bot_name',
                     ],
-                    "chat" => [
-                        "id" => $chatId,
-                        "first_name" => $firstName,
-                        "last_name" => $lastName,
-                        "username" => $username,
-                        "type" => "private"
+                    'chat' => [
+                        'id' => $chatId,
+                        'first_name' => $firstName,
+                        'last_name' => $lastName,
+                        'username' => $username,
+                        'type' => 'private',
                     ],
-                    "date" => 1682265056,
-                    "edit_date" => 1682265062,
-                    "text" => "initial_text",
-                    "reply_markup" => [
-                        "inline_keyboard" => [
+                    'date' => 1682265056,
+                    'edit_date' => 1682265062,
+                    'text' => 'initial_text',
+                    'reply_markup' => [
+                        'inline_keyboard' => [
                             [
                                 [
-                                    "text" => "initial_text",
-                                    "callback_data" => $callbackData,
-                                ]
-                            ]
-                        ]
-                    ]
+                                    'text' => 'initial_text',
+                                    'callback_data' => $callbackData,
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
-                "chat_instance" => "1357108034902232118",
-                "data" => $callbackData,
-            ]
+                'chat_instance' => '1357108034902232118',
+                'data' => $callbackData,
+            ],
         ];
 
         $this->client->request(

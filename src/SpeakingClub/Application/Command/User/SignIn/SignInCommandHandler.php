@@ -36,7 +36,7 @@ class SignInCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Разговорный клуб не найден',
+                text: '🤔 Разговорный клуб не найден',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
@@ -52,7 +52,7 @@ class SignInCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы уже записаны на этот разговорный клуб',
+                text: '🤔 Вы уже записаны на этот разговорный клуб',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ваших клубов',
@@ -68,13 +68,17 @@ class SignInCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'К сожалению, все свободные места на данное мероприятие заняты',
-                replyMarkup: [[
-                    [
+                text: '😔 К сожалению, все свободные места на данный клуб заняты',
+                replyMarkup: [
+                    [[
+                        'text' => 'Встать в лист ожидания',
+                        'callback_data' => sprintf('join_waiting_list:%s', $command->speakingClubId->toString()),
+                    ]],
+                    [[
                         'text' => '<< Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_list',
-                    ],
-                ]]
+                    ]],
+                ]
             );
             return;
         }

@@ -38,9 +38,9 @@ class SpeakingClubFreeSpaceAvailableEventListener
             $this->telegram->sendMessage(
                 chatId: $user->chatId,
                 text: sprintf(
-                    'В клубе "%s" %s появилось свободное место. Перейдите по ссылке, чтобы записаться',
+                    'В клубе "%s" %s появилось свободное место. Перейдите к описанию клуба, чтобы записаться',
                     $speakingClub->name,
-                    $speakingClub->date->format('d.m.Y')
+                    $speakingClub->date->format('d.m.Y H:i'),
                 ),
                 replyMarkup: [[
                     [

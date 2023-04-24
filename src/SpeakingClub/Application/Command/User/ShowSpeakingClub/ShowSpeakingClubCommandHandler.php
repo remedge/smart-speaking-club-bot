@@ -40,7 +40,7 @@ class ShowSpeakingClubCommandHandler
                 $this->telegram->editMessageText(
                     chatId: $command->chatId,
                     messageId: $command->messageId,
-                    text: 'Такого клуба не существует',
+                    text: '🤔 Такого клуба не существует',
                     replyMarkup: [[
                         [
                             'text' => '<< Перейти к списку ближайших клубов',
@@ -52,7 +52,7 @@ class ShowSpeakingClubCommandHandler
             } else {
                 $this->telegram->sendMessage(
                     chatId: $command->chatId,
-                    text: 'Такого клуба не существует',
+                    text: '🤔 Такого клуба не существует',
                     replyMarkup: [[
                         [
                             'text' => '<< Перейти к списку ближайших клубов',

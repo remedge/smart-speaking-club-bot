@@ -36,7 +36,7 @@ class SignInPlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Клуб не найден',
+                text: '🤔 Такой клуб не найден',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
@@ -52,7 +52,7 @@ class SignInPlusOneCommandHandler
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: 'Вы уже записаны на клуб',
+                text: '🤔 Вы уже записаны на этот разговорный клуб',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
@@ -65,9 +65,10 @@ class SignInPlusOneCommandHandler
 
         $participationCount = $this->participationRepository->countByClubId($command->speakingClubId);
         if (($participationCount + 1) >= $speakingClub->getMaxParticipantsCount()) {
-            $this->telegram->sendMessage(
+            $this->telegram->editMessageText(
                 chatId: $command->chatId,
-                text: 'Все места на данное мероприятие заняты',
+                messageId: $command->messageId,
+                text: '😔 К сожалению, все свободные места на данный клуб заняты',
                 replyMarkup: [
                     [[
                         'text' => 'Встать в лист ожидания',
@@ -95,7 +96,7 @@ class SignInPlusOneCommandHandler
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: 'Вы успешно записаны на клуб c +1 человеком',
+            text: '👌 Вы успешно записаны на клуб c +1 человеком',
             replyMarkup: [[
                 [
                     'text' => '<< Перейти к списку ваших клубов',
