@@ -55,6 +55,15 @@ class LongmanTelegram implements TelegramInterface
         $this->update = new Update(json_decode($input, true), $this->botUsername);
     }
 
+    public function isEditedMessage(): bool
+    {
+        if ($this->update === null) {
+            $this->update = new Update(json_decode(TelegramRequest::getInput(), true), $this->botUsername);
+        }
+
+        return property_exists($this->update, 'edited_message');
+    }
+
     public function isCallbackQuery(): bool
     {
         if ($this->update === null) {

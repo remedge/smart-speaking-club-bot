@@ -12,6 +12,8 @@ interface TelegramInterface
 
     public function parseUpdateFromRequest(Request $request): void;
 
+    public function isEditedMessage(): bool;
+
     public function isCallbackQuery(): bool;
 
     public function getChatId(): int;

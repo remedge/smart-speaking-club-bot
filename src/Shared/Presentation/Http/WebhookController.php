@@ -35,6 +35,10 @@ class WebhookController
     {
         $this->telegram->parseUpdateFromRequest($request);
 
+        if ($this->telegram->isEditedMessage()) {
+            return new Response();
+        }
+
         $chatId = $this->telegram->getChatId();
         $messageId = $this->telegram->getMessageId();
         $text = $this->telegram->getText();
