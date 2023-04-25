@@ -36,7 +36,7 @@ class ListUpcomingSpeakingClubsCommandHandler
         if (count($speakingClubs) === 0) {
             $text = 'Пока мы не запланировали ни одного клуба. Попробуйте позже.';
         } else {
-            $text = 'Список ближайших клубов:';
+            $text = 'Список ближайших разговорных клубов и культурных мероприятий. Нажмите на один из них, чтобы увидеть подробную информацию';
         }
 
         if ($command->messageId !== null) {

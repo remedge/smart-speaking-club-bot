@@ -60,7 +60,7 @@ class AdminListUpcomingSpeakingClubsTest extends BaseApplicationTest
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(666666);
 
-        self::assertEquals('Список ближайших клубов:', $message['text']);
+        self::assertEquals('Список ближайших разговорных клубов и культурных мероприятий. Нажмите на один из них, чтобы увидеть подробную информацию', $message['text']);
         self::assertEquals([
             [[
                 'text' => '01.01.2000 11:11 - Test club 1',
