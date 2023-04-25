@@ -110,4 +110,9 @@ class MockTelegram implements TelegramInterface
             return $this->request['message']['chat']['username'];
         }
     }
+
+    public function isEditedMessage(): bool
+    {
+        return false;
+    }
 }
