@@ -52,7 +52,7 @@ services:
 
     App\Shared\Infrastructure\EnvUserRoleProvider:
         arguments:
-            $adminChatIds: '%env(json:ADMIN_CHAT_IDS)%'
+            $adminChatUsernames: '%env(json:ADMIN_CHAT_USERNAMES)%'
 
     # Miscellaneous
     App\Shared\Infrastructure\Symfony\ExceptionListener:

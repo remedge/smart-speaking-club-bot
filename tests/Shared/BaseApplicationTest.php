@@ -28,11 +28,11 @@ abstract class BaseApplicationTest extends WebTestCase
         if ($chatId === 666666) {
             $firstName = 'Kyle';
             $lastName = 'Reese';
-            $username = 'reese_admin';
+            $username = 'kyle_reese';
         } else {
             $firstName = 'John';
             $lastName = 'Connor';
-            $username = 'connor_user';
+            $username = 'john_connor';
         }
 
         $body = [
@@ -83,11 +83,11 @@ abstract class BaseApplicationTest extends WebTestCase
         if ($chatId === 666666) {
             $firstName = 'Kyle';
             $lastName = 'Reese';
-            $username = 'reese_admin';
+            $username = 'kyle_reese';
         } else {
             $firstName = 'John';
             $lastName = 'Connor';
-            $username = 'connor_user';
+            $username = 'john_connor';
         }
 
         $body = [
@@ -109,7 +109,7 @@ abstract class BaseApplicationTest extends WebTestCase
                         'id' => 5951631065,
                         'is_bot' => true,
                         'first_name' => 'bot_first_name',
-                        'username' => 'bot_name',
+                        'username' => $username,
                     ],
                     'chat' => [
                         'id' => $chatId,

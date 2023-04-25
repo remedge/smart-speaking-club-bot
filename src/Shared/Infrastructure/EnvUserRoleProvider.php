@@ -9,20 +9,15 @@ use App\Shared\Domain\UserRolesProvider;
 class EnvUserRoleProvider implements UserRolesProvider
 {
     /**
-     * @param array<int> $adminChatIds
+     * @param array<string> $adminChatUsernames
      */
     public function __construct(
-        private array $adminChatIds,
+        private array $adminChatUsernames,
     ) {
     }
 
-    public function isUserAdmin(int $chatId): bool
+    public function isUserAdmin(string $username): bool
     {
-        return in_array($chatId, $this->adminChatIds, true);
-    }
-
-    public function getAdminChatIds(): array
-    {
-        return $this->adminChatIds;
+        return in_array(strtolower($username), $this->adminChatUsernames, true);
     }
 }

@@ -271,7 +271,8 @@ class GenericTextCommandHandler
                 );
                 return;
             }
-            if ($this->userRolesProvider->isUserAdmin($participantUser->getChatId())) {
+
+            if ($this->userRolesProvider->isUserAdmin($participantUser->getUsername())) {
                 $user->setState(UserStateEnum::IDLE);
                 $user->setActualSpeakingClubData([]);
                 $this->userRepository->save($user);

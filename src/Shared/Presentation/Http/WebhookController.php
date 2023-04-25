@@ -39,7 +39,11 @@ class WebhookController
         $messageId = $this->telegram->getMessageId();
         $text = $this->telegram->getText();
 
-        $isAdmin = $this->userRolesProvider->isUserAdmin($chatId);
+        $firstName = $this->telegram->getFirstName();
+        $lastName = $this->telegram->getLastName();
+        $username = $this->telegram->getUsername();
+
+        $isAdmin = $this->userRolesProvider->isUserAdmin($username);
         $this->telegram->setCommandsMenu();
 
         if ($this->telegram->isCallbackQuery() === true) {
@@ -52,10 +56,6 @@ class WebhookController
 
             return new Response();
         }
-
-        $firstName = $this->telegram->getFirstName();
-        $lastName = $this->telegram->getLastName();
-        $username = $this->telegram->getUsername();
 
         $this->commandBus->dispatch(new CreateUserIfNotExistCommand(
             chatId: $chatId,

@@ -6,10 +6,5 @@ namespace App\Shared\Domain;
 
 interface UserRolesProvider
 {
-    public function isUserAdmin(int $chatId): bool;
-
-    /**
-     * @return array<int>
-     */
-    public function getAdminChatIds(): array;
+    public function isUserAdmin(string $username): bool;
 }
