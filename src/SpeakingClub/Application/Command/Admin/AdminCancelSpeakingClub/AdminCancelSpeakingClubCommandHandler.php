@@ -61,7 +61,7 @@ class AdminCancelSpeakingClubCommandHandler
         $participants = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
         foreach ($participants as $participant) {
             $this->telegram->sendMessage(
-                chatId: $participant['chatId'],
+                chatId: (int) $participant['chatId'],
                 text: sprintf(
                     'К сожалению, клуб "%s" %s был отменен',
                     $speakingClub->getName(),
