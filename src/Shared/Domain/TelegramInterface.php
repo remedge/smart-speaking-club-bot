@@ -22,9 +22,9 @@ interface TelegramInterface
 
     public function getText(): string;
 
-    public function getFirstName(): string;
+    public function getFirstName(): ?string;
 
-    public function getLastName(): string;
+    public function getLastName(): ?string;
 
     public function getUsername(): string;
 

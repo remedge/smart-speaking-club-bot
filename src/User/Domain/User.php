@@ -15,8 +15,8 @@ class User
     public function __construct(
         private UuidInterface $id, // TODO: remove, user only chatId
         private int $chatId,
-        private string $firstName,
-        private string $lastName,
+        private ?string $firstName,
+        private ?string $lastName,
         private string $username,
         private DateTimeImmutable $createdAt,
         private UserStateEnum $state = UserStateEnum::IDLE,
@@ -34,12 +34,12 @@ class User
         return $this->chatId;
     }
 
-    public function getFirstName(): string
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }

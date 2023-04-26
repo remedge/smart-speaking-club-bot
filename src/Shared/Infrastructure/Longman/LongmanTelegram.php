@@ -118,7 +118,7 @@ class LongmanTelegram implements TelegramInterface
         }
     }
 
-    public function getFirstName(): string
+    public function getFirstName(): ?string
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getFirstName();
@@ -129,7 +129,7 @@ class LongmanTelegram implements TelegramInterface
         }
     }
 
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getLastName();

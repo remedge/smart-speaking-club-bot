@@ -8,8 +8,8 @@ class CreateUserIfNotExistCommand
 {
     public function __construct(
         public int $chatId,
-        public string $firstName,
-        public string $lastName,
+        public ?string $firstName,
+        public ?string $lastName,
         public string $userName,
     ) {
     }

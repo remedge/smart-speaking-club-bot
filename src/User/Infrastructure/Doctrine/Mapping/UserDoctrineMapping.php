@@ -26,8 +26,12 @@ class UserDoctrineMapping extends DoctrineMapping
             ->build();
 
         $builder->addField('chatId', 'bigint');
-        $builder->addField('firstName', 'string');
-        $builder->addField('lastName', 'string');
+        $builder->addField('firstName', 'string', [
+            'nullable' => true,
+        ]);
+        $builder->addField('lastName', 'string', [
+            'nullable' => true,
+        ]);
         $builder->addField('username', 'string');
         $builder->addField('state', 'string', [
             'enumType' => UserStateEnum::class,
