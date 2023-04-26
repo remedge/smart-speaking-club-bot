@@ -43,16 +43,26 @@ class LongmanTelegram implements TelegramInterface
     {
         $input = TelegramRequest::getInput();
 
+        $this->update = new Update(json_decode($input, true), $this->botUsername);
+
         if ($this->loggingInput === true) {
             $filesystem = new Filesystem();
             $dir = __DIR__ . '/../../../../var/requests';
             $filesystem->mkdir(Path::normalize($dir));
 
             $data = json_encode(json_decode($input), JSON_PRETTY_PRINT);
-            $filesystem->dumpFile(Path::normalize($dir . '/' . ($this->clock->now())->format('Y-m-d_H:i:s') . '.json'), $data);
+            $filesystem->dumpFile(
+                filename: Path::normalize(
+                    sprintf(
+                        '%s/%s_%s.json',
+                        $dir,
+                        ($this->clock->now())->format('Y-m-d_H:i:s'),
+                        $this->getUsername()
+                    )
+                ),
+                content: $data
+            );
         }
-
-        $this->update = new Update(json_decode($input, true), $this->botUsername);
     }
 
     public function isEditedMessage(): bool
@@ -77,6 +87,8 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getMessage()->getChat()->getId();
+        } elseif ($this->isEditedMessage() === true) {
+            return $this->update->getEditedMessage()->getChat()->getId();
         } else {
             return $this->update->getMessage()->getChat()->getId();
         }
@@ -86,6 +98,8 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getData();
+        } elseif ($this->isEditedMessage() === true) {
+            return $this->update->getEditedMessage()->getText();
         } else {
             return $this->update->getMessage()->getText();
         }
@@ -95,6 +109,8 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getFirstName();
+        } elseif ($this->isEditedMessage() === true) {
+            return $this->update->getEditedMessage()->getFrom()->getFirstName();
         } else {
             return $this->update->getMessage()->getFrom()->getFirstName();
         }
@@ -104,6 +120,8 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getLastName();
+        } elseif ($this->isEditedMessage() === true) {
+            return $this->update->getEditedMessage()->getFrom()->getLastName();
         } else {
             return $this->update->getMessage()->getFrom()->getLastName();
         }
@@ -113,6 +131,8 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getUsername();
+        } elseif ($this->isEditedMessage() === true) {
+            return $this->update->getEditedMessage()->getFrom()->getUsername();
         } else {
             return $this->update->getMessage()->getFrom()->getUsername();
         }
@@ -122,6 +142,8 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getMessage()->getMessageId();
+        } elseif ($this->isEditedMessage() === true) {
+            return $this->update->getEditedMessage()->getMessageId();
         } else {
             return $this->update->getMessage()->getMessageId();
         }
