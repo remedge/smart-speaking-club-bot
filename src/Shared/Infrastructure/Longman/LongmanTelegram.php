@@ -17,6 +17,7 @@ use Longman\TelegramBot\Request as TelegramRequest;
 use Longman\TelegramBot\Telegram;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
 
 class LongmanTelegram implements TelegramInterface
@@ -49,6 +50,18 @@ class LongmanTelegram implements TelegramInterface
             $filesystem = new Filesystem();
             $dir = __DIR__ . '/../../../../var/requests';
             $filesystem->mkdir(Path::normalize($dir));
+
+            $finder = new Finder();
+            $finder->files()->in($dir);
+
+            if ($finder->count() >= 50) {
+                $finder->sortByChangedTime();
+                for ($i = 0; $i <= $finder->count() - 50; $i++) {
+                    $finder->getIterator()->current()->isFile();
+                    $filesystem->remove($finder->getIterator()->current()->getPathname());
+                    $finder->getIterator()->next();
+                }
+            }
 
             $data = json_encode(json_decode($input), JSON_PRETTY_PRINT);
             $filesystem->dumpFile(
