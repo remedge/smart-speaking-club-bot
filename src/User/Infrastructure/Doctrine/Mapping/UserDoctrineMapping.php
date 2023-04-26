@@ -25,7 +25,7 @@ class UserDoctrineMapping extends DoctrineMapping
             ->makePrimaryKey()
             ->build();
 
-        $builder->addField('chatId', 'integer');
+        $builder->addField('chatId', 'bigint');
         $builder->addField('firstName', 'string');
         $builder->addField('lastName', 'string');
         $builder->addField('username', 'string');
