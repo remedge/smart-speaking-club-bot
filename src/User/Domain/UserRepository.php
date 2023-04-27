@@ -15,4 +15,10 @@ interface UserRepository
     public function findById(UuidInterface $id): ?User;
 
     public function findByUsername(string $username): ?User;
+
+    /**
+     * @param array<string> $usernames
+     * @return array<User>
+     */
+    public function findAllExceptUsernames(array $usernames): array;
 }

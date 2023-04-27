@@ -18,6 +18,7 @@ enum UserStateEnum: string
     case RECEIVING_DATE_FOR_EDITING = 'RECEIVING_DATE_FOR_EDITING';
 
     case RECEIVING_PARTICIPANT = 'RECEIVING_PARTICIPANT';
+    case RECEIVING_MESSAGE_FOR_EVERYONE = 'RECEIVING_MESSAGE_FOR_EVERYONE';
 
     /**
      * @return array<string, string>

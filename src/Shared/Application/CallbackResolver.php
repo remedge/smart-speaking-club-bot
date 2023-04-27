@@ -22,6 +22,7 @@ use App\SpeakingClub\Application\Command\User\SignInPlusOne\SignInPlusOneCommand
 use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\InitClubEdition\InitClubEditionCommand;
+use App\User\Application\Command\Admin\InitSendMessageEveryone\InitSendMessageEveryoneCommand;
 use App\WaitList\Application\Command\JoinWaitingList\JoinWaitingListCommand;
 use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
 use Exception;
@@ -50,9 +51,9 @@ class CallbackResolver
                 'admin_create_club' => $this->commandBus->dispatch(new InitClubCreationCommand(
                     chatId: $chatId,
                 )),
-//                'admin_send_message' => $this->commandBus->dispatch(new ListUserUpcomingSpeakingClubsCommand(
-//                    chatId: $chatId,
-//                )),
+                'admin_send_message' => $this->commandBus->dispatch(new InitSendMessageEveryoneCommand(
+                    chatId: $chatId,
+                )),
                 AdminShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new AdminShowSpeakingClubCommand(
                     chatId: $chatId,
                     speakingClubId: Uuid::fromString($objectId),

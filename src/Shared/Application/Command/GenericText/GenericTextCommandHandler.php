@@ -364,5 +364,31 @@ class GenericTextCommandHandler
                 }
             }
         }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_MESSAGE_FOR_EVERYONE) {
+            $recipients = $this->userRepository->findAllExceptUsernames($this->userRolesProvider->getAdminUsernames());
+
+            foreach ($recipients as $recipient) {
+                $this->telegram->sendMessage(
+                    chatId: $recipient->getChatId(),
+                    text: $command->text,
+                );
+            }
+
+            $user->setState(UserStateEnum::IDLE);
+            $user->setActualSpeakingClubData([]);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: '✅ Сообщение успешно отправлено всем пользователям',
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_admin_list',
+                    ],
+                ]],
+            );
+        }
     }
 }

@@ -20,4 +20,9 @@ class EnvUserRoleProvider implements UserRolesProvider
     {
         return in_array(strtolower($username), $this->adminChatUsernames, true);
     }
+
+    public function getAdminUsernames(): array
+    {
+        return $this->adminChatUsernames;
+    }
 }

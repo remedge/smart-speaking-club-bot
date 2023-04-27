@@ -46,4 +46,13 @@ class DoctrineUserRepository extends ServiceEntityRepository implements UserRepo
             'username' => $username,
         ]);
     }
+
+    public function findAllExceptUsernames(array $usernames): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.username NOT IN (:usernames)')
+            ->setParameter('usernames', $usernames)
+            ->getQuery()
+            ->getResult();
+    }
 }
