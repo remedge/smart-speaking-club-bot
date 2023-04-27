@@ -20,6 +20,7 @@ use App\SpeakingClub\Application\Command\User\ShowSpeakingClub\ShowSpeakingClubC
 use App\SpeakingClub\Application\Command\User\SignIn\SignInCommand;
 use App\SpeakingClub\Application\Command\User\SignInPlusOne\SignInPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
+use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\InitClubEdition\InitClubEditionCommand;
 use App\WaitList\Application\Command\JoinWaitingList\JoinWaitingListCommand;
 use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
@@ -43,6 +44,15 @@ class CallbackResolver
     ): void {
         if ($isAdmin === true) {
             match ($action) {
+                'admin_upcoming_clubs' => $this->commandBus->dispatch(new AdminListUpcomingSpeakingClubsCommand(
+                    chatId: $chatId,
+                )),
+                'admin_create_club' => $this->commandBus->dispatch(new InitClubCreationCommand(
+                    chatId: $chatId,
+                )),
+//                'admin_send_message' => $this->commandBus->dispatch(new ListUserUpcomingSpeakingClubsCommand(
+//                    chatId: $chatId,
+//                )),
                 AdminShowSpeakingClubCommand::CALLBACK_NAME => $this->commandBus->dispatch(new AdminShowSpeakingClubCommand(
                     chatId: $chatId,
                     speakingClubId: Uuid::fromString($objectId),
@@ -93,6 +103,12 @@ class CallbackResolver
         }
 
         match ($action) {
+            'upcoming_clubs' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand(
+                chatId: $chatId,
+            )),
+            'my_upcoming_clubs' => $this->commandBus->dispatch(new ListUserUpcomingSpeakingClubsCommand(
+                chatId: $chatId,
+            )),
             'show_speaking_club' => $this->commandBus->dispatch(new ShowSpeakingClubCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
