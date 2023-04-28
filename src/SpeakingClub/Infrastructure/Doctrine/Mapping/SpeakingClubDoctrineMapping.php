@@ -31,5 +31,8 @@ class SpeakingClubDoctrineMapping extends DoctrineMapping
         $builder->addField('isCancelled', 'boolean', [
             'default' => false,
         ]);
+        $builder->addField('isArchived', 'boolean', [
+            'default' => false,
+        ]);
     }
 }

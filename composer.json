@@ -10,6 +10,7 @@
         "doctrine/doctrine-bundle": "^2.9",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.14",
+        "google/apiclient": "*",
         "longman/telegram-bot": "*",
         "ramsey/uuid-doctrine": "^2.0",
         "symfony/console": "6.2.*",

@@ -20,3 +20,4 @@
 ###< phpunit/phpunit ###
 
 tests/.database.cache
+/credentials/credentials.json

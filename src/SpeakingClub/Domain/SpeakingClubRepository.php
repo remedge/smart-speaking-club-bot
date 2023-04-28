@@ -27,4 +27,9 @@ interface SpeakingClubRepository
      * @return array<SpeakingClub>
      */
     public function findBetweenDates(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array;
+
+    /**
+     * @return array<SpeakingClub>
+     */
+    public function findAllPastNotArchived(DateTimeImmutable $now): array;
 }

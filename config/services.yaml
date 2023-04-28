@@ -58,3 +58,8 @@ services:
     App\Shared\Infrastructure\Symfony\ExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    App\SpeakingClub\Presentation\Cli\ArchivePastSpeakingClubsCommand:
+        arguments:
+            $spreadsheetId: '%env(SPREADSHEET_ID)%'
+            $range: '%env(SPREADSHEET_RANGE)%'

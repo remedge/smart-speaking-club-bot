@@ -16,6 +16,7 @@ class SpeakingClub
         private int $maxParticipantsCount,
         private DateTimeImmutable $date,
         private bool $isCancelled = false,
+        private bool $isArchived = false,
     ) {
     }
 
@@ -72,5 +73,15 @@ class SpeakingClub
     public function isCancelled(): bool
     {
         return $this->isCancelled;
+    }
+
+    public function archive(): void
+    {
+        $this->isArchived = true;
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->isArchived;
     }
 }
