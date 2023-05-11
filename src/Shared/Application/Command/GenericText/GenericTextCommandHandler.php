@@ -116,12 +116,16 @@ class GenericTextCommandHandler
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
                 text: 'Клуб успешно создан',
-                replyMarkup: [[
-                    [
+                replyMarkup: [
+                    [[
                         'text' => 'Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_admin_list',
-                    ],
-                ]],
+                    ]],
+                    [[
+                        'text' => 'Создать еще один клуб',
+                        'callback_data' => 'admin_create_club',
+                    ]],
+                ],
             );
             return;
         }
