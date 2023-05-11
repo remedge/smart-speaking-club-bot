@@ -394,5 +394,51 @@ class GenericTextCommandHandler
                 ]],
             );
         }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_MESSAGE_FOR_PARTICIPANTS) {
+            $speakingClubId = $user->getActualSpeakingClubData()['id'] ?? null;
+
+            if ($speakingClubId === null) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Что-то пошло не так, попробуйте еще раз',
+                    replyMarkup: [[
+                        [
+                            'text' => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]],
+                );
+                return;
+            }
+
+            $participations = $this->participationRepository->findBySpeakingClubId(Uuid::fromString($speakingClubId));
+
+            foreach ($participations as $recipient) {
+                $this->telegram->sendMessage(
+                    chatId: (int) $recipient['chatId'],
+                    text: $command->text,
+                );
+            }
+
+            $user->setState(UserStateEnum::IDLE);
+            $user->setActualSpeakingClubData([]);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: '✅ Сообщение успешно отправлено всем участникам клуба',
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_admin_list',
+                    ],
+                ]],
+            );
+        }
     }
 }

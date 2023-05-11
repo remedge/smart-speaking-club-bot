@@ -79,6 +79,10 @@ class AdminShowSpeakingClubCommandHandler
                     'callback_data' => sprintf('cancel_club:%s', $speakingClub->getId()->toString()),
                 ]],
                 [[
+                    'text' => 'Отправить сообщение всем участникам клуба',
+                    'callback_data' => sprintf('notify_participants:%s', $speakingClub->getId()->toString()),
+                ]],
+                [[
                     'text' => '<< Вернуться к списку клубов',
                     'callback_data' => 'back_to_admin_list',
                 ]],

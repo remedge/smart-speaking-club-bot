@@ -28,7 +28,7 @@ class ParticipationQuery
                 username: $participation['username'],
                 firstName: $participation['firstName'],
                 lastName: $participation['lastName'],
-                chatId: $participation['chatId'],
+                chatId: (int) $participation['chatId'],
                 isPlusOne: $participation['isPlusOne'],
             );
         }

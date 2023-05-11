@@ -23,6 +23,7 @@ use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\InitClubEdition\InitClubEditionCommand;
 use App\User\Application\Command\Admin\InitSendMessageEveryone\InitSendMessageEveryoneCommand;
+use App\User\Application\Command\Admin\InitSendMessageToParticipants\InitSendMessageToParticipantsCommand;
 use App\WaitList\Application\Command\JoinWaitingList\JoinWaitingListCommand;
 use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
 use Exception;
@@ -96,6 +97,10 @@ class CallbackResolver
                 'admin_add_participant' => $this->commandBus->dispatch(new AdminAddParticipantCommand(
                     chatId: $chatId,
                     messageId: $messageId,
+                    speakingClubId: Uuid::fromString($objectId),
+                )),
+                'notify_participants' => $this->commandBus->dispatch(new InitSendMessageToParticipantsCommand(
+                    chatId: $chatId,
                     speakingClubId: Uuid::fromString($objectId),
                 )),
                 default => throw new Exception(sprintf('Unknown admin callback "%s', $action)),
