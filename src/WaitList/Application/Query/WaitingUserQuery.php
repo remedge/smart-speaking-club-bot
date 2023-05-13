@@ -26,7 +26,7 @@ class WaitingUserQuery
         return new WaitingUserDTO(
             id: $waitingUser['id'],
             userId: $waitingUser['userId'],
-            chatId: $waitingUser['chatId'],
+            chatId: (int) $waitingUser['chatId'],
             speakingClubId: $waitingUser['speakingClubId'],
         );
     }
