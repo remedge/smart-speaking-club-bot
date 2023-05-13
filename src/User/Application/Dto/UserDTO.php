@@ -11,8 +11,8 @@ class UserDTO
     public function __construct(
         public UuidInterface $id,
         public int $chatId,
-        public string $firstName,
-        public string $lastName,
+        public ?string $firstName,
+        public ?string $lastName,
         public string $username,
     ) {
     }
