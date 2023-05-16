@@ -72,7 +72,7 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
         self::assertEquals('Список ближайших клубов, куда вы записаны:', $message['text']);
         self::assertEquals([
             [[
-                'text' => '01.01.2000 11:11 - Test club 1',
+                'text' => '01.01 11:11 - Test club 1',
                 'callback_data' => 'show_my_speaking_club:00000000-0000-0000-0000-000000000001',
             ]],
         ], $message['replyMarkup']);

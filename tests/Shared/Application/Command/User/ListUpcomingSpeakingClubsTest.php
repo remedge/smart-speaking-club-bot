@@ -60,17 +60,17 @@ class ListUpcomingSpeakingClubsTest extends BaseApplicationTest
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(111111);
 
-        self::assertEquals('Список ближайших разговорных клубов и культурных мероприятий. Нажмите на один из них, чтобы увидеть подробную информацию', $message['text']);
+        self::assertEquals('Список ближайших разговорных клубов и других мероприятий школы. Нажмите на один из них, чтобы увидеть подробную информацию', $message['text']);
         self::assertEquals([
             [
                 [
-                    'text' => '01.01.2000 11:11 - Test club 1',
+                    'text' => '01.01 11:11 - Test club 1',
                     'callback_data' => 'show_speaking_club:00000000-0000-0000-0000-000000000001',
                 ],
             ],
             [
                 [
-                    'text' => '02.01.2000 22:22 - Test club 2',
+                    'text' => '02.01 22:22 - Test club 2',
                     'callback_data' => 'show_speaking_club:00000000-0000-0000-0000-000000000002',
                 ],
             ],

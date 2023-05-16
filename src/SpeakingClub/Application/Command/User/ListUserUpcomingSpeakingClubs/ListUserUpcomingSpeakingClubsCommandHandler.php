@@ -30,7 +30,7 @@ class ListUserUpcomingSpeakingClubsCommandHandler
         foreach ($speakingClubs as $speakingClub) {
             $buttons[] = [
                 [
-                    'text' => sprintf('%s - %s', $speakingClub->getDate()->format('d.m.Y H:i'), $speakingClub->getName()),
+                    'text' => sprintf('%s - %s', $speakingClub->getDate()->format('d.m H:i'), $speakingClub->getName()),
                     'callback_data' => sprintf('show_my_speaking_club:%s', $speakingClub->getId()->toString()),
                 ],
             ];
