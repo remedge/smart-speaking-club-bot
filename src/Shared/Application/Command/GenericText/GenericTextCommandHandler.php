@@ -230,6 +230,7 @@ class GenericTextCommandHandler
                     ],
                 ]],
             );
+            return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_PARTICIPANT) {
@@ -367,6 +368,7 @@ class GenericTextCommandHandler
                     $this->waitingUserRepository->remove($waitingUserEntity);
                 }
             }
+            return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MESSAGE_FOR_EVERYONE) {
@@ -393,6 +395,7 @@ class GenericTextCommandHandler
                     ],
                 ]],
             );
+            return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MESSAGE_FOR_PARTICIPANTS) {
@@ -439,6 +442,15 @@ class GenericTextCommandHandler
                     ],
                 ]],
             );
+            return;
         }
+
+        $this->telegram->sendMessage(
+            chatId: $command->chatId,
+            text: 'К сожалению я пока просто робот и могу понимать только команды через кнопки 🤖
+
+Если вы хотите узнать больше о том, что я могу, нажмите /help.
+А если хотите пообщаться с администратором, напишите пожалуйста @SmartLab_NoviSad 😊',
+        );
     }
 }
