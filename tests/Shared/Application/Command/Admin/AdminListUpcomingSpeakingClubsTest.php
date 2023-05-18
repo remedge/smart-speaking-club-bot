@@ -18,7 +18,7 @@ class AdminListUpcomingSpeakingClubsTest extends BaseApplicationTest
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(666666);
 
-        self::assertEquals('Пока мы не запланировано ни одного клуба', $message['text']);
+        self::assertEquals('Пока не запланировано ни одного клуба', $message['text']);
         self::assertEquals([], $message['replyMarkup']);
     }
 
