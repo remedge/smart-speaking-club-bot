@@ -15,6 +15,7 @@ use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpco
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
+use Longman\TelegramBot\Entities\Update;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -35,7 +36,8 @@ class WebhookController
     {
         $this->telegram->parseUpdateFromRequest($request);
 
-        if ($this->telegram->isEditedMessage()) {
+        if ($this->telegram->getUpdateType() !== Update::TYPE_MESSAGE &&
+            $this->telegram->getUpdateType() !== Update::TYPE_CALLBACK_QUERY) {
             return new Response();
         }
 

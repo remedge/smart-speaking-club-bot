@@ -19,7 +19,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
-use Throwable;
 
 class LongmanTelegram implements TelegramInterface
 {
@@ -73,7 +72,7 @@ class LongmanTelegram implements TelegramInterface
                         '%s/%s_%s.json',
                         $dir,
                         ($this->clock->now())->format('Y-m-d_H:i:s'),
-                        $this->getUsername()
+                        $this->update['update_id'],
                     )
                 ),
                 content: $data
@@ -81,13 +80,9 @@ class LongmanTelegram implements TelegramInterface
         }
     }
 
-    public function isEditedMessage(): bool
+    public function getUpdateType(): string
     {
-        if ($this->update === null) {
-            $this->update = new Update(json_decode(TelegramRequest::getInput(), true), $this->botUsername);
-        }
-
-        return property_exists($this->update, 'edited_message');
+        return $this->update->getUpdateType();
     }
 
     public function isCallbackQuery(): bool
@@ -103,8 +98,6 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getMessage()->getChat()->getId();
-        } elseif ($this->isEditedMessage() === true) {
-            return $this->update->getEditedMessage()->getChat()->getId();
         } else {
             return $this->update->getMessage()->getChat()->getId();
         }
@@ -114,8 +107,6 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getData();
-        } elseif ($this->isEditedMessage() === true) {
-            return $this->update->getEditedMessage()->getText();
         } else {
             return $this->update->getMessage()->getText();
         }
@@ -125,8 +116,6 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getFirstName();
-        } elseif ($this->isEditedMessage() === true) {
-            return $this->update->getEditedMessage()->getFrom()->getFirstName();
         } else {
             return $this->update->getMessage()->getFrom()->getFirstName();
         }
@@ -136,8 +125,6 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getLastName();
-        } elseif ($this->isEditedMessage() === true) {
-            return $this->update->getEditedMessage()->getFrom()->getLastName();
         } else {
             return $this->update->getMessage()->getFrom()->getLastName();
         }
@@ -145,16 +132,10 @@ class LongmanTelegram implements TelegramInterface
 
     public function getUsername(): ?string
     {
-        try {
-            if ($this->isCallbackQuery() === true) {
-                return $this->update->getCallbackQuery()->getFrom()->getUsername();
-            } elseif ($this->isEditedMessage() === true) {
-                return $this->update->getEditedMessage()->getFrom()->getUsername();
-            } else {
-                return $this->update->getMessage()->getFrom()->getUsername();
-            }
-        } catch (Throwable $e) {
-            return null;
+        if ($this->isCallbackQuery() === true) {
+            return $this->update->getCallbackQuery()->getFrom()->getUsername();
+        } else {
+            return $this->update->getMessage()->getFrom()->getUsername();
         }
     }
 
@@ -162,8 +143,6 @@ class LongmanTelegram implements TelegramInterface
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getMessage()->getMessageId();
-        } elseif ($this->isEditedMessage() === true) {
-            return $this->update->getEditedMessage()->getMessageId();
         } else {
             return $this->update->getMessage()->getMessageId();
         }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Mock;
 
 use App\Shared\Domain\TelegramInterface;
+use Longman\TelegramBot\Entities\Update;
 use Symfony\Component\HttpFoundation\Request;
 
 class MockTelegram implements TelegramInterface
@@ -111,8 +112,8 @@ class MockTelegram implements TelegramInterface
         }
     }
 
-    public function isEditedMessage(): bool
+    public function getUpdateType(): string
     {
-        return false;
+        return Update::TYPE_MESSAGE;
     }
 }
