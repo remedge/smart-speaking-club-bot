@@ -26,6 +26,8 @@ class LongmanTelegram implements TelegramInterface
 
     private ?Update $update;
 
+    private const LOGS_COUNT = 500;
+
     public function __construct(
         string $apiKey,
         private readonly string $botUsername,
@@ -54,9 +56,9 @@ class LongmanTelegram implements TelegramInterface
             $finder = new Finder();
             $finder->files()->in($dir);
 
-            if ($finder->count() >= 50) {
+            if ($finder->count() >= self::LOGS_COUNT) {
                 $finder->sortByChangedTime();
-                for ($i = 0; $i <= $finder->count() - 50; $i++) {
+                for ($i = 0; $i <= $finder->count() - self::LOGS_COUNT; $i++) {
                     $finder->getIterator()->current()->isFile();
                     $filesystem->remove($finder->getIterator()->current()->getPathname());
                     $finder->getIterator()->next();
@@ -140,7 +142,7 @@ class LongmanTelegram implements TelegramInterface
         }
     }
 
-    public function getUsername(): string
+    public function getUsername(): ?string
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getFrom()->getUsername();
