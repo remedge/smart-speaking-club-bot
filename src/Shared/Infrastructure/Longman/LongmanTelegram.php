@@ -72,7 +72,7 @@ class LongmanTelegram implements TelegramInterface
                         '%s/%s_%s.json',
                         $dir,
                         ($this->clock->now())->format('Y-m-d_H:i:s'),
-                        $this->update['update_id'],
+                        $this->update->getUpdateId(),
                     )
                 ),
                 content: $data
