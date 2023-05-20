@@ -19,6 +19,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
+use Throwable;
 
 class LongmanTelegram implements TelegramInterface
 {
@@ -144,12 +145,16 @@ class LongmanTelegram implements TelegramInterface
 
     public function getUsername(): ?string
     {
-        if ($this->isCallbackQuery() === true) {
-            return $this->update->getCallbackQuery()->getFrom()->getUsername();
-        } elseif ($this->isEditedMessage() === true) {
-            return $this->update->getEditedMessage()->getFrom()->getUsername();
-        } else {
-            return $this->update->getMessage()->getFrom()->getUsername();
+        try {
+            if ($this->isCallbackQuery() === true) {
+                return $this->update->getCallbackQuery()->getFrom()->getUsername();
+            } elseif ($this->isEditedMessage() === true) {
+                return $this->update->getEditedMessage()->getFrom()->getUsername();
+            } else {
+                return $this->update->getMessage()->getFrom()->getUsername();
+            }
+        } catch (Throwable $e) {
+            return null;
         }
     }
 
