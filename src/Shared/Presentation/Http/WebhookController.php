@@ -47,6 +47,14 @@ class WebhookController
         $lastName = $this->telegram->getLastName();
         $username = $this->telegram->getUsername();
 
+        if ($username === null) {
+            $this->telegram->sendMessage(
+                $chatId,
+                'Пожалуйста, установите username в настройках телеграма и перезапустите бота',
+            );
+            return new Response();
+        }
+
         $isAdmin = $this->userRolesProvider->isUserAdmin($username);
         $this->telegram->setCommandsMenu();
 

@@ -26,7 +26,7 @@ interface TelegramInterface
 
     public function getLastName(): ?string;
 
-    public function getUsername(): string;
+    public function getUsername(): ?string;
 
     /**
      * @param  array<int, array<int, array<string, string>>> $replyMarkup
