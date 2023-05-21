@@ -20,7 +20,7 @@ interface TelegramInterface
 
     public function getMessageId(): int;
 
-    public function getText(): string;
+    public function getText(): ?string;
 
     public function getFirstName(): ?string;
 

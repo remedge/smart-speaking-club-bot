@@ -45,6 +45,10 @@ class WebhookController
         $messageId = $this->telegram->getMessageId();
         $text = $this->telegram->getText();
 
+        if ($text === null) {
+            return new Response();
+        }
+
         $firstName = $this->telegram->getFirstName();
         $lastName = $this->telegram->getLastName();
         $username = $this->telegram->getUsername();

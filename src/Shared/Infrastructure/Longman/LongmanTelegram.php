@@ -103,7 +103,7 @@ class LongmanTelegram implements TelegramInterface
         }
     }
 
-    public function getText(): string
+    public function getText(): ?string
     {
         if ($this->isCallbackQuery() === true) {
             return $this->update->getCallbackQuery()->getData();
