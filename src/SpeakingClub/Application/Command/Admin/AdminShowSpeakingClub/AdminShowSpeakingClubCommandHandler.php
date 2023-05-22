@@ -68,14 +68,13 @@ class AdminShowSpeakingClubCommandHandler
                 . PHP_EOL . 'Записалось участников: %s'
                 . PHP_EOL
                 . PHP_EOL . 'Список участников: ' . PHP_EOL . '%s'
-                . PHP_EOL
                 . PHP_EOL . 'Список ожидающих: ' . PHP_EOL . '%s',
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
                 $speakingClub->getDate()->format('d.m.Y H:i'),
                 $speakingClub->getMaxParticipantsCount(),
                 $totalParticipantsCount,
-                $participants === '' ? 'Нет участников' : $participants,
+                $participants === '' ? 'Нет участников' . PHP_EOL : $participants,
                 $waitingUsersString === '' ? 'Нет ожидающих' : $waitingUsersString,
             ),
             replyMarkup: [
