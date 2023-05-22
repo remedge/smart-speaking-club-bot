@@ -20,7 +20,7 @@ interface WaitingUserRepository
     public function findOneByUserIdAndSpeakingClubId(UuidInterface $userId, UuidInterface $speakingClubId): ?array;
 
     /**
-     * @return array<array{id: UuidInterface, userId: UuidInterface, speakingClubId: UuidInterface, chatId: int}>
+     * @return array<array{id: UuidInterface, userId: UuidInterface, speakingClubId: UuidInterface, chatId: int, username: string}>
      */
     public function findBySpeakingClubId(UuidInterface $speakingClubId): array;
 }

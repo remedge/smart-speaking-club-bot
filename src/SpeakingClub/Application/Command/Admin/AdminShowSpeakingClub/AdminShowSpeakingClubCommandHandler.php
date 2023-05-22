@@ -8,6 +8,7 @@ use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Query\ParticipationQuery;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\WaitList\Domain\WaitingUserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -18,6 +19,7 @@ class AdminShowSpeakingClubCommandHandler
         private SpeakingClubRepository $speakingClubRepository,
         private ParticipationRepository $participationRepository,
         private ParticipationQuery $participationQuery,
+        private WaitingUserRepository $waitingUserRepository,
     ) {
     }
 
@@ -48,6 +50,12 @@ class AdminShowSpeakingClubCommandHandler
             $participants .= '@' . $participation->username . ' ' . ($participation->isPlusOne ? '(+1)' : '') . PHP_EOL;
         }
 
+        $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($speakingClub->getId());
+        $waitingUsersString = '';
+        foreach ($waitingUsers as $waitingUser) {
+            $waitingUsersString .= '@' . $waitingUser['username'] . PHP_EOL;
+        }
+
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
@@ -55,15 +63,20 @@ class AdminShowSpeakingClubCommandHandler
                 'Название: %s'
                 . PHP_EOL . 'Описание: %s'
                 . PHP_EOL . 'Дата: %s'
+                . PHP_EOL
                 . PHP_EOL . 'Максимальное количество участников: %s'
                 . PHP_EOL . 'Записалось участников: %s'
-                . PHP_EOL . 'Список участников: %s',
+                . PHP_EOL
+                . PHP_EOL . 'Список участников: ' . PHP_EOL . '%s'
+                . PHP_EOL
+                . PHP_EOL . 'Список ожидающих: ' . PHP_EOL . '%s',
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
                 $speakingClub->getDate()->format('d.m.Y H:i'),
                 $speakingClub->getMaxParticipantsCount(),
                 $totalParticipantsCount,
-                $participants,
+                $participants === '' ? 'Нет участников' : $participants,
+                $waitingUsersString === '' ? 'Нет ожидающих' : $waitingUsersString,
             ),
             replyMarkup: [
                 [[

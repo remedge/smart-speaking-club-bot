@@ -49,7 +49,7 @@ class DoctrineWaitingUserRepository extends ServiceEntityRepository implements W
     public function findBySpeakingClubId(UuidInterface $speakingClubId): array
     {
         return $this->createQueryBuilder('wu')
-            ->select('wu.id, wu.userId, wu.speakingClubId, u.chatId')
+            ->select('wu.id, wu.userId, wu.speakingClubId, u.chatId, u.username')
             ->join(User::class, 'u', 'WITH', 'wu.userId = u.id')
             ->where('wu.speakingClubId = :speakingClubId')
             ->setParameter('speakingClubId', $speakingClubId)
