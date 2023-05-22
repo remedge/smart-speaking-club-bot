@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Presentation\Cli;
 use App\Shared\Application\Clock;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\WaitList\Domain\WaitingUserRepository;
 use Google_Service_Sheets;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -19,6 +20,7 @@ class ArchivePastSpeakingClubsCommand extends Command
     public function __construct(
         private SpeakingClubRepository $speakingClubRepository,
         private ParticipationRepository $participationRepository,
+        private WaitingUserRepository $waitingUserRepository,
         private Clock $clock,
         private string $spreadsheetId,
         private string $range,
@@ -43,6 +45,8 @@ class ArchivePastSpeakingClubsCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
             $participationsCount = $this->participationRepository->countByClubId($speakingClub->getId());
 
+            $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($speakingClub->getId());
+
             $newRow = [
                 $speakingClub->getDate()->format('d.m.Y H:i'),
                 $speakingClub->getName(),
@@ -50,6 +54,7 @@ class ArchivePastSpeakingClubsCommand extends Command
                 $speakingClub->getMaxParticipantsCount(),
                 $participationsCount,
                 implode(', ', array_map(fn (array $p) => $p['username'] . (($p['isPlusOne'] === true) ? ' (+1)' : ''), $participations)),
+                implode(', ', array_map(fn (array $w) => $w['username'], $waitingUsers)),
             ];
             $rows = [$newRow];
             $valueRange = new \Google_Service_Sheets_ValueRange();
