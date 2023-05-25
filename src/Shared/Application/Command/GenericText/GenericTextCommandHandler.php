@@ -445,6 +445,137 @@ class GenericTextCommandHandler
             return;
         }
 
+        if ($user->getState() === UserStateEnum::RECEIVING_CONFIRMATION_CLUB_CANCELLATION) {
+            $speakingClubId = $user->getActualSpeakingClubData()['id'] ?? null;
+
+            if ($speakingClubId === null) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Что-то пошло не так, попробуйте еще раз',
+                    replyMarkup: [[
+                        [
+                            'text' => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]],
+                );
+                return;
+            }
+
+            $speakingClub = $this->speakingClubRepository->findById($speakingClubId);
+            if ($speakingClub === null) {
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Клуб не найден',
+                    replyMarkup: [[
+                        [
+                            'text' => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]]
+                );
+                return;
+            }
+
+            if ($speakingClub->getName() !== $command->text) {
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Введенное название не совпадает с выбранным клубом 🤨, попробуйте еще раз или введите /skip для отмены',
+                );
+                return;
+            }
+
+            if ($speakingClub->isCancelled() === true) {
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Клуб уже отменен',
+                    replyMarkup: [[
+                        [
+                            'text' => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]]
+                );
+                return;
+            }
+
+            // TODO: move to participation domain
+
+            $participants = $this->participationRepository->findBySpeakingClubId($speakingClubId);
+            foreach ($participants as $participant) {
+                $this->telegram->sendMessage(
+                    chatId: (int) $participant['chatId'],
+                    text: sprintf(
+                        'К сожалению, клуб "%s" %s был отменен',
+                        $speakingClub->getName(),
+                        $speakingClub->getDate()->format('d.m.Y H:i')
+                    ),
+                    replyMarkup: [[
+                        [
+                            'text' => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]]
+                );
+            }
+
+            // TODO: move  to waitlist domain
+
+            $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($speakingClub->getId());
+            foreach ($waitingUsers as $waitingUser) {
+                $user = $this->userRepository->findById($waitingUser['userId']); // TODO: rewrite it
+                if ($user !== null) {
+                    $this->telegram->sendMessage(
+                        chatId: $user->getChatId(),
+                        text: sprintf(
+                            'К сожалению, клуб "%s" %s был отменен',
+                            $speakingClub->getName(),
+                            $speakingClub->getDate()->format('d.m.Y H:i')
+                        ),
+                        replyMarkup: [[
+                            [
+                                'text' => 'Перейти к списку ближайших клубов',
+                                'callback_data' => 'back_to_list',
+                            ],
+                        ]]
+                    );
+                }
+
+                $waitingUserEntity = $this->waitingUserRepository->findById($waitingUser['id']);
+                if ($waitingUserEntity !== null) {
+                    $this->waitingUserRepository->remove($waitingUserEntity);
+                }
+            }
+
+            $speakingClub->cancel();
+            $this->speakingClubRepository->save($speakingClub);
+
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: sprintf(
+                    'Клуб "%s" %s успешно отменен',
+                    $speakingClub->getName(),
+                    $speakingClub->getDate()->format('d.m.Y H:i')
+                ),
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_admin_list',
+                    ],
+                ]]
+            );
+
+            $user->setState(UserStateEnum::IDLE);
+            $user->setActualSpeakingClubData([]);
+            $this->userRepository->save($user);
+
+            return;
+        }
+
         $this->telegram->sendMessage(
             chatId: $command->chatId,
             text: 'К сожалению я пока просто робот и могу понимать только команды через кнопки 🤖

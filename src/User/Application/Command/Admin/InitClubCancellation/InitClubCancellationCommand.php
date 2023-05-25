@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\SpeakingClub\Application\Command\Admin\AdminCancelSpeakingClub;
+namespace App\User\Application\Command\Admin\InitClubCancellation;
 
 use Ramsey\Uuid\UuidInterface;
 
-class AdminCancelSpeakingClubCommand
+class InitClubCancellationCommand
 {
     public function __construct(
-        public int $chatId,
         public UuidInterface $speakingClubId,
+        public int $chatId,
         public int $messageId,
     ) {
     }

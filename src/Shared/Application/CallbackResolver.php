@@ -6,7 +6,6 @@ namespace App\Shared\Application;
 
 use App\SpeakingClub\Application\Command\Admin\AdminAddParticipant\AdminAddParticipantCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminAddPlusOneToParticipant\AdminAddPlusOneToParticipantCommand;
-use App\SpeakingClub\Application\Command\Admin\AdminCancelSpeakingClub\AdminCancelSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminRemoveParticipant\AdminRemoveParticipantCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminRemovePlusOneToParticipant\AdminRemovePlusOneToParticipantCommand;
@@ -20,6 +19,7 @@ use App\SpeakingClub\Application\Command\User\ShowSpeakingClub\ShowSpeakingClubC
 use App\SpeakingClub\Application\Command\User\SignIn\SignInCommand;
 use App\SpeakingClub\Application\Command\User\SignInPlusOne\SignInPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
+use App\User\Application\Command\Admin\InitClubCancellation\InitClubCancellationCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\InitClubEdition\InitClubEditionCommand;
 use App\User\Application\Command\Admin\InitSendMessageEveryone\InitSendMessageEveryoneCommand;
@@ -69,9 +69,9 @@ class CallbackResolver
                     speakingClubId: Uuid::fromString($objectId),
                     messageId: $messageId,
                 )),
-                'cancel_club' => $this->commandBus->dispatch(new AdminCancelSpeakingClubCommand(
-                    chatId: $chatId,
+                'cancel_club' => $this->commandBus->dispatch(new InitClubCancellationCommand(
                     speakingClubId: Uuid::fromString($objectId),
+                    chatId: $chatId,
                     messageId: $messageId,
                 )),
                 'show_participants' => $this->commandBus->dispatch(new AdminShowParticipantsCommand(

@@ -14,6 +14,7 @@ use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\Ad
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
+use App\User\Application\Command\Admin\Skip\SkipCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
 use Longman\TelegramBot\Entities\Update;
 use Symfony\Component\HttpFoundation\Request;
@@ -106,6 +107,11 @@ class WebhookController
 
         if ($text === '/help') {
             $this->commandBus->dispatch(new HelpCommand($chatId, $isAdmin));
+            return new Response();
+        }
+
+        if ($text === '/skip') {
+            $this->commandBus->dispatch(new SkipCommand($chatId, $isAdmin));
             return new Response();
         }
 
