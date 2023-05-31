@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\SpeakingClub\Application\Command\User\ShowSpeakingClub;
 
+use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Command\User\AddPlusOne\AddPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\RemovePlusOne\RemovePlusOneCommand;
@@ -28,6 +29,7 @@ class ShowSpeakingClubCommandHandler
         private ParticipationRepository $participationRepository,
         private UserQuery $userQuery,
         private WaitingUserQuery $waitingUserQuery,
+        private Clock $clock,
     ) {
     }
 
@@ -62,6 +64,20 @@ class ShowSpeakingClubCommandHandler
                 );
                 return;
             }
+        }
+
+        if ($this->clock->now() > $speakingClub->getDate()) {
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: '🤔 К сожалению, этот разговорный клуб уже прошел',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
+            );
+            return;
         }
 
         $user = $this->userQuery->getByChatId($command->chatId);

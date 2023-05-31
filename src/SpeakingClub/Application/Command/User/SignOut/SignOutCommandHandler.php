@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\SpeakingClub\Application\Command\User\SignOut;
 
+use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
 use App\SpeakingClub\Domain\ParticipationRepository;
@@ -21,6 +22,7 @@ class SignOutCommandHandler
         private SpeakingClubRepository $speakingClubRepository,
         private TelegramInterface $telegram,
         private EventDispatcherInterface $eventDispatcher,
+        private Clock $clock,
     ) {
     }
 
@@ -34,6 +36,20 @@ class SignOutCommandHandler
                 chatId: $command->chatId,
                 messageId: $command->messageId,
                 text: '🤔 Разговорный клуб не найден',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
+            );
+            return;
+        }
+
+        if ($this->clock->now() > $speakingClub->getDate()) {
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: '🤔 К сожалению, этот разговорный клуб уже прошел',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',

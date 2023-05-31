@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\SpeakingClub\Application\Command\User\AddPlusOne;
 
+use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
@@ -18,6 +19,7 @@ class AddPlusOneCommandHandler
         private ParticipationRepository $participationRepository,
         private SpeakingClubRepository $speakingClubRepository,
         private TelegramInterface $telegram,
+        private Clock $clock,
     ) {
     }
 
@@ -31,6 +33,20 @@ class AddPlusOneCommandHandler
                 chatId: $command->chatId,
                 messageId: $command->messageId,
                 text: '🤔 Разговорный клуб не найден',
+                replyMarkup: [[
+                    [
+                        'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
+            );
+            return;
+        }
+
+        if ($this->clock->now() > $speakingClub->getDate()) {
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: '🤔 К сожалению, этот разговорный клуб уже прошел',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
