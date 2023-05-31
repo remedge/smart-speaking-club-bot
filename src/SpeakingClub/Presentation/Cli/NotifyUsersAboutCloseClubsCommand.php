@@ -39,7 +39,7 @@ class NotifyUsersAboutCloseClubsCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
 
             foreach ($participations as $participation) {
-                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 24 часа', $speakingClub->getName()));
+                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 24 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $speakingClub->getName()));
             }
         }
 
@@ -55,7 +55,7 @@ class NotifyUsersAboutCloseClubsCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
 
             foreach ($participations as $participation) {
-                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 2 часа', $speakingClub->getName()));
+                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $speakingClub->getName()));
             }
         }
 
