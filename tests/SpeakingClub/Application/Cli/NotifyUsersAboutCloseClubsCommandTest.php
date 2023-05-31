@@ -75,9 +75,9 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
         self::assertEquals(Command::SUCCESS, $result);
 
         $messages = array_key_exists(111111, MockTelegram::$messages) ? MockTelegram::$messages[111111] : null;
-        self::assertEquals('Разговорный клуб "Test club 1" начнется через 24 часа', $messages[0]['text']);
+        self::assertEquals('Разговорный клуб "Test club 1" начнется через 24 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $messages[0]['text']);
 
         $messages = array_key_exists(222222, MockTelegram::$messages) ? MockTelegram::$messages[222222] : null;
-        self::assertEquals('Разговорный клуб "Test club 2" начнется через 2 часа', $messages[0]['text']);
+        self::assertEquals('Разговорный клуб "Test club 2" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $messages[0]['text']);
     }
 }
