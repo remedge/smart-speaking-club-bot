@@ -43,9 +43,10 @@ class ArchivePastSpeakingClubsCommand extends Command
 
         foreach ($speakingClubs as $speakingClub) {
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
-            $participationsCount = $this->participationRepository->countByClubId($speakingClub->getId());
+            $participationsCount = count($participations);
 
             $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($speakingClub->getId());
+            $waitingUsersCount = count($waitingUsers);
 
             $newRow = [
                 $speakingClub->getDate()->format('d.m.Y H:i'),
@@ -55,6 +56,7 @@ class ArchivePastSpeakingClubsCommand extends Command
                 $participationsCount,
                 implode(', ', array_map(fn (array $p) => $p['username'] . (($p['isPlusOne'] === true) ? ' (+1)' : ''), $participations)),
                 implode(', ', array_map(fn (array $w) => $w['username'], $waitingUsers)),
+                $waitingUsersCount,
             ];
             $rows = [$newRow];
             $valueRange = new \Google_Service_Sheets_ValueRange();
