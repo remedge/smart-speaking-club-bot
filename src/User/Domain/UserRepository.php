@@ -21,4 +21,6 @@ interface UserRepository
      * @return array<User>
      */
     public function findAllExceptUsernames(array $usernames): array;
+
+    public function getTotalUsersCount(): int;
 }

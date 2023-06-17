@@ -16,6 +16,11 @@ class UserQuery
     ) {
     }
 
+    public function getTotalUsersCount(): int
+    {
+        return $this->userRepository->getTotalUsersCount();
+    }
+
     public function getByChatId(int $chatId): UserDTO
     {
         $user = $this->userRepository->findByChatId($chatId);

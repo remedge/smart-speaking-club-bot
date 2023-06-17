@@ -55,4 +55,12 @@ class DoctrineUserRepository extends ServiceEntityRepository implements UserRepo
             ->getQuery()
             ->getResult();
     }
+
+    public function getTotalUsersCount(): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
