@@ -23,7 +23,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class GenericTextCommandHandler
+class AdminGenericTextCommandHandler
 {
     public function __construct(
         private UserRepository $userRepository,
@@ -38,7 +38,7 @@ class GenericTextCommandHandler
     ) {
     }
 
-    public function __invoke(GenericTextCommand $command): void
+    public function __invoke(AdminGenericTextCommand $command): void
     {
         $user = $this->userRepository->findByChatId($command->chatId);
         if ($user === null) {
@@ -539,7 +539,7 @@ class GenericTextCommandHandler
                         replyMarkup: [[
                             [
                                 'text' => 'Перейти к списку ближайших клубов',
-                                'callback_data' => 'back_to_list',
+                                'callback_data' => 'back_to_admin_list',
                             ],
                         ]]
                     );

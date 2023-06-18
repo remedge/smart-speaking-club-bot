@@ -32,4 +32,9 @@ interface SpeakingClubRepository
      * @return array<SpeakingClub>
      */
     public function findAllPastNotArchived(DateTimeImmutable $now): array;
+
+    /**
+     * @return array<SpeakingClub>
+     */
+    public function findAllPastNotAskedForRating(DateTimeImmutable $now): array;
 }

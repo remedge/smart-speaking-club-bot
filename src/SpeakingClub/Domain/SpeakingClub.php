@@ -17,6 +17,7 @@ class SpeakingClub
         private DateTimeImmutable $date,
         private bool $isCancelled = false,
         private bool $isArchived = false,
+        private bool $isRatingAsked = false,
     ) {
     }
 
@@ -83,5 +84,15 @@ class SpeakingClub
     public function isArchived(): bool
     {
         return $this->isArchived;
+    }
+
+    public function setRatingAsked(): void
+    {
+        $this->isRatingAsked = true;
+    }
+
+    public function isRatingAsked(): bool
+    {
+        return $this->isRatingAsked;
     }
 }

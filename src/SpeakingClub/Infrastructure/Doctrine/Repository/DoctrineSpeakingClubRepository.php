@@ -80,7 +80,19 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
             ->andWhere('speaking_club.isCancelled = false')
             ->andWhere('speaking_club.isArchived = false')
             ->setParameter('now', $now)
-            ->orderBy('speaking_club.date', 'DESC')
+            ->orderBy('speaking_club.date', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllPastNotAskedForRating(DateTimeImmutable $now): array
+    {
+        return $this->createQueryBuilder('speaking_club')
+            ->andWhere('speaking_club.date < :now')
+            ->andWhere('speaking_club.isCancelled = false')
+            ->andWhere('speaking_club.isRatingAsked = false')
+            ->setParameter('now', $now)
+            ->orderBy('speaking_club.date', 'ASC')
             ->getQuery()
             ->getResult();
     }

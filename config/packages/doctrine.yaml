@@ -19,6 +19,10 @@ doctrine:
                 type: php
                 dir: "%kernel.project_dir%/src/SpeakingClub/Infrastructure/Doctrine/Mapping"
                 prefix: App\SpeakingClub\Domain\Participation
+            App\SpeakingClub\Domain\Rating:
+                type: php
+                dir: "%kernel.project_dir%/src/SpeakingClub/Infrastructure/Doctrine/Mapping"
+                prefix: App\SpeakingClub\Domain\Rating
             App\User\Domain\User:
                 type: php
                 dir: "%kernel.project_dir%/src/User/Infrastructure/Doctrine/Mapping"

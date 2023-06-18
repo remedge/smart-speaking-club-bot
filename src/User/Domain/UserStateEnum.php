@@ -24,6 +24,8 @@ enum UserStateEnum: string
 
     case RECEIVING_CONFIRMATION_CLUB_CANCELLATION = 'RECEIVING_CONFIRMATION_CLUB_CANCELLATION';
 
+    case RECEIVING_SPEAKING_CLUB_FEEDBACK = 'RECEIVING_SPEAKING_CLUB_FEEDBACK';
+
     /**
      * @return array<string, string>
      */

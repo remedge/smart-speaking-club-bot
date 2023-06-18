@@ -14,6 +14,7 @@ use App\SpeakingClub\Application\Command\Admin\AdminShowSpeakingClub\AdminShowSp
 use App\SpeakingClub\Application\Command\User\AddPlusOne\AddPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
+use App\SpeakingClub\Application\Command\User\RateSpeakingClub\RateSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\User\RemovePlusOne\RemovePlusOneCommand;
 use App\SpeakingClub\Application\Command\User\ShowSpeakingClub\ShowSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\User\SignIn\SignInCommand;
@@ -41,6 +42,7 @@ class CallbackResolver
         string $action,
         int $chatId,
         ?string $objectId,
+        ?string $additionalObjectId,
         int $messageId,
         bool $isAdmin
     ): void {
@@ -166,6 +168,12 @@ class CallbackResolver
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
                 messageId: $messageId,
+            )),
+            'rate' => $this->commandBus->dispatch(new RateSpeakingClubCommand(
+                speakingClubId: Uuid::fromString($objectId),
+                chatId: $chatId,
+                messageId: $messageId,
+                rating: (int) $additionalObjectId,
             )),
             'back_to_list' => $this->commandBus->dispatch(new ListUpcomingSpeakingClubsCommand(
                 chatId: $chatId,

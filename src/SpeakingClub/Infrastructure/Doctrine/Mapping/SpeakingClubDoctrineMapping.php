@@ -34,5 +34,8 @@ class SpeakingClubDoctrineMapping extends DoctrineMapping
         $builder->addField('isArchived', 'boolean', [
             'default' => false,
         ]);
+        $builder->addField('isRatingAsked', 'boolean', [
+            'default' => false,
+        ]);
     }
 }

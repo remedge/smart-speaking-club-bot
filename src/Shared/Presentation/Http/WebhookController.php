@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Presentation\Http;
 
 use App\Shared\Application\CallbackResolver;
-use App\Shared\Application\Command\GenericText\GenericTextCommand;
+use App\Shared\Application\Command\GenericText\AdminGenericTextCommand;
 use App\Shared\Application\Command\Help\HelpCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
@@ -16,6 +16,7 @@ use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\List
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\Skip\SkipCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
+use App\User\Application\Command\User\UserGenericTextCommand;
 use Longman\TelegramBot\Entities\Update;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -86,8 +87,9 @@ class WebhookController
 
             $action = $callbackData[0];
             $objectId = $callbackData[1] ?? null;
+            $additionalObjectId = $callbackData[2] ?? null;
 
-            $this->callbackResolver->resolve($action, $chatId, $objectId, $messageId, $isAdmin);
+            $this->callbackResolver->resolve($action, $chatId, $objectId, $additionalObjectId, $messageId, $isAdmin);
 
             return new Response();
         }
@@ -114,7 +116,6 @@ class WebhookController
             $this->commandBus->dispatch(new SkipCommand($chatId, $isAdmin));
             return new Response();
         }
-
         if ($isAdmin === false) {
             match ($text) {
                 ListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
@@ -123,7 +124,7 @@ class WebhookController
                 ListUserUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
                     new ListUserUpcomingSpeakingClubsCommand($chatId)
                 ),
-                default => '',
+                default => $this->commandBus->dispatch(new UserGenericTextCommand($chatId, $text)),
             };
 
             return new Response();
@@ -135,7 +136,7 @@ class WebhookController
                 InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
                     new InitClubCreationCommand($chatId)
                 ),
-                default => $this->commandBus->dispatch(new GenericTextCommand($chatId, $text)),
+                default => $this->commandBus->dispatch(new AdminGenericTextCommand($chatId, $text)),
             };
         }
 

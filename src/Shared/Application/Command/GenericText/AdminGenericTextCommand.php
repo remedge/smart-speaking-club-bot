@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Command\GenericText;
 
-class GenericTextCommand
+class AdminGenericTextCommand
 {
     public function __construct(
         public int $chatId,
