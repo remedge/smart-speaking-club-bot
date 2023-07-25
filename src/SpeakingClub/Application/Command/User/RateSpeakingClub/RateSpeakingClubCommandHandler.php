@@ -76,6 +76,16 @@ class RateSpeakingClubCommandHandler
 
         $rating = $this->ratingRepository->findBySpeakingClubIdAndUserId($speakingClub->getId(), $user->getId());
         if ($rating !== null) {
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: 'Что-то пошло не так, попробуйте еще раз',
+                replyMarkup: [[
+                    [
+                        'text' => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]],
+            );
             return;
         }
 
