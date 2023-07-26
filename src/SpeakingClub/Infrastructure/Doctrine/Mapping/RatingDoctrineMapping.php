@@ -34,6 +34,10 @@ class RatingDoctrineMapping extends DoctrineMapping
             'nullable' => true,
         ]);
 
+        $builder->addField('isDumped', 'boolean', [
+            'default' => false,
+        ]);
+
         $builder->addIndex(['speaking_club_id'], 'rating_speaking_club_id');
     }
 }

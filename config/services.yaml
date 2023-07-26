@@ -63,3 +63,8 @@ services:
         arguments:
             $spreadsheetId: '%env(SPREADSHEET_ID)%'
             $range: '%env(SPREADSHEET_RANGE)%'
+
+    App\SpeakingClub\Presentation\Cli\DumpRatingsCommand:
+        arguments:
+            $spreadsheetId: '%env(RATINGS_SPREADSHEET_ID)%'
+            $range: '%env(RATINGS_SPREADSHEET_RANGE)%'

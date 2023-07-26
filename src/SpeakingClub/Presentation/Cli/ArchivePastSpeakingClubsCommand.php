@@ -8,6 +8,7 @@ use App\Shared\Application\Clock;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\WaitList\Domain\WaitingUserRepository;
+use Google_Client;
 use Google_Service_Sheets;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -30,7 +31,7 @@ class ArchivePastSpeakingClubsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $client = new \Google_Client();
+        $client = new Google_Client();
         $client->setApplicationName('Google Sheets API');
         $client->setScopes([Google_Service_Sheets::SPREADSHEETS]);
         $client->setAccessType('offline');
