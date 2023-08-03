@@ -21,6 +21,7 @@ use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Throwable;
 
 #[AsMessageHandler]
 class AdminGenericTextCommandHandler
@@ -107,7 +108,12 @@ class AdminGenericTextCommandHandler
                 maxParticipantsCount: $data['max_participants_count'],
                 date: $date,
             );
-            $this->speakingClubRepository->save($speakingClub);
+            try {
+                $this->speakingClubRepository->save($speakingClub);
+            } catch (Throwable $e) {
+                $this->telegram->sendMessage($command->chatId, 'Что-то пошло не так, попробуйте еще раз');
+                return;
+            }
 
             $user->setState(UserStateEnum::IDLE);
             $user->setActualSpeakingClubData([]);
