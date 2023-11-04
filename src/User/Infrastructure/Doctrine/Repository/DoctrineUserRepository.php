@@ -56,6 +56,15 @@ class DoctrineUserRepository extends ServiceEntityRepository implements UserRepo
             ->getResult();
     }
 
+    public function findAllIncludeUsernames(array $usernames): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.username IN (:usernames)')
+            ->setParameter('usernames', $usernames)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function getTotalUsersCount(): int
     {
         return (int) $this->createQueryBuilder('u')

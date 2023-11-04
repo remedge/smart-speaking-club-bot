@@ -96,4 +96,37 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
             ->getQuery()
             ->getResult();
     }
+
+    public function findAllCanceled(DateTimeImmutable $now): array
+    {
+        return $this->createQueryBuilder('speaking_club')
+            ->andWhere('speaking_club.date > :now')
+            ->andWhere('speaking_club.isCancelled = true')
+            ->setParameter('now', $now)
+            ->orderBy('speaking_club.date', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function markArchived(UuidInterface $id): void
+    {
+        $this->createQueryBuilder('sc')
+            ->update()
+            ->set('sc.isArchived', true)
+            ->where('sc.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->execute();
+    }
+
+    public function markRatingAsked(UuidInterface $id): void
+    {
+        $this->createQueryBuilder('sc')
+            ->update()
+            ->set('sc.isRatingAsked', true)
+            ->where('sc.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->execute();
+    }
 }

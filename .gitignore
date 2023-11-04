@@ -21,3 +21,4 @@
 
 tests/.database.cache
 /credentials/credentials.json
+/.idea/

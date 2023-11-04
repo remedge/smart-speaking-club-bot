@@ -38,6 +38,7 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test club 1',
             description: 'Test description 1',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2000-01-01 11:11'),
         ));
@@ -45,6 +46,7 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
             id: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
             name: 'Test club 2',
             description: 'Test description 2',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2000-01-02 22:22'),
             isCancelled: true

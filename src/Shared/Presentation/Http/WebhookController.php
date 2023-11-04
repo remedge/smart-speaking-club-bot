@@ -17,6 +17,8 @@ use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\Skip\SkipCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
 use App\User\Application\Command\User\UserGenericTextCommand;
+use App\UserBan\Application\Command\ListBan\ListBanCommand;
+use App\UserWarning\Application\Command\ListWarning\ListWarningCommand;
 use Longman\TelegramBot\Entities\Update;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -135,6 +137,12 @@ class WebhookController
                 ),
                 InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
                     new InitClubCreationCommand($chatId)
+                ),
+                ListBanCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                    new ListBanCommand($chatId)
+                ),
+                ListWarningCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                    new ListWarningCommand($chatId)
                 ),
                 default => $this->commandBus->dispatch(new AdminGenericTextCommand($chatId, $text)),
             };

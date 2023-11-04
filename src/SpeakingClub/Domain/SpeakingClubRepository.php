@@ -37,4 +37,13 @@ interface SpeakingClubRepository
      * @return array<SpeakingClub>
      */
     public function findAllPastNotAskedForRating(DateTimeImmutable $now): array;
+
+    /**
+     * @return array<SpeakingClub>
+     */
+    public function findAllCanceled(DateTimeImmutable $now): array;
+
+    public function markArchived(UuidInterface $id): void;
+
+    public function markRatingAsked(UuidInterface $id): void;
 }

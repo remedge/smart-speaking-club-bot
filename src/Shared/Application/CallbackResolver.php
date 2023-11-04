@@ -20,11 +20,16 @@ use App\SpeakingClub\Application\Command\User\ShowSpeakingClub\ShowSpeakingClubC
 use App\SpeakingClub\Application\Command\User\SignIn\SignInCommand;
 use App\SpeakingClub\Application\Command\User\SignInPlusOne\SignInPlusOneCommand;
 use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
+use App\SpeakingClub\Application\Command\User\SignOutApply\SignOutApplyCommand;
 use App\User\Application\Command\Admin\InitClubCancellation\InitClubCancellationCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\InitClubEdition\InitClubEditionCommand;
 use App\User\Application\Command\Admin\InitSendMessageEveryone\InitSendMessageEveryoneCommand;
 use App\User\Application\Command\Admin\InitSendMessageToParticipants\InitSendMessageToParticipantsCommand;
+use App\UserBan\Application\Command\AddBan\AddBanCommand;
+use App\UserBan\Application\Command\RemoveBan\RemoveBanCommand;
+use App\UserWarning\Application\Command\AddWarning\AddWarningCommand;
+use App\UserWarning\Application\Command\RemoveWarning\RemoveWarningCommand;
 use App\WaitList\Application\Command\JoinWaitingList\JoinWaitingListCommand;
 use App\WaitList\Application\Command\LeaveWaitingList\LeaveWaitingListCommand;
 use Exception;
@@ -105,6 +110,24 @@ class CallbackResolver
                     chatId: $chatId,
                     speakingClubId: Uuid::fromString($objectId),
                 )),
+                'add_ban' => $this->commandBus->dispatch(new AddBanCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                )),
+                'remove_ban' => $this->commandBus->dispatch(new RemoveBanCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                    banId: Uuid::fromString($objectId),
+                )),
+                'add_warning' => $this->commandBus->dispatch(new AddWarningCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                )),
+                'remove_warning' => $this->commandBus->dispatch(new RemoveWarningCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                    warningId: Uuid::fromString($objectId),
+                )),
                 default => throw new Exception(sprintf('Unknown admin callback "%s', $action)),
             };
             return;
@@ -145,6 +168,11 @@ class CallbackResolver
                 messageId: $messageId,
             )),
             SignOutCommand::CALLBACK_NAME => $this->commandBus->dispatch(new SignOutCommand(
+                chatId: $chatId,
+                speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
+            )),
+            SignOutApplyCommand::CALLBACK_NAME => $this->commandBus->dispatch(new SignOutApplyCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
                 messageId: $messageId,
