@@ -95,6 +95,7 @@ class ShowSpeakingClubCommandHandler
             'Название: %s'
             . PHP_EOL . 'Описание: %s'
             . PHP_EOL . 'Дата: %s'
+            . PHP_EOL . 'Минимальное количество участников: %s'
             . PHP_EOL . 'Максимальное количество участников: %s'
             . PHP_EOL . 'Записалось участников: %s'
             . PHP_EOL
@@ -103,6 +104,7 @@ class ShowSpeakingClubCommandHandler
             $speakingClub->getName(),
             $speakingClub->getDescription(),
             $speakingClub->getDate()->format('d.m.Y H:i'),
+            $speakingClub->getMinParticipantsCount(),
             $speakingClub->getMaxParticipantsCount(),
             $totalParticipantsCount,
             ($participation === null) ? 'Вы не записаны' : (($participation->isPlusOne() === true)

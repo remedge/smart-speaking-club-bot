@@ -22,5 +22,11 @@ interface UserRepository
      */
     public function findAllExceptUsernames(array $usernames): array;
 
+    /**
+     * @param array<string> $usernames
+     * @return array<User>
+     */
+    public function findAllIncludeUsernames(array $usernames): array;
+
     public function getTotalUsersCount(): int;
 }

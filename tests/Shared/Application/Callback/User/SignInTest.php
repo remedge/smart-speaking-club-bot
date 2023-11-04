@@ -25,6 +25,7 @@ class SignInTest extends BaseApplicationTest
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test Club',
             description: 'Test Description',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));
@@ -93,6 +94,7 @@ HEREDOC, $message['text']);
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test Club',
             description: 'Test Description',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));
@@ -134,6 +136,7 @@ HEREDOC, $message['text']);
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test Club',
             description: 'Test Description',
+            minParticipantsCount: 1,
             maxParticipantsCount: 1,
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));

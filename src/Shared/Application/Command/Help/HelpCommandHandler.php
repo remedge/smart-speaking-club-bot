@@ -10,6 +10,7 @@ use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\Ad
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
+use App\UserBan\Application\Command\ListBan\ListBanCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -43,6 +44,11 @@ class HelpCommandHandler
                     '%s - %s',
                     InitClubCreationCommand::COMMAND_NAME,
                     InitClubCreationCommand::COMMAND_DESCRIPTION
+                ) . PHP_EOL
+                . sprintf(
+                    '%s - %s',
+                    ListBanCommand::COMMAND_NAME,
+                    ListBanCommand::COMMAND_DESCRIPTION
                 ) . PHP_EOL,
             false => 'Список команд:' . PHP_EOL
                 . sprintf(

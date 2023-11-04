@@ -16,6 +16,10 @@ use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
+use App\UserBan\Domain\UserBan;
+use App\UserBan\Domain\UserBanRepository;
+use App\UserWarning\Domain\UserWarning;
+use App\UserWarning\Domain\UserWarningRepository;
 use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
@@ -36,6 +40,8 @@ class AdminGenericTextCommandHandler
         private EventDispatcherInterface $eventDispatcher,
         private UserRolesProvider $userRolesProvider,
         private WaitingUserRepository $waitingUserRepository,
+        private UserBanRepository $userBanRepository,
+        private UserWarningRepository $userWarningRepository,
     ) {
     }
 
@@ -61,6 +67,23 @@ class AdminGenericTextCommandHandler
         if ($user->getState() === UserStateEnum::RECEIVING_DESCRIPTION_FOR_CREATION) {
             $data = $user->getActualSpeakingClubData();
             $data['description'] = $command->text;
+
+            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+            $user->setActualSpeakingClubData($data);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage($command->chatId, 'Введите минимальное количество участников');
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION) {
+            if (!is_int((int) $command->text) || (int) $command->text <= 0) {
+                $this->telegram->sendMessage($command->chatId, 'Введите целое число больше 0');
+                return;
+            }
+
+            $data = $user->getActualSpeakingClubData();
+            $data['min_participants_count'] = (int) $command->text;
 
             $user->setState(UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION);
             $user->setActualSpeakingClubData($data);
@@ -105,6 +128,7 @@ class AdminGenericTextCommandHandler
                 id: $this->uuidProvider->provide(),
                 name: $data['name'],
                 description: $data['description'],
+                minParticipantsCount: $data['min_participants_count'],
                 maxParticipantsCount: $data['max_participants_count'],
                 date: $date,
             );
@@ -151,6 +175,23 @@ class AdminGenericTextCommandHandler
         if ($user->getState() === UserStateEnum::RECEIVING_DESCRIPTION_FOR_EDITING) {
             $data = $user->getActualSpeakingClubData();
             $data['description'] = $command->text;
+
+            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING);
+            $user->setActualSpeakingClubData($data);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage($command->chatId, 'Введите новое минимальное количество участников');
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING) {
+            if (!is_int((int) $command->text) || (int) $command->text <= 0) {
+                $this->telegram->sendMessage($command->chatId, 'Введите целое число больше 0');
+                return;
+            }
+
+            $data = $user->getActualSpeakingClubData();
+            $data['min_participants_count'] = (int) $command->text;
 
             $user->setState(UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_EDITING);
             $user->setActualSpeakingClubData($data);
@@ -579,6 +620,119 @@ class AdminGenericTextCommandHandler
             $user->setActualSpeakingClubData([]);
             $this->userRepository->save($user);
 
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_ADD_BAN) {
+            $participantUser = $this->userRepository->findByUsername($command->text);
+
+            if ($participantUser === null) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Такого пользователя нет в базе бота',
+                );
+                return;
+            }
+
+            if ($this->userRolesProvider->isUserAdmin($participantUser->getUsername())) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Нельзя забанить администратора',
+                );
+                return;
+            }
+
+            $endDate = $this->clock->now()->modify('+1 week');
+
+            $this->userBanRepository->save(new UserBan(
+                id: $this->uuidProvider->provide(),
+                userId: $participantUser->getId(),
+                endDate: $endDate,
+                createdAt: $this->clock->now(),
+            ));
+
+            $user->setState(UserStateEnum::IDLE);
+            $user->setActualSpeakingClubData([]);
+            $this->userRepository->save($user);
+
+            // Notify admin
+            $this->telegram->sendMessage(
+                chatId: $user->getChatId(),
+                text: 'Пользователь успешно забанен',
+            );
+
+            // Notify user
+            /*$this->telegram->sendMessage(
+                chatId: $participantUser->getChatId(),
+                text: sprintf(
+                    'Администратор забанил вас "%s" %s',
+                    $speakingClub->getName(),
+                    $speakingClub->getDate()->format('d.m.Y H:i'),
+                ),
+            );*/
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_ADD_WARNING) {
+            $participantUser = $this->userRepository->findByUsername($command->text);
+
+            if ($participantUser === null) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Такого пользователя нет в базе бота',
+                );
+                return;
+            }
+
+            if ($this->userRolesProvider->isUserAdmin($participantUser->getUsername())) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Нельзя добавить в список предупреждения администратора',
+                );
+                return;
+            }
+
+            $this->userWarningRepository->save(new UserWarning(
+                id: $this->uuidProvider->provide(),
+                userId: $participantUser->getId(),
+                createdAt: $this->clock->now(),
+            ));
+
+            $user->setState(UserStateEnum::IDLE);
+            $user->setActualSpeakingClubData([]);
+            $this->userRepository->save($user);
+
+            // Notify admin
+            $this->telegram->sendMessage(
+                chatId: $user->getChatId(),
+                text: 'Пользователь успешно добавлен в список предупреждения',
+            );
+
+            // Notify user
+            /*$this->telegram->sendMessage(
+                chatId: $participantUser->getChatId(),
+                text: sprintf(
+                    'Администратор забанил вас "%s" %s',
+                    $speakingClub->getName(),
+                    $speakingClub->getDate()->format('d.m.Y H:i'),
+                ),
+            );*/
             return;
         }
 

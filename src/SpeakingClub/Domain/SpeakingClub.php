@@ -13,6 +13,7 @@ class SpeakingClub
         private UuidInterface $id,
         private string $name,
         private string $description,
+        private int $minParticipantsCount,
         private int $maxParticipantsCount,
         private DateTimeImmutable $date,
         private bool $isCancelled = false,
@@ -44,6 +45,16 @@ class SpeakingClub
     public function getDescription(): string
     {
         return $this->description;
+    }
+
+    public function setMinParticipantsCount(int $minParticipantsCount): void
+    {
+        $this->minParticipantsCount = $minParticipantsCount;
+    }
+
+    public function getMinParticipantsCount(): int
+    {
+        return $this->minParticipantsCount;
     }
 
     public function setMaxParticipantsCount(int $maxParticipantsCount): void

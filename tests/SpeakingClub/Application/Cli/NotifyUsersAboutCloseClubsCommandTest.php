@@ -36,6 +36,7 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test club 1',
             description: 'Test description',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2000-01-02 00:00:00'),
         ));
@@ -50,6 +51,7 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
             id: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
             name: 'Test club 2',
             description: 'Test description',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2000-01-01 02:00:00'),
         ));
@@ -75,7 +77,7 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
         self::assertEquals(Command::SUCCESS, $result);
 
         $messages = array_key_exists(111111, MockTelegram::$messages) ? MockTelegram::$messages[111111] : null;
-        self::assertEquals('Разговорный клуб "Test club 1" начнется через 24 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $messages[0]['text']);
+        self::assertEquals('Разговорный клуб "Test club 1" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $messages[0]['text']);
 
         $messages = array_key_exists(222222, MockTelegram::$messages) ? MockTelegram::$messages[222222] : null;
         self::assertEquals('Разговорный клуб "Test club 2" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $messages[0]['text']);

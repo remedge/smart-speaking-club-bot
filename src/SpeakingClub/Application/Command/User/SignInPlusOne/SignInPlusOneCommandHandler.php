@@ -11,6 +11,7 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
+use App\UserBan\Domain\UserBanRepository;
 use App\WaitList\Domain\WaitingUserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -21,6 +22,7 @@ class SignInPlusOneCommandHandler
         private UserQuery $userQuery,
         private ParticipationRepository $participationRepository,
         private SpeakingClubRepository $speakingClubRepository,
+        private UserBanRepository $userBanRepository,
         private TelegramInterface $telegram,
         private UuidProvider $uuidProvider,
         private WaitingUserRepository $waitingUserRepository,
@@ -97,6 +99,20 @@ class SignInPlusOneCommandHandler
                         'callback_data' => 'back_to_list',
                     ]],
                 ]
+            );
+            return;
+        }
+
+        $userBan = $this->userBanRepository->findByUserId($user->id);
+
+        if ($userBan !== null) {
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: sprintf(
+                    'На вас наложены ограничения, поэтому вы не можете записываться в клубы до %s',
+                    $userBan->getEndDate()->format('d.m.Y H:i')
+                )
             );
             return;
         }

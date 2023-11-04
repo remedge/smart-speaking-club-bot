@@ -53,6 +53,7 @@ class ArchivePastSpeakingClubsCommand extends Command
                 $speakingClub->getDate()->format('d.m.Y H:i'),
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
+                $speakingClub->getMinParticipantsCount(),
                 $speakingClub->getMaxParticipantsCount(),
                 $participationsCount,
                 implode(', ', array_map(fn (array $p) => $p['username'] . (($p['isPlusOne'] === true) ? ' (+1)' : ''), $participations)),
@@ -67,8 +68,7 @@ class ArchivePastSpeakingClubsCommand extends Command
             ];
             $service->spreadsheets_values->append($this->spreadsheetId, $this->range, $valueRange, $options);
 
-            $speakingClub->archive();
-            $this->speakingClubRepository->save($speakingClub);
+            $this->speakingClubRepository->markArchived($speakingClub->getId());
         }
 
         return Command::SUCCESS;

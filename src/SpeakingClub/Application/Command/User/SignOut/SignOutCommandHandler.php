@@ -6,6 +6,7 @@ namespace App\SpeakingClub\Application\Command\User\SignOut;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Command\User\SignOutApply\SignOutApplyCommand;
 use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
@@ -69,6 +70,28 @@ class SignOutCommandHandler
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]]
+            );
+            return;
+        }
+
+        if ($this->clock->now()->modify('+24 hours') > $speakingClub->getDate()) {
+            $this->telegram->sendMessage(
+                chatId: $command->chatId,
+                text: 'Вы точно хотите отменить запись',
+                replyMarkup: [[
+                    [
+                        'text' => 'Да',
+                        'callback_data' => sprintf(
+                            '%s:%s',
+                            SignOutApplyCommand::CALLBACK_NAME,
+                            $speakingClub->getId()
+                        ),
+                    ],
+                    [
+                        'text' => 'Нет',
                         'callback_data' => 'back_to_list',
                     ],
                 ]]

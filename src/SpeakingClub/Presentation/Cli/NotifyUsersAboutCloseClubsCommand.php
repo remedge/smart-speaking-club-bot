@@ -27,10 +27,10 @@ class NotifyUsersAboutCloseClubsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $startDate = $this->clock->now()->modify('+24 hours');
+        $startDate = $this->clock->now()->modify('+27 hours');
         $startDate = $startDate->setTime((int) $startDate->format('H'), 0, 0);
 
-        $endDate = $this->clock->now()->modify('+24 hours');
+        $endDate = $this->clock->now()->modify('+27 hours');
         $endDate = $endDate->setTime((int) $endDate->format('H'), 59, 0);
 
         $speakingClubs = $this->speakingClubRepository->findBetweenDates($startDate, $endDate);
@@ -39,7 +39,7 @@ class NotifyUsersAboutCloseClubsCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
 
             foreach ($participations as $participation) {
-                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 24 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $speakingClub->getName()));
+                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $speakingClub->getName()));
             }
         }
 

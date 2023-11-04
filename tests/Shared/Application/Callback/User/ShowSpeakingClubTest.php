@@ -23,6 +23,7 @@ class ShowSpeakingClubTest extends BaseApplicationTest
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test Club',
             description: 'Test Description',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));
@@ -35,6 +36,7 @@ class ShowSpeakingClubTest extends BaseApplicationTest
 Название: Test Club
 Описание: Test Description
 Дата: 01.01.2021 12:00
+Минимальное количество участников: 5
 Максимальное количество участников: 10
 Записалось участников: 0
 
@@ -66,6 +68,7 @@ HEREDOC, $message['text']);
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test Club',
             description: 'Test Description',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));
@@ -87,6 +90,7 @@ HEREDOC, $message['text']);
 Название: Test Club
 Описание: Test Description
 Дата: 01.01.2021 12:00
+Минимальное количество участников: 5
 Максимальное количество участников: 10
 Записалось участников: 1
 
@@ -118,6 +122,7 @@ HEREDOC, $message['text']);
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test Club',
             description: 'Test Description',
+            minParticipantsCount: 5,
             maxParticipantsCount: 10,
             date: new DateTimeImmutable('2021-01-01 12:00'),
         ));
@@ -139,6 +144,7 @@ HEREDOC, $message['text']);
 Название: Test Club
 Описание: Test Description
 Дата: 01.01.2021 12:00
+Минимальное количество участников: 5
 Максимальное количество участников: 10
 Записалось участников: 2
 

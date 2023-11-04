@@ -59,8 +59,7 @@ class AskForRatingCommand extends Command
                 );
             }
 
-            $speakingClub->setRatingAsked();
-            $this->speakingClubRepository->save($speakingClub);
+            $this->speakingClubRepository->markRatingAsked($speakingClub->getId());
         }
 
         return Command::SUCCESS;

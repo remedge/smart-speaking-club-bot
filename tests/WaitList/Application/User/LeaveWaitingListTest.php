@@ -22,6 +22,7 @@ class LeaveWaitingListTest extends BaseApplicationTest
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test club 1',
             description: 'Test description 1',
+            minParticipantsCount: 1,
             maxParticipantsCount: 1,
             date: new DateTimeImmutable('2000-01-01 11:11'),
         ));
@@ -54,6 +55,7 @@ class LeaveWaitingListTest extends BaseApplicationTest
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             name: 'Test club 1',
             description: 'Test description 1',
+            minParticipantsCount: 1,
             maxParticipantsCount: 1,
             date: new DateTimeImmutable('2000-01-01 11:11'),
         ));
