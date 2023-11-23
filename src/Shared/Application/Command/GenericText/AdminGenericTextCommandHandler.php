@@ -249,6 +249,7 @@ class AdminGenericTextCommandHandler
             }
             $speakingClub->setName($data['name']);
             $speakingClub->setDescription($data['description']);
+            $speakingClub->setMinParticipantsCount((int) $data['min_participants_count']);
 
             if ($speakingClub->getMaxParticipantsCount() < $data['max_participants_count']) {
                 $this->eventDispatcher->dispatch(new SpeakingClubFreeSpaceAvailableEvent($speakingClub->getId()));
