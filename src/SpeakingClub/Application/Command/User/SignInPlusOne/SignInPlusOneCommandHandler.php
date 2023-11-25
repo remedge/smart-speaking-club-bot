@@ -103,7 +103,7 @@ class SignInPlusOneCommandHandler
             return;
         }
 
-        $userBan = $this->userBanRepository->findByUserId($user->id);
+        $userBan = $this->userBanRepository->findByUserId($user->id, $this->clock->now());
 
         if ($userBan !== null) {
             $this->telegram->editMessageText(
