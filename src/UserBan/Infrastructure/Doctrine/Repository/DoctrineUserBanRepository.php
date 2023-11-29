@@ -40,7 +40,7 @@ class DoctrineUserBanRepository extends ServiceEntityRepository implements UserB
         return $this->find($id);
     }
 
-    public function findByUserId(UuidInterface $userId, DateTimeImmutable $now): ?array
+    public function findByUserId(UuidInterface $userId, DateTimeImmutable $now): ?UserBan
     {
         return $this->createQueryBuilder('ub')
             ->andWhere('ub.userId = :userId')
