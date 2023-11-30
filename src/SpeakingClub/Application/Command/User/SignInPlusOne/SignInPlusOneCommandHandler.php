@@ -103,23 +103,20 @@ class SignInPlusOneCommandHandler
             return;
         }
 
-        $userBanArr = $this->userBanRepository->findByUserId($user->id, $this->clock->now());
+        $userBan = $this->userBanRepository->findByUserId($user->id, $this->clock->now());
 
-        if ($userBanArr !== null) {
-            $userBan = $this->userBanRepository->findById($userBanArr['id']);
-            if ($userBan !== null) {
-                $this->telegram->editMessageText(
-                    chatId: $command->chatId,
-                    messageId: $command->messageId,
-                    text: sprintf(
-                        'Здравствуйте! Мы заметили, что недавно вы дважды отменили участие в нашем разговорном клубе менее чем за 24 часа до начала. 
+        if ($userBan !== null) {
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: sprintf(
+                    'Здравствуйте! Мы заметили, что недавно вы дважды отменили участие в нашем разговорном клубе менее чем за 24 часа до начала. 
 
 Чтобы гарантировать комфортное общение и планирование для всех участников, мы временно ограничиваем вашу возможность записываться на новые сессии. Это ограничение будет действовать до %s',
-                        $userBan->getEndDate()->format('d.m.Y H:i')
-                    )
-                );
-                return;
-            }
+                    $userBan->getEndDate()->format('d.m.Y H:i')
+                )
+            );
+            return;
         }
 
         $this->participationRepository->save(new Participation(
