@@ -29,7 +29,7 @@ jobs:
           pull: true
           load: true
           files: |
-            compose.yaml
+            docker-compose.yaml
             compose.override.yaml
           set: |
             *.cache-from=type=gha,scope=${{github.ref}}

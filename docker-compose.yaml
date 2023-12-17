@@ -49,6 +49,9 @@ services:
             MYSQL_PASSWORD: mysql
         ports:
             - "3306:3306"
+        volumes:
+            - ./frankenphp/database/init.sql:/usr/local/bin/init.sql
+        command: mysqld --init-file="/usr/local/bin/init.sql"
         networks:
             - bot
 
