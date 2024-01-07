@@ -46,8 +46,6 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 			exit 1
 		else
 			echo "The database is now ready and reachable"
-			echo "Create test database"
-			php bin/console doctrine:database:create --if-not-exists --env=test
 		fi
 
 		if [ "$( find ./migrations -iname '*.php' -print -quit )" ]; then

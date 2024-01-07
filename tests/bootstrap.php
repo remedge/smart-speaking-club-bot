@@ -19,20 +19,15 @@ if ($_SERVER['APP_DEBUG']) {
     umask(0000);
 }
 
-$cacheFilePath = __DIR__ . TestBootstrapHelper::DATABASE_CACHE_FILE;
+//$cacheFilePath = __DIR__ . TestBootstrapHelper::DATABASE_CACHE_FILE;
 $currentDatabaseHash = DatabaseCachingUtils::calculateDirectoriesHash(
     __DIR__ . TestBootstrapHelper::MIGRATIONS_PATH,
     ...TestBootstrapHelper::getAllFixturesPaths(__DIR__),
 );
 
-if (!DatabaseCachingUtils::isCacheUpToDate($cacheFilePath, $currentDatabaseHash)) {
-    $application = TestBootstrapHelper::createApplication();
-    TestBootstrapHelper::databaseSetup($application);
-    $application->getKernel()->shutdown();
-
-    $filesystem = new Filesystem();
-    $filesystem->dumpFile($cacheFilePath, $currentDatabaseHash);
-}
+$application = TestBootstrapHelper::createApplication();
+TestBootstrapHelper::databaseSetup($application);
+$application->getKernel()->shutdown();
 
 // executes the "php bin/console cache:clear" command
 passthru(
