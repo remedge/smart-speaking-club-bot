@@ -11,10 +11,14 @@ use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 class ShowSpeakingClubTest extends BaseApplicationTest
 {
+    /**
+     * @throws Exception
+     */
     public function testShowClubWithNoParticipation(): void
     {
         /** @var SpeakingClubRepository $clubRepository */

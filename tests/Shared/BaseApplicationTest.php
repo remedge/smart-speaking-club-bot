@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Shared;
 
 use App\Tests\Mock\MockTelegram;
+use App\Tests\TestCaseTrait;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 abstract class BaseApplicationTest extends WebTestCase
 {
+    use TestCaseTrait;
+
     protected KernelBrowser $client;
 
     protected function setUp(): void
