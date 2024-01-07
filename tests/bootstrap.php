@@ -33,3 +33,37 @@ if (!DatabaseCachingUtils::isCacheUpToDate($cacheFilePath, $currentDatabaseHash)
     $filesystem = new Filesystem();
     $filesystem->dumpFile($cacheFilePath, $currentDatabaseHash);
 }
+
+// executes the "php bin/console cache:clear" command
+passthru(
+    sprintf(
+        'APP_ENV=%s php "%s/../bin/console" cache:clear --no-warmup',
+        $_ENV['APP_ENV'],
+        __DIR__
+    )
+);
+
+passthru(
+    sprintf(
+        'php "%s/../bin/console" doctrine:database:create --if-not-exists --env=test',
+        __DIR__
+    )
+);
+
+$schemaValidateResult = null;
+passthru(
+    sprintf(
+        'php "%s/../bin/console" doctrine:schema:validate --env=test',
+        __DIR__
+    ),
+    $schemaValidateResult
+);
+if (0 !== $schemaValidateResult) {
+    passthru(
+        sprintf(
+            'php "%s/../bin/console" doctrine:schema:create --env=test',
+            __DIR__
+        )
+    );
+}
+
