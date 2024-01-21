@@ -49,9 +49,12 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: root_password
             MYSQL_DATABASE: bot
-            MYSQ_TESTL_DATABASE: bot_test
+            MYSQ_TEST_DATABASE: bot_test
             MYSQL_USER: mysql
             MYSQL_PASSWORD: mysql
+        volumes:
+            - ./frankenphp/database/init.sql:/usr/local/bin/init.sql
+        command: mysqld --init-file="/usr/local/bin/init.sql"
         healthcheck:
             test: "/usr/bin/mysql --user=root --password=root_password --execute 'SHOW DATABASES'"
             timeout: 10s
