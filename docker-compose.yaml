@@ -62,13 +62,8 @@ services:
             test: "/usr/bin/mysql --user=root --password=root_password --execute 'SHOW DATABASES'"
             timeout: 10s
             interval: 10s
-#            retries: 20
-#            start_period: 30s
         ports:
             - "3306:3306"
-#        volumes:
-#            - ./frankenphp/database/init.sql:/usr/local/bin/init.sql
-#        command: mysqld --init-file="/usr/local/bin/init.sql"
         networks:
             - bot
 
