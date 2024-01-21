@@ -42,12 +42,13 @@ jobs:
         name: Start services
         run: docker-compose up -d --no-build
       -
+        name: Waiting for containers to start
+        run: sleep 10
+      -
         name: Run PHPUnit
-#        if: false # Remove this line if PHPUnit is installed
         run: docker compose exec -T php bin/phpunit
       -
         name: Doctrine Schema Validator
-#        if: false # Remove this line if Doctrine ORM is installed
         run: docker compose exec -T php bin/console -e test doctrine:schema:validate
   lint:
     name: Docker Lint
