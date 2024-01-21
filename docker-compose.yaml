@@ -1,11 +1,30 @@
+version: '3.4'
+
 services:
+    db:
+        image: mysql:latest
+        container_name: bot-db
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_DATABASE: bot
+            MYSQ_TESTL_DATABASE: bot_test
+            MYSQL_USER: mysql
+            MYSQL_PASSWORD: mysql
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./frankenphp/database/init.sql:/usr/local/bin/init.sql
+        command: mysqld --init-file="/usr/local/bin/init.sql"
+        networks:
+            - bot
+
     php:
         image: ${IMAGES_PREFIX:-}app-php
         container_name: bot-app
         depends_on:
-            db:
-                condition: service_healthy
-        restart: unless-stopped
+            - "db"
+        restart: always
         environment:
             SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
             MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
@@ -39,29 +58,6 @@ services:
                 protocol: udp
         networks:
             - bot
-
-    db:
-        image: mysql:latest
-        container_name: bot-db
-        restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: root_password
-            MYSQL_DATABASE: bot
-            MYSQ_TESTL_DATABASE: bot_test
-            MYSQL_USER: mysql
-            MYSQL_PASSWORD: mysql
-        ports:
-            - "3306:3306"
-        volumes:
-            - ./frankenphp/database/init.sql:/usr/local/bin/init.sql
-        command: mysqld --init-file="/usr/local/bin/init.sql"
-        networks:
-            - bot
-        healthcheck:
-            test: "/usr/bin/mysql --user=root --password=root_password --execute 'SHOW DATABASES'"
-            timeout: 30s
-            interval: 3s
-            retries: 20
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
