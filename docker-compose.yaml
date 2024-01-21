@@ -2,6 +2,9 @@ services:
     php:
         image: ${IMAGES_PREFIX:-}app-php
         container_name: bot-app
+        depends_on:
+            db:
+                condition: service_healthy
         restart: unless-stopped
         environment:
             SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
@@ -54,6 +57,10 @@ services:
         command: mysqld --init-file="/usr/local/bin/init.sql"
         networks:
             - bot
+        healthcheck:
+            test: "/usr/bin/mysql --user=root --password=root_password --execute 'SHOW DATABASES'"
+            timeout: 50s
+            retries: 10
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
