@@ -1,7 +1,12 @@
+version: '3.4'
+
 services:
     php:
         image: ${IMAGES_PREFIX:-}app-php
         container_name: bot-app
+        depends_on:
+            db:
+                condition: service_healthy
         restart: unless-stopped
         environment:
             SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
@@ -44,14 +49,18 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: root_password
             MYSQL_DATABASE: bot
-            MYSQ_TESTL_DATABASE: bot_test
+            MYSQ_TEST_DATABASE: bot_test
             MYSQL_USER: mysql
             MYSQL_PASSWORD: mysql
-        ports:
-            - "3306:3306"
         volumes:
             - ./frankenphp/database/init.sql:/usr/local/bin/init.sql
         command: mysqld --init-file="/usr/local/bin/init.sql"
+        healthcheck:
+            test: "/usr/bin/mysql --user=root --password=root_password --execute 'SHOW DATABASES'"
+            timeout: 10s
+            interval: 10s
+        ports:
+            - "3306:3306"
         networks:
             - bot
 
