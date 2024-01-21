@@ -22,6 +22,12 @@ services:
             # The two next lines can be removed after initial installation
             SYMFONY_VERSION: ${SYMFONY_VERSION:-}
             STABILITY: ${STABILITY:-stable}
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost" ]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
         volumes:
             - caddy_data:/data
             - caddy_config:/config
