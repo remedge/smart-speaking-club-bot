@@ -37,10 +37,7 @@ jobs:
             *.cache-to=type=gha,scope=${{github.ref}},mode=max
       -
         name: Start services
-        run: docker compose up --wait --no-build
-      -
-        name: Start services
-        run: docker compose up --wait --no-build
+        run: docker compose up --wait --no-build && docker compose up --wait --no-build
       -
         name: Check HTTP reachability
         run: curl -v -o /dev/null http://localhost
