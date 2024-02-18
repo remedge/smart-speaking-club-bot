@@ -19,16 +19,7 @@ class SignOutTest extends BaseApplicationTest
 {
     public function testSuccess(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
@@ -52,8 +43,12 @@ class SignOutTest extends BaseApplicationTest
             messageId: 123,
             callbackData: 'sign_out:00000000-0000-0000-0000-000000000001'
         );
-        $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+        
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 👌 Вы успешно отписаны от разговорного клуба
@@ -87,8 +82,12 @@ HEREDOC, $message['text']);
             messageId: 123,
             callbackData: 'sign_out:00000000-0000-0000-0000-000000000001'
         );
-        $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+        
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Разговорный клуб не найден
@@ -104,24 +103,19 @@ HEREDOC, $message['text']);
 
     public function testAlreadySignedOut(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
         $this->sendWebhookCallbackQuery(
             chatId: 111111,
             messageId: 123,
             callbackData: 'sign_out:00000000-0000-0000-0000-000000000001'
         );
-        $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+        
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Вы не записаны на этот клуб

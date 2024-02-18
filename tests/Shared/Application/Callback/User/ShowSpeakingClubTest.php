@@ -21,20 +21,16 @@ class ShowSpeakingClubTest extends BaseApplicationTest
      */
     public function testShowClubWithNoParticipation(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
         $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:00000000-0000-0000-0000-000000000001');
         $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 Название: Test Club
@@ -66,16 +62,7 @@ HEREDOC, $message['text']);
 
     public function testShowClubWithSingleParticipation(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
@@ -88,7 +75,12 @@ HEREDOC, $message['text']);
 
         $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:00000000-0000-0000-0000-000000000001');
         $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 Название: Test Club
@@ -120,16 +112,7 @@ HEREDOC, $message['text']);
 
     public function testShowClubWithPlusOneParticipation(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
@@ -141,8 +124,12 @@ HEREDOC, $message['text']);
         ));
 
         $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:00000000-0000-0000-0000-000000000001');
-        $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+        
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 Название: Test Club
