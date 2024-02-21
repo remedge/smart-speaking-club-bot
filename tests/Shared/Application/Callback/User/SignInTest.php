@@ -35,14 +35,14 @@ class SignInTest extends BaseApplicationTest
             new WaitingUser(
                 id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
                 userId: Uuid::fromString(UserFixtures::USER_ID_1),
-                speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                speakingClubId: $speakingClub->getId(),
             )
         );
 
         $this->sendWebhookCallbackQuery(
             chatId: 111111,
             messageId: 123,
-            callbackData: 'sign_in:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in:' . $speakingClub->getId()
         );
         $this->assertResponseIsSuccessful();
 
@@ -114,23 +114,17 @@ HEREDOC,
      */
     public function testAlreadySigned(): void
     {
-        $this->createSpeakingClub();
+        $speakingClub = $this->createSpeakingClub();
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(
-            new Participation(
-                id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                userId: Uuid::fromString(UserFixtures::USER_ID_1),
-                speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                isPlusOne: false,
-            )
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_1
         );
 
         $this->sendWebhookCallbackQuery(
             chatId: 111111,
             messageId: 123,
-            callbackData: 'sign_in:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in:' . $speakingClub->getId()
         );
         $this->assertResponseIsSuccessful();
 
@@ -162,23 +156,17 @@ HEREDOC,
      */
     public function testNoFreeSpace(): void
     {
-        $this->createSpeakingClub(minParticipantsCount: 1, maxParticipantsCount: 1);
+        $speakingClub = $this->createSpeakingClub(minParticipantsCount: 1, maxParticipantsCount: 1);
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(
-            new Participation(
-                id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                userId: Uuid::fromString(UserFixtures::USER_ID_2),
-                speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                isPlusOne: false,
-            )
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_2
         );
 
         $this->sendWebhookCallbackQuery(
             chatId: 111111,
             messageId: 123,
-            callbackData: 'sign_in:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in:' . $speakingClub->getId()
         );
         $this->assertResponseIsSuccessful();
 
@@ -199,7 +187,7 @@ HEREDOC,
             [
                 [
                     'text'          => 'Встать в лист ожидания',
-                    'callback_data' => 'join_waiting_list:00000000-0000-0000-0000-000000000001',
+                    'callback_data' => 'join_waiting_list:' . $speakingClub->getId()
                 ]
             ],
             [
@@ -216,14 +204,14 @@ HEREDOC,
      */
     public function testBannedUser(): void
     {
-        $this->createSpeakingClub();
+        $speakingClub = $this->createSpeakingClub();
 
         $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
 
         $this->sendWebhookCallbackQuery(
             chatId: self::CHAT_ID,
             messageId: 123,
-            callbackData: 'sign_in:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in:' . $speakingClub->getId()
         );
 
         $this->assertResponseIsSuccessful();
@@ -245,9 +233,12 @@ HEREDOC,
         );
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDuplicatedBannedUser(): void
     {
-        $this->createSpeakingClub();
+        $speakingClub = $this->createSpeakingClub();
 
         $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
         $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
@@ -255,7 +246,7 @@ HEREDOC,
         $this->sendWebhookCallbackQuery(
             chatId: self::CHAT_ID,
             messageId: 123,
-            callbackData: 'sign_in:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in:' . $speakingClub->getId()
         );
 
         $this->assertResponseIsSuccessful();

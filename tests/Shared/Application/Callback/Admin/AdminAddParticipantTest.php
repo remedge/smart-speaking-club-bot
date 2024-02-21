@@ -14,9 +14,9 @@ class AdminAddParticipantTest extends BaseApplicationTest
      */
     public function testSuccess(): void
     {
-        $this->createSpeakingClub();
+        $speakingClub = $this->createSpeakingClub();
 
-        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_participant:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_participant:' . $speakingClub->getId());
         $this->assertResponseIsSuccessful();
 
         $message = $this->getMessage(666666, 123);

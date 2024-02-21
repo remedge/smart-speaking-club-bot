@@ -11,6 +11,7 @@ use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 class SignInPlusOneTest extends BaseApplicationTest
@@ -22,7 +23,7 @@ class SignInPlusOneTest extends BaseApplicationTest
         $this->sendWebhookCallbackQuery(
             chatId: 111111,
             messageId: 123,
-            callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
@@ -69,23 +70,22 @@ HEREDOC, $message['text']);
         ], $message['replyMarkup']);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testAlreadySigned(): void
     {
         $speakingClub = $this->createSpeakingClub();
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_1),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: false,
-        ));
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_1
+        );
 
         $this->sendWebhookCallbackQuery(
             chatId: 111111,
             messageId: 123,
-            callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
@@ -106,18 +106,12 @@ HEREDOC, $message['text']);
         ], $message['replyMarkup']);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testNoFreeSpace(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 1,
-            maxParticipantsCount: 1,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub(minParticipantsCount: 1, maxParticipantsCount: 1);
 
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
@@ -131,7 +125,7 @@ HEREDOC, $message['text']);
         $this->sendWebhookCallbackQuery(
             chatId: 111111,
             messageId: 123,
-            callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
+            callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
@@ -147,7 +141,7 @@ HEREDOC, $message['text']);
         self::assertEquals([
             [[
                 'text' => 'Встать в лист ожидания',
-                'callback_data' => 'join_waiting_list:00000000-0000-0000-0000-000000000001',
+                'callback_data' => 'join_waiting_list:' . $speakingClub->getId()
             ]],
             [[
                 'text' => '<< Перейти к списку ближайших клубов',

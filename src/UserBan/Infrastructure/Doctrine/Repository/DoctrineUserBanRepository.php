@@ -7,12 +7,10 @@ namespace App\UserBan\Infrastructure\Doctrine\Repository;
 use App\User\Domain\User;
 use App\UserBan\Domain\UserBan;
 use App\UserBan\Domain\UserBanRepository;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Ramsey\Uuid\UuidInterface;
-use DateTimeImmutable;
 
 /**
  * @extends ServiceEntityRepository<UserBan>

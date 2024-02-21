@@ -22,20 +22,21 @@ trait TestCaseTrait
      * @throws Exception
      */
     protected function createSpeakingClub(
-        string $id = '00000000-0000-0000-0000-000000000001',
         string $name = 'Test Club',
         string $date = null,
         int $minParticipantsCount = 5,
         int $maxParticipantsCount = 10,
+        bool $isCancelled = false,
     ): SpeakingClub {
         $date = $date ?: date('Y-m-d H:i:s', timestamp: strtotime('+1 hour'));
         $speakingClub = new SpeakingClub(
-            id: Uuid::fromString($id),
+            id: $this->uuidProvider->provide(),
             name: $name,
             description: 'Test Description',
             minParticipantsCount: $minParticipantsCount,
             maxParticipantsCount: $maxParticipantsCount,
             date: new DateTimeImmutable($date),
+            isCancelled: $isCancelled
         );
 
         /** @var SpeakingClubRepository $clubRepository */
@@ -46,15 +47,14 @@ trait TestCaseTrait
     }
 
     protected function createParticipation(
-        string $speakingClubId,
-        string $id,
+        UuidInterface $speakingClubId,
         string $userId,
         bool $isPlusOne = false,
     ): Participation {
         $participation = new Participation(
-            id: Uuid::fromString($id),
+            id: $this->uuidProvider->provide(),
             userId: Uuid::fromString($userId),
-            speakingClubId: Uuid::fromString($speakingClubId),
+            speakingClubId: $speakingClubId,
             isPlusOne: $isPlusOne,
         );
 

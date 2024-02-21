@@ -9,27 +9,26 @@ use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
+use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
 {
+    /**
+     * @throws Exception
+     */
     public function testSuccess(): void
     {
         $speakingClub = $this->createSpeakingClub();
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(
-            new Participation(
-                id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                isPlusOne: false
-            )
+        $participation = $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_1
         );
 
-        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:' . $participation->getId());
         $this->assertResponseIsSuccessful();
 
         $message = $this->getMessage(666666, 123);
@@ -39,7 +38,7 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
             [
                 [
                     'text'          => '<< Вернуться к списку участников',
-                    'callback_data' => 'show_participants:00000000-0000-0000-0000-000000000001',
+                    'callback_data' => 'show_participants:' . $speakingClub->getId(),
                 ]
             ],
         ], $message['replyMarkup']);
@@ -58,13 +57,15 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
             [
                 [
                     'text'          => 'Посмотреть информацию о клубе',
-                    'callback_data' => 'show_speaking_club:00000000-0000-0000-0000-000000000001',
+                    'callback_data' => 'show_speaking_club:' . $speakingClub->getId(),
                 ]
             ],
         ], $message['replyMarkup']);
 
-        $participation = $participationRepository->findById(Uuid::fromString('00000000-0000-0000-0000-000000000001'));
-        self::assertTrue($participation->isPlusOne());
+        /** @var ParticipationRepository $participationRepository */
+        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
+        $updatedParticipation = $participationRepository->findById($participation->getId());
+        self::assertTrue($updatedParticipation->isPlusOne());
     }
 
     public function testParticipationNotFound(): void
@@ -158,22 +159,20 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
         ], $message['replyMarkup']);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testAlreadyPlusOne(): void
     {
         $speakingClub = $this->createSpeakingClub();
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(
-            new Participation(
-                id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                isPlusOne: true
-            )
+        $participation = $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_1,
+            true
         );
 
-        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:' . $participation->getId());
         $this->assertResponseIsSuccessful();
 
         $message = $this->getMessage(666666, 123);
@@ -183,7 +182,7 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
             [
                 [
                     'text'          => '<< Вернуться к списку участников',
-                    'callback_data' => 'show_participants:00000000-0000-0000-0000-000000000001',
+                    'callback_data' => 'show_participants:' . $speakingClub->getId(),
                 ]
             ],
         ], $message['replyMarkup']);
