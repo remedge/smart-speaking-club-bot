@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
-use App\SpeakingClub\Domain\Participation;
-use App\SpeakingClub\Domain\ParticipationRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;

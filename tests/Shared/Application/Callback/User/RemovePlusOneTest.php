@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
-use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
-use App\SpeakingClub\Domain\SpeakingClub;
-use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
 use App\WaitList\Domain\WaitingUserRepository;
-use DateTimeImmutable;
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 class RemovePlusOneTest extends BaseApplicationTest
@@ -137,7 +134,7 @@ HEREDOC, $message['text']);
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSignedWithoutPlusOne(): void
     {

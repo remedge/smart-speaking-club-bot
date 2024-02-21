@@ -6,16 +6,16 @@ namespace App\Tests\Shared\Application\Callback\User;
 
 use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
-use App\SpeakingClub\Domain\SpeakingClub;
-use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
-use DateTimeImmutable;
 use Exception;
 use Ramsey\Uuid\Uuid;
 
 class SignInPlusOneTest extends BaseApplicationTest
 {
+    /**
+     * @throws Exception
+     */
     public function testSuccess(): void
     {
         $speakingClub = $this->createSpeakingClub();
@@ -148,5 +148,74 @@ HEREDOC, $message['text']);
                 'callback_data' => 'back_to_list',
             ]],
         ], $message['replyMarkup']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testBannedUser(): void
+    {
+        $speakingClub = $this->createSpeakingClub();
+
+        $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
+
+        $this->sendWebhookCallbackQuery(
+            chatId: self::CHAT_ID,
+            messageId: 123,
+            callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
+        );
+
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+
+        self::assertStringContainsString(
+            sprintf(
+                'Здравствуйте! Мы заметили, что недавно вы дважды отменили участие в нашем разговорном клубе менее чем за 24 часа до начала. 
+
+Чтобы гарантировать комфортное общение и планирование для всех участников, мы временно ограничиваем вашу возможность записываться на новые сессии. Это ограничение будет действовать до %s',
+                $userBan->getEndDate()->format('d.m.Y H:i')
+            ),
+            $message['text']
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testDuplicatedBannedUser(): void
+    {
+        $speakingClub = $this->createSpeakingClub();
+
+        $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
+        $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
+
+        $this->sendWebhookCallbackQuery(
+            chatId: self::CHAT_ID,
+            messageId: 123,
+            callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
+        );
+
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+
+        self::assertStringContainsString(
+            sprintf(
+                'Здравствуйте! Мы заметили, что недавно вы дважды отменили участие в нашем разговорном клубе менее чем за 24 часа до начала. 
+
+Чтобы гарантировать комфортное общение и планирование для всех участников, мы временно ограничиваем вашу возможность записываться на новые сессии. Это ограничение будет действовать до %s',
+                $userBan->getEndDate()->format('d.m.Y H:i')
+            ),
+            $message['text']
+        );
     }
 }

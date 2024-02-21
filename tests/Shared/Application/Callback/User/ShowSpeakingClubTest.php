@@ -4,15 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
-use App\SpeakingClub\Domain\Participation;
-use App\SpeakingClub\Domain\ParticipationRepository;
-use App\SpeakingClub\Domain\SpeakingClub;
-use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
-use DateTimeImmutable;
 use Exception;
-use Ramsey\Uuid\Uuid;
 
 class ShowSpeakingClubTest extends BaseApplicationTest
 {
