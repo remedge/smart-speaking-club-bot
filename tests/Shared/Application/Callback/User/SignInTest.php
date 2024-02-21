@@ -83,7 +83,7 @@ class SignInTest extends BaseApplicationTest
             messageId: 123,
             callbackData: 'sign_in:00000000-0000-0000-0000-000000000001'
         );
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 
@@ -238,8 +238,14 @@ HEREDOC,
     {
         $speakingClub = $this->createSpeakingClub();
 
-        $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
-        $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
+        $this->createBannedUser(
+            Uuid::fromString(UserFixtures::USER_ID_1),
+            (new DateTimeImmutable())->modify('+25 hours')
+        );
+        $userBan = $this->createBannedUser(
+            Uuid::fromString(UserFixtures::USER_ID_1),
+            (new DateTimeImmutable())->modify('+2 days')
+        );
 
         $this->sendWebhookCallbackQuery(
             chatId: self::CHAT_ID,

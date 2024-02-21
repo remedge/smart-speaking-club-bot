@@ -66,6 +66,9 @@ class ShowSpeakingClubTest extends BaseApplicationTest
         ], $message['replyMarkup']);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testShowClubWithSingleParticipation(): void
     {
         $speakingClub = $this->createSpeakingClub();

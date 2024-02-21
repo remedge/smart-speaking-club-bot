@@ -8,6 +8,7 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
+use DateTimeImmutable;
 use Exception;
 use Ramsey\Uuid\Uuid;
 
@@ -191,8 +192,14 @@ HEREDOC, $message['text']);
     {
         $speakingClub = $this->createSpeakingClub();
 
-        $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
-        $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
+        $this->createBannedUser(
+            Uuid::fromString(UserFixtures::USER_ID_1),
+            (new DateTimeImmutable())->modify('+25 hours')
+        );
+        $userBan = $this->createBannedUser(
+            Uuid::fromString(UserFixtures::USER_ID_1),
+            (new DateTimeImmutable())->modify('+2 days')
+        );
 
         $this->sendWebhookCallbackQuery(
             chatId: self::CHAT_ID,

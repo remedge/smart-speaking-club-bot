@@ -46,6 +46,7 @@ class DoctrineUserBanRepository extends ServiceEntityRepository implements UserB
             ->andWhere('ub.endDate > :now')
             ->setParameter('userId', $userId)
             ->setParameter('now', $now)
+            ->orderBy('ub.endDate', 'desc')
             ->getQuery()
             ->getResult();
 
