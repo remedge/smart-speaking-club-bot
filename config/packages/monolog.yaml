@@ -53,6 +53,12 @@ when@prod:
                 # max number of log files to keep
                 # defaults to zero, which means infinite files
                 max_files: 10
+            info:
+                type: rotating_file
+                path: "%kernel.logs_dir%/%kernel.environment%.info-log"
+                level: info
+                channels: [ "!event", "!deprecation" ]
+                max_files: 5
             nested:
                 type: stream
                 path: php://stderr

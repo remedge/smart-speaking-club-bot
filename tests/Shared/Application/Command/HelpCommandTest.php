@@ -38,6 +38,7 @@ HEREDOC, $message['text']);
 /help - Показать список команд
 /admin_upcoming_clubs - Список клубов, которые будут в ближайшее время
 /admin_create_club - Создать новый разговорный клуб
+/bans - Список забаненных пользователей
 
 HEREDOC, $message['text']);
 

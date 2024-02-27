@@ -9,71 +9,68 @@ use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
+use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
 {
+    /**
+     * @throws Exception
+     */
     public function testSuccess(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: false
-        ));
+        $participation = $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_1
+        );
 
-        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:' . $participation->getId());
         $this->assertResponseIsSuccessful();
 
         $message = $this->getMessage(666666, 123);
 
         self::assertEquals('Участнику добавлен +1', $message['text']);
         self::assertEquals([
-            [[
-                'text' => '<< Вернуться к списку участников',
-                'callback_data' => 'show_participants:00000000-0000-0000-0000-000000000001',
-            ]],
+            [
+                [
+                    'text'          => '<< Вернуться к списку участников',
+                    'callback_data' => 'show_participants:' . $speakingClub->getId(),
+                ]
+            ],
         ], $message['replyMarkup']);
 
         $message = $this->getFirstMessage(111111);
-        self::assertEquals('Администратор добавил вам +1 к участию в клубе "Test Club" 01.01.2021 12:00', $message['text']);
+        self::assertEquals(
+            sprintf(
+                'Администратор добавил вам +1 к участию в клубе "%s" %s %s',
+                $speakingClub->getName(),
+                $speakingClub->getDate()->format('d.m.Y'),
+                $speakingClub->getDate()->format('H:i'),
+            ),
+            $message['text']
+        );
         self::assertEquals([
-            [[
-                'text' => 'Посмотреть информацию о клубе',
-                'callback_data' => 'show_speaking_club:00000000-0000-0000-0000-000000000001',
-            ]],
+            [
+                [
+                    'text'          => 'Посмотреть информацию о клубе',
+                    'callback_data' => 'show_speaking_club:' . $speakingClub->getId(),
+                ]
+            ],
         ], $message['replyMarkup']);
 
-        $participation = $participationRepository->findById(Uuid::fromString('00000000-0000-0000-0000-000000000001'));
-        self::assertTrue($participation->isPlusOne());
+        /** @var ParticipationRepository $participationRepository */
+        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
+        $updatedParticipation = $participationRepository->findById($participation->getId());
+        self::assertTrue($updatedParticipation->isPlusOne());
     }
 
     public function testParticipationNotFound(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
         $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:00000000-0000-0000-0000-000000000001');
         $this->assertResponseIsSuccessful();
@@ -82,10 +79,12 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
 
         self::assertEquals('🤔 Участник не найден', $message['text']);
         self::assertEquals([
-            [[
-                'text' => '<< Вернуться к списку клубов',
-                'callback_data' => 'back_to_admin_list',
-            ]],
+            [
+                [
+                    'text'          => '<< Вернуться к списку клубов',
+                    'callback_data' => 'back_to_admin_list',
+                ]
+            ],
         ], $message['replyMarkup']);
     }
 
@@ -93,12 +92,14 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
     {
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: false
-        ));
+        $participationRepository->save(
+            new Participation(
+                id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                isPlusOne: false
+            )
+        );
 
         $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:00000000-0000-0000-0000-000000000001');
         $this->assertResponseIsSuccessful();
@@ -107,10 +108,12 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
 
         self::assertEquals('🤔 Разговорный клуб не найден', $message['text']);
         self::assertEquals([
-            [[
-                'text' => '<< Вернуться к списку клубов',
-                'callback_data' => 'back_to_admin_list',
-            ]],
+            [
+                [
+                    'text'          => '<< Вернуться к списку клубов',
+                    'callback_data' => 'back_to_admin_list',
+                ]
+            ],
         ], $message['replyMarkup']);
     }
 
@@ -118,23 +121,27 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
     {
         /** @var SpeakingClubRepository $clubRepository */
         $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 1,
-            maxParticipantsCount: 1,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $clubRepository->save(
+            new SpeakingClub(
+                id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                name: 'Test Club',
+                description: 'Test Description',
+                minParticipantsCount: 1,
+                maxParticipantsCount: 1,
+                date: new DateTimeImmutable('2021-01-01 12:00'),
+            )
+        );
 
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: false
-        ));
+        $participationRepository->save(
+            new Participation(
+                id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+                isPlusOne: false
+            )
+        );
 
         $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:00000000-0000-0000-0000-000000000001');
         $this->assertResponseIsSuccessful();
@@ -143,46 +150,41 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
 
         self::assertEquals('В клубе нет свободных мест', $message['text']);
         self::assertEquals([
-            [[
-                'text' => '<< Вернуться к списку участников',
-                'callback_data' => 'show_participants:00000000-0000-0000-0000-000000000001',
-            ]],
+            [
+                [
+                    'text'          => '<< Вернуться к списку участников',
+                    'callback_data' => 'show_participants:00000000-0000-0000-0000-000000000001',
+                ]
+            ],
         ], $message['replyMarkup']);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testAlreadyPlusOne(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: true
-        ));
+        $participation = $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_1,
+            true
+        );
 
-        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:00000000-0000-0000-0000-000000000001');
+        $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:' . $participation->getId());
         $this->assertResponseIsSuccessful();
 
         $message = $this->getMessage(666666, 123);
 
         self::assertEquals('Участник уже имеет +1', $message['text']);
         self::assertEquals([
-            [[
-                'text' => '<< Вернуться к списку участников',
-                'callback_data' => 'show_participants:00000000-0000-0000-0000-000000000001',
-            ]],
+            [
+                [
+                    'text'          => '<< Вернуться к списку участников',
+                    'callback_data' => 'show_participants:' . $speakingClub->getId(),
+                ]
+            ],
         ], $message['replyMarkup']);
     }
 }

@@ -19,6 +19,7 @@ use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistComman
 use App\User\Application\Command\User\UserGenericTextCommand;
 use App\UserBan\Application\Command\ListBan\ListBanCommand;
 use App\UserWarning\Application\Command\ListWarning\ListWarningCommand;
+use Exception;
 use Longman\TelegramBot\Entities\Update;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,6 +36,9 @@ class WebhookController
     ) {
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route(path: '/webhook', methods: [Request::METHOD_POST])]
     public function __invoke(Request $request): Response
     {

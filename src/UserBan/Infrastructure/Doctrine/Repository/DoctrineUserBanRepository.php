@@ -7,11 +7,10 @@ namespace App\UserBan\Infrastructure\Doctrine\Repository;
 use App\User\Domain\User;
 use App\UserBan\Domain\UserBan;
 use App\UserBan\Domain\UserBanRepository;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Ramsey\Uuid\UuidInterface;
-use DateTimeImmutable;
 
 /**
  * @extends ServiceEntityRepository<UserBan>
@@ -42,13 +41,16 @@ class DoctrineUserBanRepository extends ServiceEntityRepository implements UserB
 
     public function findByUserId(UuidInterface $userId, DateTimeImmutable $now): ?UserBan
     {
-        return $this->createQueryBuilder('ub')
+        $result = $this->createQueryBuilder('ub')
             ->andWhere('ub.userId = :userId')
             ->andWhere('ub.endDate > :now')
             ->setParameter('userId', $userId)
             ->setParameter('now', $now)
+            ->orderBy('ub.endDate', 'desc')
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getResult();
+
+        return current($result) ?: null;
     }
 
     public function findAllBan(): ?array

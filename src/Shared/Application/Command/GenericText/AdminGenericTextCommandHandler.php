@@ -22,6 +22,7 @@ use App\UserWarning\Domain\UserWarning;
 use App\UserWarning\Domain\UserWarningRepository;
 use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -42,6 +43,7 @@ class AdminGenericTextCommandHandler
         private WaitingUserRepository $waitingUserRepository,
         private UserBanRepository $userBanRepository,
         private UserWarningRepository $userWarningRepository,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -77,13 +79,13 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION) {
-            if (!is_int((int) $command->text) || (int) $command->text <= 0) {
+            if (!is_int((int)$command->text) || (int)$command->text <= 0) {
                 $this->telegram->sendMessage($command->chatId, 'Введите целое число больше 0');
                 return;
             }
 
             $data = $user->getActualSpeakingClubData();
-            $data['min_participants_count'] = (int) $command->text;
+            $data['min_participants_count'] = (int)$command->text;
 
             $user->setState(UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION);
             $user->setActualSpeakingClubData($data);
@@ -94,13 +96,13 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION) {
-            if (!is_int((int) $command->text) || (int) $command->text <= 0) {
+            if (!is_int((int)$command->text) || (int)$command->text <= 0) {
                 $this->telegram->sendMessage($command->chatId, 'Введите целое число больше 0');
                 return;
             }
 
             $data = $user->getActualSpeakingClubData();
-            $data['max_participants_count'] = (int) $command->text;
+            $data['max_participants_count'] = (int)$command->text;
 
             $user->setState(UserStateEnum::RECEIVING_DATE_FOR_CREATION);
             $user->setActualSpeakingClubData($data);
@@ -147,14 +149,18 @@ class AdminGenericTextCommandHandler
                 chatId: $command->chatId,
                 text: 'Клуб успешно создан',
                 replyMarkup: [
-                    [[
-                        'text' => 'Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_admin_list',
-                    ]],
-                    [[
-                        'text' => 'Создать еще один клуб',
-                        'callback_data' => 'admin_create_club',
-                    ]],
+                    [
+                        [
+                            'text'          => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ]
+                    ],
+                    [
+                        [
+                            'text'          => 'Создать еще один клуб',
+                            'callback_data' => 'admin_create_club',
+                        ]
+                    ],
                 ],
             );
             return;
@@ -185,13 +191,13 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING) {
-            if (!is_int((int) $command->text) || (int) $command->text <= 0) {
+            if (!is_int((int)$command->text) || (int)$command->text <= 0) {
                 $this->telegram->sendMessage($command->chatId, 'Введите целое число больше 0');
                 return;
             }
 
             $data = $user->getActualSpeakingClubData();
-            $data['min_participants_count'] = (int) $command->text;
+            $data['min_participants_count'] = (int)$command->text;
 
             $user->setState(UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_EDITING);
             $user->setActualSpeakingClubData($data);
@@ -202,7 +208,7 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_EDITING) {
-            if (!is_int((int) $command->text) || (int) $command->text <= 0) {
+            if (!is_int((int)$command->text) || (int)$command->text <= 0) {
                 $this->telegram->sendMessage($command->chatId, 'Введите целое число больше 0');
                 return;
             }
@@ -211,14 +217,17 @@ class AdminGenericTextCommandHandler
                 Uuid::fromString($user->getActualSpeakingClubData()['id'])
             );
 
-            if ($currentParticipationsCount > (int) $command->text) {
-                $this->telegram->sendMessage($command->chatId, 'На текущий момент в клубе уже есть участники, ' .
-                    'поэтому максимальное количество участников не может быть меньше текущего. Попробуйте еще раз');
+            if ($currentParticipationsCount > (int)$command->text) {
+                $this->telegram->sendMessage(
+                    $command->chatId,
+                    'На текущий момент в клубе уже есть участники, ' .
+                    'поэтому максимальное количество участников не может быть меньше текущего. Попробуйте еще раз'
+                );
                 return;
             }
 
             $data = $user->getActualSpeakingClubData();
-            $data['max_participants_count'] = (int) $command->text;
+            $data['max_participants_count'] = (int)$command->text;
 
             $user->setState(UserStateEnum::RECEIVING_DATE_FOR_EDITING);
             $user->setActualSpeakingClubData($data);
@@ -249,13 +258,13 @@ class AdminGenericTextCommandHandler
             }
             $speakingClub->setName($data['name']);
             $speakingClub->setDescription($data['description']);
-            $speakingClub->setMinParticipantsCount((int) $data['min_participants_count']);
+            $speakingClub->setMinParticipantsCount((int)$data['min_participants_count']);
 
             if ($speakingClub->getMaxParticipantsCount() < $data['max_participants_count']) {
                 $this->eventDispatcher->dispatch(new SpeakingClubFreeSpaceAvailableEvent($speakingClub->getId()));
             }
 
-            $speakingClub->setMaxParticipantsCount((int) $data['max_participants_count']);
+            $speakingClub->setMaxParticipantsCount((int)$data['max_participants_count']);
 
             if ($speakingClub->getDate() !== $date) {
                 $this->eventDispatcher->dispatch(new SpeakingClubScheduleChangedEvent($speakingClub->getId()));
@@ -271,12 +280,14 @@ class AdminGenericTextCommandHandler
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
                 text: 'Клуб успешно изменен',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_admin_list',
-                    ],
-                ]],
+                        [
+                            'text'          => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]
+                ],
             );
             return;
         }
@@ -297,10 +308,12 @@ class AdminGenericTextCommandHandler
                     chatId: $command->chatId,
                     text: 'В клубе нет свободных мест',
                     replyMarkup: [
-                        [[
-                            'text' => '<< Вернуться к списку участников',
-                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
-                        ]],
+                        [
+                            [
+                                'text'          => '<< Вернуться к списку участников',
+                                'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                            ]
+                        ],
                     ],
                 );
                 return;
@@ -316,10 +329,12 @@ class AdminGenericTextCommandHandler
                     chatId: $command->chatId,
                     text: 'Такого пользователя нет в базе бота',
                     replyMarkup: [
-                        [[
-                            'text' => '<< Вернуться к списку участников',
-                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
-                        ]],
+                        [
+                            [
+                                'text'          => '<< Вернуться к списку участников',
+                                'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                            ]
+                        ],
                     ],
                 );
                 return;
@@ -334,10 +349,12 @@ class AdminGenericTextCommandHandler
                     chatId: $command->chatId,
                     text: 'Нельзя добавить администратора в клуб',
                     replyMarkup: [
-                        [[
-                            'text' => '<< Вернуться к списку участников',
-                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
-                        ]],
+                        [
+                            [
+                                'text'          => '<< Вернуться к списку участников',
+                                'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                            ]
+                        ],
                     ],
                 );
                 return;
@@ -356,21 +373,25 @@ class AdminGenericTextCommandHandler
                     chatId: $command->chatId,
                     text: 'Пользователь уже участвует в клубе',
                     replyMarkup: [
-                        [[
-                            'text' => '<< Вернуться к списку участников',
-                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
-                        ]],
+                        [
+                            [
+                                'text'          => '<< Вернуться к списку участников',
+                                'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                            ]
+                        ],
                     ],
                 );
                 return;
             }
 
-            $this->participationRepository->save(new Participation(
-                id: $this->uuidProvider->provide(),
-                userId: $participantUser->getId(),
-                speakingClubId: $speakingClubId,
-                isPlusOne: false,
-            ));
+            $this->participationRepository->save(
+                new Participation(
+                    id: $this->uuidProvider->provide(),
+                    userId: $participantUser->getId(),
+                    speakingClubId: $speakingClubId,
+                    isPlusOne: false,
+                )
+            );
 
             $user->setState(UserStateEnum::IDLE);
             $user->setActualSpeakingClubData([]);
@@ -381,10 +402,12 @@ class AdminGenericTextCommandHandler
                 chatId: $user->getChatId(),
                 text: 'Пользователь успешно добавлен в клуб',
                 replyMarkup: [
-                    [[
-                        'text' => 'Перейти к списку участников',
-                        'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
-                    ]],
+                    [
+                        [
+                            'text'          => 'Перейти к списку участников',
+                            'callback_data' => sprintf('show_participants:%s', $speakingClubId->toString()),
+                        ]
+                    ],
                 ],
             );
 
@@ -397,10 +420,12 @@ class AdminGenericTextCommandHandler
                     $speakingClub->getDate()->format('d.m.Y H:i'),
                 ),
                 replyMarkup: [
-                    [[
-                        'text' => 'Перейти к описанию клуба',
-                        'callback_data' => sprintf('show_speaking_club:%s', $speakingClubId->toString()),
-                    ]],
+                    [
+                        [
+                            'text'          => 'Перейти к описанию клуба',
+                            'callback_data' => sprintf('show_speaking_club:%s', $speakingClubId->toString()),
+                        ]
+                    ],
                 ],
             );
 
@@ -436,13 +461,20 @@ class AdminGenericTextCommandHandler
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
                 text: '✅ Сообщение успешно отправлено всем пользователям',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_admin_list',
-                    ],
-                ]],
+                        [
+                            'text'          => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]
+                ],
             );
+            $this->logger->info('Message sent to all users', [
+                'adminChatId' => $command->chatId,
+                'adminState'  => $user->getState(),
+                'text'        => $command->text,
+            ]);
             return;
         }
 
@@ -457,12 +489,14 @@ class AdminGenericTextCommandHandler
                 $this->telegram->sendMessage(
                     chatId: $command->chatId,
                     text: 'Что-то пошло не так, попробуйте еще раз',
-                    replyMarkup: [[
+                    replyMarkup: [
                         [
-                            'text' => 'Перейти к списку ближайших клубов',
-                            'callback_data' => 'back_to_admin_list',
-                        ],
-                    ]],
+                            [
+                                'text'          => 'Перейти к списку ближайших клубов',
+                                'callback_data' => 'back_to_admin_list',
+                            ],
+                        ]
+                    ],
                 );
                 return;
             }
@@ -471,7 +505,7 @@ class AdminGenericTextCommandHandler
 
             foreach ($participations as $recipient) {
                 $this->telegram->sendMessage(
-                    chatId: (int) $recipient['chatId'],
+                    chatId: (int)$recipient['chatId'],
                     text: $command->text,
                 );
             }
@@ -483,12 +517,14 @@ class AdminGenericTextCommandHandler
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
                 text: '✅ Сообщение успешно отправлено всем участникам клуба',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_admin_list',
-                    ],
-                ]],
+                        [
+                            'text'          => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]
+                ],
             );
             return;
         }
@@ -504,12 +540,14 @@ class AdminGenericTextCommandHandler
                 $this->telegram->sendMessage(
                     chatId: $command->chatId,
                     text: 'Что-то пошло не так, попробуйте еще раз',
-                    replyMarkup: [[
+                    replyMarkup: [
                         [
-                            'text' => 'Перейти к списку ближайших клубов',
-                            'callback_data' => 'back_to_admin_list',
-                        ],
-                    ]],
+                            [
+                                'text'          => 'Перейти к списку ближайших клубов',
+                                'callback_data' => 'back_to_admin_list',
+                            ],
+                        ]
+                    ],
                 );
                 return;
             }
@@ -519,12 +557,14 @@ class AdminGenericTextCommandHandler
                 $this->telegram->sendMessage(
                     chatId: $command->chatId,
                     text: 'Клуб не найден',
-                    replyMarkup: [[
+                    replyMarkup: [
                         [
-                            'text' => '<< Перейти к списку ближайших клубов',
-                            'callback_data' => 'back_to_admin_list',
-                        ],
-                    ]]
+                            [
+                                'text'          => '<< Перейти к списку ближайших клубов',
+                                'callback_data' => 'back_to_admin_list',
+                            ],
+                        ]
+                    ]
                 );
                 return;
             }
@@ -541,12 +581,14 @@ class AdminGenericTextCommandHandler
                 $this->telegram->sendMessage(
                     chatId: $command->chatId,
                     text: 'Клуб уже отменен',
-                    replyMarkup: [[
+                    replyMarkup: [
                         [
-                            'text' => '<< Перейти к списку ближайших клубов',
-                            'callback_data' => 'back_to_admin_list',
-                        ],
-                    ]]
+                            [
+                                'text'          => '<< Перейти к списку ближайших клубов',
+                                'callback_data' => 'back_to_admin_list',
+                            ],
+                        ]
+                    ]
                 );
                 return;
             }
@@ -556,18 +598,20 @@ class AdminGenericTextCommandHandler
             $participants = $this->participationRepository->findBySpeakingClubId($speakingClubId);
             foreach ($participants as $participant) {
                 $this->telegram->sendMessage(
-                    chatId: (int) $participant['chatId'],
+                    chatId: (int)$participant['chatId'],
                     text: sprintf(
                         'К сожалению, клуб "%s" %s был отменен',
                         $speakingClub->getName(),
                         $speakingClub->getDate()->format('d.m.Y H:i')
                     ),
-                    replyMarkup: [[
+                    replyMarkup: [
                         [
-                            'text' => 'Перейти к списку ближайших клубов',
-                            'callback_data' => 'back_to_list',
-                        ],
-                    ]]
+                            [
+                                'text'          => 'Перейти к списку ближайших клубов',
+                                'callback_data' => 'back_to_list',
+                            ],
+                        ]
+                    ]
                 );
             }
 
@@ -584,12 +628,14 @@ class AdminGenericTextCommandHandler
                             $speakingClub->getName(),
                             $speakingClub->getDate()->format('d.m.Y H:i')
                         ),
-                        replyMarkup: [[
+                        replyMarkup: [
                             [
-                                'text' => 'Перейти к списку ближайших клубов',
-                                'callback_data' => 'back_to_admin_list',
-                            ],
-                        ]]
+                                [
+                                    'text'          => 'Перейти к списку ближайших клубов',
+                                    'callback_data' => 'back_to_admin_list',
+                                ],
+                            ]
+                        ]
                     );
                 }
 
@@ -609,12 +655,14 @@ class AdminGenericTextCommandHandler
                     $speakingClub->getName(),
                     $speakingClub->getDate()->format('d.m.Y H:i')
                 ),
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_admin_list',
-                    ],
-                ]]
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]
+                ]
             );
 
             $user->setState(UserStateEnum::IDLE);
@@ -653,12 +701,14 @@ class AdminGenericTextCommandHandler
 
             $endDate = $this->clock->now()->modify('+1 week');
 
-            $this->userBanRepository->save(new UserBan(
-                id: $this->uuidProvider->provide(),
-                userId: $participantUser->getId(),
-                endDate: $endDate,
-                createdAt: $this->clock->now(),
-            ));
+            $this->userBanRepository->save(
+                new UserBan(
+                    id: $this->uuidProvider->provide(),
+                    userId: $participantUser->getId(),
+                    endDate: $endDate,
+                    createdAt: $this->clock->now(),
+                )
+            );
 
             $user->setState(UserStateEnum::IDLE);
             $user->setActualSpeakingClubData([]);
@@ -709,11 +759,13 @@ class AdminGenericTextCommandHandler
                 return;
             }
 
-            $this->userWarningRepository->save(new UserWarning(
-                id: $this->uuidProvider->provide(),
-                userId: $participantUser->getId(),
-                createdAt: $this->clock->now(),
-            ));
+            $this->userWarningRepository->save(
+                new UserWarning(
+                    id: $this->uuidProvider->provide(),
+                    userId: $participantUser->getId(),
+                    createdAt: $this->clock->now(),
+                )
+            );
 
             $user->setState(UserStateEnum::IDLE);
             $user->setActualSpeakingClubData([]);
@@ -744,5 +796,11 @@ class AdminGenericTextCommandHandler
 Если вы хотите узнать больше о том, что я могу, нажмите /help.
 А если хотите пообщаться с администратором, напишите пожалуйста @SmartLab_NoviSad 😊',
         );
+
+        $this->logger->info('Admin state not found in the list.', [
+            'adminChatId' => $command->chatId,
+            'adminState'  => $user->getState(),
+            'text'        => $command->text,
+        ]);
     }
 }

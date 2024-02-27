@@ -6,22 +6,26 @@ namespace App\Tests\SpeakingClub\Application\Cli;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
-use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
-use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\SpeakingClub\Presentation\Cli\NotifyUsersAboutCloseClubsCommand;
 use App\Tests\Mock\MockTelegram;
+use App\Tests\Shared\BaseApplicationTest;
+use App\Tests\TestCaseTrait;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
-use Ramsey\Uuid\Uuid;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Exception;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
+class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 {
+    use TestCaseTrait;
+
+    /**
+     * @throws Exception
+     */
     public function testSuccess(): void
     {
         $application = new Application();
@@ -32,42 +36,41 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = $this->getContainer()->get(ParticipationRepository::class);
 
-        $speakingClubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test club 1',
-            description: 'Test description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2000-01-02 00:00:00'),
-        ));
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_1),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: false,
-        ));
+        $speakingClub1 = $this->createSpeakingClub(
+            'Test club 1',
+            date: (new DateTimeImmutable())->modify('+27 hours')->format('Y-m-d H:i:s')
+        );
+        $this->createParticipation(
+            $speakingClub1->getId(),
+            UserFixtures::USER_ID_1
+        );
 
-        $speakingClubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
-            name: 'Test club 2',
-            description: 'Test description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2000-01-01 02:00:00'),
-        ));
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_2),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000002'),
-            isPlusOne: false,
-        ));
+        $speakingClub2 = $this->createSpeakingClub(
+            'Test club 2',
+            date: (new DateTimeImmutable())->modify('+2 hours')->format('Y-m-d H:i:s')
+        );
+        $this->createParticipation(
+            $speakingClub2->getId(),
+            UserFixtures::USER_ID_2
+        );
 
-        $application->add(new NotifyUsersAboutCloseClubsCommand(
-            speakingClubRepository: $speakingClubRepository,
-            participationRepository: $participationRepository,
-            clock: $this->getContainer()->get(Clock::class),
-            telegram: $this->getContainer()->get(TelegramInterface::class),
-        ));
+        $this->createSpeakingClub(
+            'Test club 3',
+            date: (new DateTimeImmutable())->modify('+26 hours 59 minutes 59 seconds')->format('Y-m-d H:i:s')
+        );
+        $this->createSpeakingClub(
+            'Test club 4',
+            date: (new DateTimeImmutable())->modify('+1 hours  59 minutes 59 seconds')->format('Y-m-d H:i:s')
+        );
+
+        $application->add(
+            new NotifyUsersAboutCloseClubsCommand(
+                speakingClubRepository: $speakingClubRepository,
+                participationRepository: $participationRepository,
+                clock: $this->getContainer()->get(Clock::class),
+                telegram: $this->getContainer()->get(TelegramInterface::class),
+            )
+        );
 
         $command = $application->find('app:notify-users');
         $commandTester = new CommandTester($command);
@@ -76,10 +79,20 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
 
         self::assertEquals(Command::SUCCESS, $result);
 
-        $messages = array_key_exists(111111, MockTelegram::$messages) ? MockTelegram::$messages[111111] : null;
-        self::assertEquals('Разговорный клуб "Test club 1" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $messages[0]['text']);
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
 
-        $messages = array_key_exists(222222, MockTelegram::$messages) ? MockTelegram::$messages[222222] : null;
-        self::assertEquals('Разговорный клуб "Test club 2" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $messages[0]['text']);
+        self::assertEquals(
+            'Разговорный клуб "Test club 1" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',
+            $messages[0]['text']
+        );
+
+        $this->assertArrayHasKey(222222, $this->getMessages());
+        $messages = $this->getMessagesByChatId(222222);
+
+        self::assertEquals(
+            'Разговорный клуб "Test club 2" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',
+            $messages[0]['text']
+        );
     }
 }

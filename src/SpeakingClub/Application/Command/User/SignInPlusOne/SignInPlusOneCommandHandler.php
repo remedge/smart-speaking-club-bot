@@ -40,12 +40,14 @@ class SignInPlusOneCommandHandler
                 chatId: $command->chatId,
                 messageId: $command->messageId,
                 text: '🤔 Такой клуб не найден',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_list',
-                    ],
-                ]]
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]
+                ]
             );
             return;
         }
@@ -54,28 +56,35 @@ class SignInPlusOneCommandHandler
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
                 text: '🤔 К сожалению, этот разговорный клуб уже прошел',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_list',
-                    ],
-                ]]
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]
+                ]
             );
             return;
         }
 
-        $participation = $this->participationRepository->findByUserIdAndSpeakingClubId($user->id, $command->speakingClubId);
+        $participation = $this->participationRepository->findByUserIdAndSpeakingClubId(
+            $user->id,
+            $command->speakingClubId
+        );
         if ($participation !== null) {
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
                 text: '🤔 Вы уже записаны на этот разговорный клуб',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_list',
-                    ],
-                ]]
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]
+                ]
             );
             return;
         }
@@ -87,17 +96,21 @@ class SignInPlusOneCommandHandler
                 messageId: $command->messageId,
                 text: '😔 К сожалению, все свободные места на данный клуб заняты',
                 replyMarkup: [
-                    [[
-                        'text' => 'Встать в лист ожидания',
-                        'callback_data' => sprintf(
-                            'join_waiting_list:%s',
-                            $command->speakingClubId->toString()
-                        ),
-                    ]],
-                    [[
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_list',
-                    ]],
+                    [
+                        [
+                            'text'          => 'Встать в лист ожидания',
+                            'callback_data' => sprintf(
+                                'join_waiting_list:%s',
+                                $command->speakingClubId->toString()
+                            ),
+                        ]
+                    ],
+                    [
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ]
+                    ],
                 ]
             );
             return;
@@ -119,23 +132,27 @@ class SignInPlusOneCommandHandler
             return;
         }
 
-        $this->participationRepository->save(new Participation(
-            id: $this->uuidProvider->provide(),
-            userId: $user->id,
-            speakingClubId: $command->speakingClubId,
-            isPlusOne: true,
-        ));
+        $this->participationRepository->save(
+            new Participation(
+                id: $this->uuidProvider->provide(),
+                userId: $user->id,
+                speakingClubId: $command->speakingClubId,
+                isPlusOne: true,
+            )
+        );
 
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
             text: '👌 Вы успешно записаны на клуб c +1 человеком',
-            replyMarkup: [[
+            replyMarkup: [
                 [
-                    'text' => '<< Перейти к списку ваших клубов',
-                    'callback_data' => 'back_to_my_list',
-                ],
-            ]]
+                    [
+                        'text'          => '<< Перейти к списку ваших клубов',
+                        'callback_data' => 'back_to_my_list',
+                    ],
+                ]
+            ]
         );
 
         $waitUserArray = $this->waitingUserRepository->findOneByUserIdAndSpeakingClubId(

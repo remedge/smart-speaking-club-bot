@@ -1,0 +1,3 @@
+CREATE USER IF NOT EXISTS 'mysql_test'@'%' IDENTIFIED BY 'mysql_test';
+GRANT ALL PRIVILEGES ON *.* TO 'mysql_test'@'%';
+FLUSH PRIVILEGES;
