@@ -4,54 +4,43 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\Admin;
 
-use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
-use App\SpeakingClub\Domain\SpeakingClub;
-use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
 use App\WaitList\Domain\WaitingUserRepository;
-use DateTimeImmutable;
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 class AdminRemoveParticipantTest extends BaseApplicationTest
 {
+    /**
+     * @throws Exception
+     */
     public function testSuccess(): void
     {
-        /** @var SpeakingClubRepository $clubRepository */
-        $clubRepository = self::getContainer()->get(SpeakingClubRepository::class);
-        $clubRepository->save(new SpeakingClub(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            name: 'Test Club',
-            description: 'Test Description',
-            minParticipantsCount: 5,
-            maxParticipantsCount: 10,
-            date: new DateTimeImmutable('2021-01-01 12:00'),
-        ));
+        $speakingClub = $this->createSpeakingClub();
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_1),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: false,
-        ));
+        $participation = $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_1
+        );
 
         /** @var WaitingUserRepository $waitingUserRepository */
         $waitingUserRepository = self::getContainer()->get(WaitingUserRepository::class);
         $waitingUserRepository->save(new WaitingUser(
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             userId: Uuid::fromString(UserFixtures::USER_ID_2),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
+            speakingClubId: $speakingClub->getId(),
         ));
 
         $this->sendWebhookCallbackQuery(666666, 123, 'remove_participant:00000000-0000-0000-0000-000000000001');
         $this->assertResponseIsSuccessful();
 
-        $participation = $participationRepository->findById(Uuid::fromString('00000000-0000-0000-0000-000000000001'));
-        self::assertNull($participation);
+        /** @var ParticipationRepository $participationRepository */
+        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
+
+        self::assertNull($participationRepository->findById($participation->getId()));
 
         $message = $this->getMessage(666666, 123);
 
@@ -59,13 +48,21 @@ class AdminRemoveParticipantTest extends BaseApplicationTest
         self::assertEquals([
             [[
                 'text' => '<< Вернуться к списку участников',
-                'callback_data' => 'show_participants:00000000-0000-0000-0000-000000000001',
+                'callback_data' => 'show_participants:' . $speakingClub->getId(),
             ]],
         ], $message['replyMarkup']);
 
         $message = $this->getFirstMessage(111111);
 
-        self::assertEquals('Администратор убрал вас из участников клуба "Test Club" 01.01.2021 12:00', $message['text']);
+        self::assertEquals(
+            sprintf(
+                'Администратор убрал вас из участников клуба "%s" %s %s',
+                $speakingClub->getName(),
+                $speakingClub->getDate()->format('d.m.Y'),
+                $speakingClub->getDate()->format('H:i'),
+            ),
+            $message['text']
+        );
         self::assertEquals([
             [[
                 'text' => 'Посмотреть список ближайших клубов',
@@ -74,11 +71,20 @@ class AdminRemoveParticipantTest extends BaseApplicationTest
         ], $message['replyMarkup']);
 
         $message = $this->getFirstMessage(222222);
-        self::assertEquals('Появилось свободное место в клубе "Test Club" 01.01.2021 12:00, спешите записаться!', $message['text']);
+        self::assertEquals(
+            sprintf(
+                'Появилось свободное место в клубе "%s" %s %s, спешите записаться!',
+                $speakingClub->getName(),
+                $speakingClub->getDate()->format('d.m.Y'),
+                $speakingClub->getDate()->format('H:i'),
+            ),
+            $message['text']
+        );
+
         self::assertEquals([
             [[
                 'text' => 'Посмотреть информацию о клубе',
-                'callback_data' => 'show_speaking_club:00000000-0000-0000-0000-000000000001',
+                'callback_data' => 'show_speaking_club:' . $speakingClub->getId(),
             ]],
         ], $message['replyMarkup']);
     }

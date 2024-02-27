@@ -10,15 +10,16 @@ use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\SpeakingClub\Presentation\Cli\NotifyUsersAboutCloseClubsCommand;
 use App\Tests\Mock\MockTelegram;
+use App\Tests\Shared\BaseApplicationTest;
 use App\Tests\TestCaseTrait;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
+use DateTimeImmutable;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
+class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 {
     use TestCaseTrait;
 
@@ -36,36 +37,30 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
         $participationRepository = $this->getContainer()->get(ParticipationRepository::class);
 
         $speakingClub1 = $this->createSpeakingClub(
-            '00000000-0000-0000-0000-000000000001',
             'Test club 1',
-            '2000-01-02 03:00:00'
+            date: (new DateTimeImmutable())->modify('+27 hours')->format('Y-m-d H:i:s')
         );
         $this->createParticipation(
-            $speakingClub1->getId()->toString(),
-            '00000000-0000-0000-0000-000000000001',
+            $speakingClub1->getId(),
             UserFixtures::USER_ID_1
         );
 
         $speakingClub2 = $this->createSpeakingClub(
-            '00000000-0000-0000-0000-000000000002',
             'Test club 2',
-            '2000-01-01 02:00:00'
+            date: (new DateTimeImmutable())->modify('+2 hours')->format('Y-m-d H:i:s')
         );
         $this->createParticipation(
-            $speakingClub2->getId()->toString(),
-            '00000000-0000-0000-0000-000000000002',
+            $speakingClub2->getId(),
             UserFixtures::USER_ID_2
         );
 
         $this->createSpeakingClub(
-            '00000000-0000-0000-0000-000000000003',
             'Test club 3',
-            '2000-01-02 02:59:59'
+            date: (new DateTimeImmutable())->modify('+26 hours 59 minutes 59 seconds')->format('Y-m-d H:i:s')
         );
         $this->createSpeakingClub(
-            '00000000-0000-0000-0000-000000000004',
             'Test club 4',
-            '2000-01-01 03:00:00'
+            date: (new DateTimeImmutable())->modify('+1 hours  59 minutes 59 seconds')->format('Y-m-d H:i:s')
         );
 
         $application->add(
@@ -84,13 +79,17 @@ class NotifyUsersAboutCloseClubsCommandTest extends KernelTestCase
 
         self::assertEquals(Command::SUCCESS, $result);
 
-        $messages = array_key_exists(111111, MockTelegram::$messages) ? MockTelegram::$messages[111111] : null;
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
         self::assertEquals(
             'Разговорный клуб "Test club 1" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',
             $messages[0]['text']
         );
 
-        $messages = array_key_exists(222222, MockTelegram::$messages) ? MockTelegram::$messages[222222] : null;
+        $this->assertArrayHasKey(222222, $this->getMessages());
+        $messages = $this->getMessagesByChatId(222222);
+
         self::assertEquals(
             'Разговорный клуб "Test club 2" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',
             $messages[0]['text']

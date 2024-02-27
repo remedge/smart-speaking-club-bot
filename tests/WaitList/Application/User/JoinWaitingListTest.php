@@ -28,8 +28,12 @@ class JoinWaitingListTest extends BaseApplicationTest
         ));
 
         $this->sendWebhookCallbackQuery(111111, 123, 'join_waiting_list:00000000-0000-0000-0000-000000000001');
-        $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+        
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals('Вы успешно добавлены в список ожидания, я сообщу вам, когда появится свободное место', $message['text']);
         self::assertEquals([
@@ -62,8 +66,12 @@ class JoinWaitingListTest extends BaseApplicationTest
         ));
 
         $this->sendWebhookCallbackQuery(111111, 123, 'join_waiting_list:00000000-0000-0000-0000-000000000001');
-        $this->assertResponseIsSuccessful();
-        $message = $this->getMessage(111111, 123);
+        
+        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals('Вы уже находитесь в списке ожидания', $message['text']);
         self::assertEquals([

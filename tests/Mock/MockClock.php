@@ -9,11 +9,22 @@ namespace App\Tests\Mock;
 
 use App\Shared\Application\Clock;
 use DateTimeImmutable;
+use Exception;
 
 class MockClock implements Clock
 {
+    private ?DateTimeImmutable $now;
+
+    /**
+     * @throws Exception
+     */
+    public function setNow(string $now): void
+    {
+        $this->now = new DateTimeImmutable($now);
+    }
+
     public function now(): DateTimeImmutable
     {
-        return new DateTimeImmutable('2000-01-01 00:00:00');
+        return $this->now ?: new DateTimeImmutable('2000-01-01 00:00:00');
     }
 }
