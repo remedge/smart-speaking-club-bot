@@ -25,4 +25,9 @@ interface UserBanRepository
      * @return array<UserBan>|null
      */
     public function findAllBan(): ?array;
+
+    /**
+     * @return array<UserBan>|null
+     */
+    public function findAllBanNow(DateTimeImmutable $now): ?array;
 }

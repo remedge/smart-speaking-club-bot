@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\UserBan\Application\Query;
 
+use App\Shared\Application\Clock;
 use App\UserBan\Application\DTO\UserBanDTO;
 use App\UserBan\Domain\UserBanRepository;
 
 class UserBanQuery
 {
-    public function __construct(
-        private UserBanRepository $userBanRepository,
-    ) {
+    public function __construct(private UserBanRepository $userBanRepository, private Clock $clock)
+    {
     }
 
     /**
      * @return array<UserBanDTO>
      */
-    public function findAllBan(): array
+    public function findAllBanNow(): array
     {
-        $userBans = $this->userBanRepository->findAllBan();
+        $userBans = $this->userBanRepository->findAllBanNow($this->clock->now());
         $userBanDTOs = [];
         foreach ($userBans as $userBan) {
             $userBanDTOs[] = new UserBanDTO(
@@ -27,7 +27,7 @@ class UserBanQuery
                 username: $userBan['username'],
                 firstName: $userBan['firstName'],
                 lastName: $userBan['lastName'],
-                chatId: (int) $userBan['chatId'],
+                chatId: (int)$userBan['chatId'],
             );
         }
 

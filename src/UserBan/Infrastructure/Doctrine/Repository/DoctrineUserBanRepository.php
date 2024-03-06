@@ -61,4 +61,16 @@ class DoctrineUserBanRepository extends ServiceEntityRepository implements UserB
             ->getQuery()
             ->getResult();
     }
+
+    public function findAllBanNow(DateTimeImmutable $now): ?array
+    {
+        return $this->createQueryBuilder('ub')
+            ->select('ub.id, u.username, u.chatId, u.firstName, u.lastName, ub.endDate')
+            ->join(User::class, 'u', 'WITH', 'ub.userId = u.id')
+            ->andWhere('ub.endDate > :now')
+            ->orderBy('ub.endDate', 'desc')
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+    }
 }
