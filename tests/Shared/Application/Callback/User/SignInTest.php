@@ -8,7 +8,6 @@ use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
 use App\WaitList\Domain\WaitingUserRepository;
-use DateInterval;
 use DateTimeImmutable;
 use Exception;
 use Ramsey\Uuid\Uuid;
@@ -24,7 +23,7 @@ class SignInTest extends BaseApplicationTest
 
         $this->createBannedUser(
             Uuid::fromString(UserFixtures::USER_ID_1),
-            (new DateTimeImmutable())->add(DateInterval::createFromDateString('-1 minute'))
+            new DateTimeImmutable('-1 minute')
         );
 
         /** @var WaitingUserRepository $waitUserRepository */

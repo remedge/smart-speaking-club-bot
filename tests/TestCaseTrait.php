@@ -6,11 +6,8 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
-use App\User\Domain\User;
 use App\UserBan\Domain\UserBan;
 use App\UserBan\Domain\UserBanRepository;
-use DateInterval;
-use DateTime;
 use DateTimeImmutable;
 use Exception;
 use Ramsey\Uuid\Uuid;
@@ -73,7 +70,7 @@ trait TestCaseTrait
         $userBan = new UserBan(
             id: $this->uuidProvider->provide(),
             userId: $userId,
-            endDate: $endDatetime ?: (new DateTimeImmutable())->add(DateInterval::createFromDateString('1 minute')),
+            endDate: $endDatetime ?: new DateTimeImmutable('+1 minute'),
             createdAt: new DateTimeImmutable()
         );
 

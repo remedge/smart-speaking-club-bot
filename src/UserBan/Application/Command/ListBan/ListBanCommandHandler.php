@@ -19,7 +19,7 @@ class ListBanCommandHandler
 
     public function __invoke(ListBanCommand $command): void
     {
-        $userBans = $this->userBanQuery->findAllBan();
+        $userBans = $this->userBanQuery->findAllBanNow();
 
         $buttons = [];
         foreach ($userBans as $userBan) {
