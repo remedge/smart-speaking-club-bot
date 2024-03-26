@@ -6,9 +6,12 @@ namespace App\Tests\Shared;
 
 use App\Shared\Application\Clock;
 use App\Shared\Application\UuidProvider;
+use App\SpeakingClub\Domain\ParticipationRepository;
+use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Mock\MockTelegram;
 use App\Tests\Mock\MockUuidProvider;
 use App\Tests\TestCaseTrait;
+use App\WaitList\Domain\WaitingUserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -21,6 +24,7 @@ abstract class BaseApplicationTest extends WebTestCase
 
     protected KernelBrowser $client;
     protected UuidProvider $uuidProvider;
+    protected Clock $clock;
 
     protected function setUp(): void
     {
@@ -31,8 +35,8 @@ abstract class BaseApplicationTest extends WebTestCase
         ]);
 
         $this->uuidProvider = new MockUuidProvider();
-        $clock = $this->getContainer()->get(Clock::class);
-        $clock->setNow(date('Y-m-d H:i:s'));
+        $this->clock = self::getContainer()->get(Clock::class);
+        $this->clock->setNow(date('Y-m-d H:i:s'));
     }
 
     protected function sendWebhookCommand(int $chatId, string $commandName): void
@@ -191,5 +195,19 @@ abstract class BaseApplicationTest extends WebTestCase
     public function getMessage(int $chatId, int $messageId): array
     {
         return MockTelegram::$messages[$chatId][$messageId];
+    }
+
+    protected function getSpeakingClubRepository(): SpeakingClubRepository
+    {
+        return self::getContainer()->get(SpeakingClubRepository::class);
+    }
+
+    protected function getParticipationRepository(): ParticipationRepository
+    {
+        return self::getContainer()->get(ParticipationRepository::class);
+    }
+    protected function getWaitingUserRepository(): WaitingUserRepository
+    {
+        return self::getContainer()->get(WaitingUserRepository::class);
     }
 }

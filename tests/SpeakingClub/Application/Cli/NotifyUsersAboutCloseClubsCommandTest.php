@@ -6,8 +6,6 @@ namespace App\Tests\SpeakingClub\Application\Cli;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
-use App\SpeakingClub\Domain\ParticipationRepository;
-use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\SpeakingClub\Presentation\Cli\NotifyUsersAboutCloseClubsCommand;
 use App\Tests\Mock\MockTelegram;
 use App\Tests\Shared\BaseApplicationTest;
@@ -31,14 +29,12 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
         $application = new Application();
         MockTelegram::$messages = [];
 
-        /** @var SpeakingClubRepository $speakingClubRepository */
-        $speakingClubRepository = $this->getContainer()->get(SpeakingClubRepository::class);
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = $this->getContainer()->get(ParticipationRepository::class);
+        $speakingClubRepository = $this->getSpeakingClubRepository();
+        $participationRepository = $this->getParticipationRepository();
 
         $speakingClub1 = $this->createSpeakingClub(
             'Test club 1',
-            date: (new DateTimeImmutable())->modify('+27 hours')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable('+27 hours'))->format('Y-m-d H:i:s')
         );
         $this->createParticipation(
             $speakingClub1->getId(),
@@ -47,7 +43,7 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 
         $speakingClub2 = $this->createSpeakingClub(
             'Test club 2',
-            date: (new DateTimeImmutable())->modify('+2 hours')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable('+2 hours'))->format('Y-m-d H:i:s')
         );
         $this->createParticipation(
             $speakingClub2->getId(),
@@ -56,11 +52,11 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 
         $this->createSpeakingClub(
             'Test club 3',
-            date: (new DateTimeImmutable())->modify('+26 hours 59 minutes 59 seconds')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable('+26 hours 59 minutes 59 seconds'))->format('Y-m-d H:i:s')
         );
         $this->createSpeakingClub(
             'Test club 4',
-            date: (new DateTimeImmutable())->modify('+1 hours  59 minutes 59 seconds')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable('+1 hours  59 minutes 59 seconds'))->format('Y-m-d H:i:s')
         );
 
         $application->add(

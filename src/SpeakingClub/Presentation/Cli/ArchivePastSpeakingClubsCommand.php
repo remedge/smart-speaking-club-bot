@@ -8,7 +8,6 @@ use App\Shared\Application\Clock;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\WaitList\Domain\WaitingUserRepository;
-use Google_Client;
 use Google_Service_Sheets;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -23,6 +22,7 @@ class ArchivePastSpeakingClubsCommand extends Command
         private ParticipationRepository $participationRepository,
         private WaitingUserRepository $waitingUserRepository,
         private Clock $clock,
+        private DumpFactory $dumpFactory,
         private string $spreadsheetId,
         private string $range,
     ) {
@@ -31,14 +31,14 @@ class ArchivePastSpeakingClubsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $client = new Google_Client();
+        $client = $this->dumpFactory->createClient();
         $client->setApplicationName('Google Sheets API');
         $client->setScopes([Google_Service_Sheets::SPREADSHEETS]);
         $client->setAccessType('offline');
         $path = __DIR__ . '/../../../../credentials/credentials.json';
         $client->setAuthConfig($path);
 
-        $service = new Google_Service_Sheets($client);
+        $service = $this->dumpFactory->createServiceSheets($client);
 
         $speakingClubs = $this->speakingClubRepository->findAllPastNotArchived($this->clock->now());
 
@@ -61,7 +61,7 @@ class ArchivePastSpeakingClubsCommand extends Command
                 $waitingUsersCount,
             ];
             $rows = [$newRow];
-            $valueRange = new \Google_Service_Sheets_ValueRange();
+            $valueRange = $this->dumpFactory->createServiceSheetsValueRange();
             $valueRange->setValues($rows);
             $options = [
                 'valueInputOption' => 'USER_ENTERED',
