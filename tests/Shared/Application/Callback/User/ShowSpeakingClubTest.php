@@ -47,21 +47,21 @@ class ShowSpeakingClubTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => 'Записаться',
+                    'text' => 'Записаться',
                     'callback_data' => 'sign_in:' . $speakingClub->getId(),
-                ]
+                ],
             ],
             [
                 [
-                    'text'          => 'Записаться с +1 человеком',
+                    'text' => 'Записаться с +1 человеком',
                     'callback_data' => 'sign_in_plus_one:' . $speakingClub->getId(),
-                ]
+                ],
             ],
             [
                 [
-                    'text'          => '<< Вернуться к списку клубов',
+                    'text' => '<< Вернуться к списку клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -108,21 +108,21 @@ class ShowSpeakingClubTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => 'Отменить запись',
+                    'text' => 'Отменить запись',
                     'callback_data' => 'sign_out:' . $speakingClub->getId(),
-                ]
+                ],
             ],
             [
                 [
-                    'text'          => 'Добавить +1 человека с собой',
+                    'text' => 'Добавить +1 человека с собой',
                     'callback_data' => 'add_plus_one:' . $speakingClub->getId(),
-                ]
+                ],
             ],
             [
                 [
-                    'text'          => '<< Вернуться к списку клубов',
+                    'text' => '<< Вернуться к списку клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -169,21 +169,21 @@ class ShowSpeakingClubTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => 'Отменить запись',
+                    'text' => 'Отменить запись',
                     'callback_data' => 'sign_out:' . $speakingClub->getId(),
-                ]
+                ],
             ],
             [
                 [
-                    'text'          => 'Убрать +1 человека с собой',
+                    'text' => 'Убрать +1 человека с собой',
                     'callback_data' => 'remove_plus_one:' . $speakingClub->getId(),
-                ]
+                ],
             ],
             [
                 [
-                    'text'          => '<< Вернуться к списку клубов',
+                    'text' => '<< Вернуться к списку клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }

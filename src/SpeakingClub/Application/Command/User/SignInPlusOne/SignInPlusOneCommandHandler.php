@@ -43,10 +43,10 @@ class SignInPlusOneCommandHandler
                 replyMarkup: [
                     [
                         [
-                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'text' => '<< Перейти к списку ближайших клубов',
                             'callback_data' => 'back_to_list',
                         ],
-                    ]
+                    ],
                 ]
             );
             return;
@@ -59,10 +59,10 @@ class SignInPlusOneCommandHandler
                 replyMarkup: [
                     [
                         [
-                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'text' => '<< Перейти к списку ближайших клубов',
                             'callback_data' => 'back_to_list',
                         ],
-                    ]
+                    ],
                 ]
             );
             return;
@@ -80,10 +80,10 @@ class SignInPlusOneCommandHandler
                 replyMarkup: [
                     [
                         [
-                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'text' => '<< Перейти к списку ближайших клубов',
                             'callback_data' => 'back_to_list',
                         ],
-                    ]
+                    ],
                 ]
             );
             return;
@@ -98,18 +98,18 @@ class SignInPlusOneCommandHandler
                 replyMarkup: [
                     [
                         [
-                            'text'          => 'Встать в лист ожидания',
+                            'text' => 'Встать в лист ожидания',
                             'callback_data' => sprintf(
                                 'join_waiting_list:%s',
                                 $command->speakingClubId->toString()
                             ),
-                        ]
+                        ],
                     ],
                     [
                         [
-                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'text' => '<< Перейти к списку ближайших клубов',
                             'callback_data' => 'back_to_list',
-                        ]
+                        ],
                     ],
                 ]
             );
@@ -148,10 +148,10 @@ class SignInPlusOneCommandHandler
             replyMarkup: [
                 [
                     [
-                        'text'          => '<< Перейти к списку ваших клубов',
+                        'text' => '<< Перейти к списку ваших клубов',
                         'callback_data' => 'back_to_my_list',
                     ],
-                ]
+                ],
             ]
         );
 

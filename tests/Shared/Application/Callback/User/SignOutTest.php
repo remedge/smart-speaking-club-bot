@@ -62,9 +62,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'text' => '<< Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
 
@@ -83,9 +83,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к описанию клуба',
-                    'callback_data' => 'show_speaking_club:' . $speakingClub->getId()
-                ]
+                    'text' => 'Перейти к описанию клуба',
+                    'callback_data' => 'show_speaking_club:' . $speakingClub->getId(),
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -114,9 +114,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'text' => '<< Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -147,9 +147,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'text' => '<< Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }

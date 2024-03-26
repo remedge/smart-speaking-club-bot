@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Tests\DatabaseCachingUtils;
 use App\Tests\TestBootstrapHelper;
 use Symfony\Component\Dotenv\Dotenv;
-use Symfony\Component\Filesystem\Filesystem;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -53,7 +52,7 @@ passthru(
     ),
     $schemaValidateResult
 );
-if (0 !== $schemaValidateResult) {
+if ($schemaValidateResult !== 0) {
     passthru(
         sprintf(
             'php "%s/../bin/console" doctrine:schema:create --env=test',
@@ -61,4 +60,3 @@ if (0 !== $schemaValidateResult) {
         )
     );
 }
-

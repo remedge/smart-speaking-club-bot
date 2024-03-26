@@ -32,9 +32,9 @@ class AdminListBanTest extends BaseApplicationTest
             [
                 [
                     [
-                        'text'          => 'Забанить участника',
+                        'text' => 'Забанить участника',
                         'callback_data' => 'add_ban',
-                    ]
+                    ],
                 ],
             ],
             $message['replyMarkup']
@@ -73,31 +73,31 @@ class AdminListBanTest extends BaseApplicationTest
             [
                 [
                     [
-                        'text'          => sprintf(
+                        'text' => sprintf(
                             '%s %s (@%s) - Убрать',
                             $user1->getFirstName(),
                             $user1->getLastName(),
                             $user1->getUsername()
                         ),
                         'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_1),
-                    ]
+                    ],
                 ],
                 [
                     [
-                        'text'          => sprintf(
+                        'text' => sprintf(
                             '%s %s (@%s) - Убрать',
                             $user2->getFirstName(),
                             $user2->getLastName(),
                             $user2->getUsername()
                         ),
                         'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_2),
-                    ]
+                    ],
                 ],
                 [
                     [
-                        'text'          => 'Забанить участника',
+                        'text' => 'Забанить участника',
                         'callback_data' => 'add_ban',
-                    ]
+                    ],
                 ],
             ],
             $message['replyMarkup']

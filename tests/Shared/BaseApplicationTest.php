@@ -16,10 +16,12 @@ abstract class BaseApplicationTest extends WebTestCase
 {
     use TestCaseTrait;
 
-    const CHAT_ID = 111111;
-    const MESSAGE_ID = 123;
+    public const CHAT_ID = 111111;
+
+    public const MESSAGE_ID = 123;
 
     protected KernelBrowser $client;
+
     protected UuidProvider $uuidProvider;
 
     protected function setUp(): void
@@ -51,30 +53,30 @@ abstract class BaseApplicationTest extends WebTestCase
 
         $body = [
             'update_id' => 476767316,
-            'message'   => [
+            'message' => [
                 'message_id' => 111,
-                'from'       => [
-                    'id'            => $chatId,
-                    'is_bot'        => false,
-                    'first_name'    => $firstName,
-                    'last_name'     => $lastName,
-                    'username'      => $username,
+                'from' => [
+                    'id' => $chatId,
+                    'is_bot' => false,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'username' => $username,
                     'language_code' => 'ru',
                 ],
-                'chat'       => [
-                    'id'         => $chatId,
+                'chat' => [
+                    'id' => $chatId,
                     'first_name' => $firstName,
-                    'last_name'  => $lastName,
-                    'username'   => $username,
-                    'type'       => 'private',
+                    'last_name' => $lastName,
+                    'username' => $username,
+                    'type' => 'private',
                 ],
-                'date'       => 1680272755,
-                'text'       => sprintf('/%s', $commandName),
-                'entities'   => [
+                'date' => 1680272755,
+                'text' => sprintf('/%s', $commandName),
+                'entities' => [
                     [
                         'offset' => 0,
                         'length' => 6,
-                        'type'   => 'bot_command',
+                        'type' => 'bot_command',
                     ],
                 ],
             ],
@@ -105,41 +107,41 @@ abstract class BaseApplicationTest extends WebTestCase
         }
 
         $body = [
-            'update_id'      => 156705969,
+            'update_id' => 156705969,
             'callback_query' => [
-                'id'            => '4210226841674178',
-                'from'          => [
-                    'id'            => $chatId,
-                    'is_bot'        => false,
-                    'first_name'    => $firstName,
-                    'last_name'     => $lastName,
-                    'username'      => $username,
+                'id' => '4210226841674178',
+                'from' => [
+                    'id' => $chatId,
+                    'is_bot' => false,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'username' => $username,
                     'language_code' => 'ru',
-                    'is_premium'    => true,
+                    'is_premium' => true,
                 ],
-                'message'       => [
-                    'message_id'   => $messageId,
-                    'from'         => [
-                        'id'         => 5951631065,
-                        'is_bot'     => true,
+                'message' => [
+                    'message_id' => $messageId,
+                    'from' => [
+                        'id' => 5951631065,
+                        'is_bot' => true,
                         'first_name' => 'bot_first_name',
-                        'username'   => $username,
+                        'username' => $username,
                     ],
-                    'chat'         => [
-                        'id'         => $chatId,
+                    'chat' => [
+                        'id' => $chatId,
                         'first_name' => $firstName,
-                        'last_name'  => $lastName,
-                        'username'   => $username,
-                        'type'       => 'private',
+                        'last_name' => $lastName,
+                        'username' => $username,
+                        'type' => 'private',
                     ],
-                    'date'         => 1682265056,
-                    'edit_date'    => 1682265062,
-                    'text'         => 'initial_text',
+                    'date' => 1682265056,
+                    'edit_date' => 1682265062,
+                    'text' => 'initial_text',
                     'reply_markup' => [
                         'inline_keyboard' => [
                             [
                                 [
-                                    'text'          => 'initial_text',
+                                    'text' => 'initial_text',
                                     'callback_data' => $callbackData,
                                 ],
                             ],
@@ -147,7 +149,7 @@ abstract class BaseApplicationTest extends WebTestCase
                     ],
                 ],
                 'chat_instance' => '1357108034902232118',
-                'data'          => $callbackData,
+                'data' => $callbackData,
             ],
         ];
 

@@ -32,7 +32,7 @@ class ListWarningCommandHandler
                         $userWarning->username,
                     ),
                     'callback_data' => sprintf('remove_warning:%s', $userWarning->id->toString()),
-                ]
+                ],
             ];
         }
         $buttons[] = [[

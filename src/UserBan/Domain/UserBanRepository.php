@@ -15,10 +15,6 @@ interface UserBanRepository
 
     public function findById(UuidInterface $id): ?UserBan;
 
-    /**
-     * @param UuidInterface $userId
-     * @param DateTimeImmutable $now
-     */
     public function findByUserId(UuidInterface $userId, DateTimeImmutable $now): ?UserBan;
 
     /**

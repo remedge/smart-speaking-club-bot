@@ -32,7 +32,7 @@ class ListBanCommandHandler
                         $userBan->username,
                     ),
                     'callback_data' => sprintf('remove_ban:%s', $userBan->id->toString()),
-                ]
+                ],
             ];
         }
         $buttons[] = [[

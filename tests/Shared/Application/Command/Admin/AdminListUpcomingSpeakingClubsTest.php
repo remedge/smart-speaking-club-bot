@@ -46,25 +46,25 @@ class AdminListUpcomingSpeakingClubsTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => sprintf(
+                    'text' => sprintf(
                         '%s %s - %s',
                         $speakingClub1->getDate()->format('d.m'),
                         $speakingClub1->getDate()->format('H:i'),
                         $speakingClub1->getName()
                     ),
                     'callback_data' => 'admin_show_speaking_club:' . $speakingClub1->getId(),
-                ]
+                ],
             ],
             [
                 [
-                    'text'          => sprintf(
+                    'text' => sprintf(
                         '%s %s - %s',
                         $speakingClub2->getDate()->format('d.m'),
                         $speakingClub2->getDate()->format('H:i'),
                         $speakingClub2->getName()
                     ),
                     'callback_data' => 'admin_show_speaking_club:' . $speakingClub2->getId(),
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }

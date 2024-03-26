@@ -85,7 +85,7 @@ HEREDOC, $message['text']);
             messageId: 123,
             callbackData: 'remove_plus_one:00000000-0000-0000-0000-000000000001'
         );
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 

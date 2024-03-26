@@ -22,9 +22,9 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к списку ближайших клубов',
+                    'text' => 'Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -54,14 +54,14 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => sprintf(
+                    'text' => sprintf(
                         '%s %s - %s',
                         $speakingClub1->getDate()->format('d.m'),
                         $speakingClub1->getDate()->format('H:i'),
                         $speakingClub1->getName()
                     ),
                     'callback_data' => 'show_my_speaking_club:' . $speakingClub1->getId(),
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
