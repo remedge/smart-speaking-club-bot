@@ -45,9 +45,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к списку ваших клубов',
+                    'text' => 'Перейти к списку ваших клубов',
                     'callback_data' => 'back_to_my_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -76,9 +76,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'text' => '<< Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -110,9 +110,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к списку ближайших клубов',
+                    'text' => 'Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -150,9 +150,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к списку ближайших клубов',
+                    'text' => 'Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -192,9 +192,9 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к списку ваших клубов',
+                    'text' => 'Перейти к списку ваших клубов',
                     'callback_data' => 'back_to_my_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }

@@ -10,8 +10,10 @@ use App\UserBan\Domain\UserBanRepository;
 
 class UserBanQuery
 {
-    public function __construct(private UserBanRepository $userBanRepository, private Clock $clock)
-    {
+    public function __construct(
+        private UserBanRepository $userBanRepository,
+        private Clock $clock
+    ) {
     }
 
     /**
@@ -27,7 +29,7 @@ class UserBanQuery
                 username: $userBan['username'],
                 firstName: $userBan['firstName'],
                 lastName: $userBan['lastName'],
-                chatId: (int)$userBan['chatId'],
+                chatId: (int) $userBan['chatId'],
             );
         }
 

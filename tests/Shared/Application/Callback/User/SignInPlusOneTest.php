@@ -26,7 +26,7 @@ class SignInPlusOneTest extends BaseApplicationTest
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 
@@ -52,7 +52,7 @@ HEREDOC, $message['text']);
             messageId: 123,
             callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
         );
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 
@@ -88,7 +88,7 @@ HEREDOC, $message['text']);
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 
@@ -128,7 +128,7 @@ HEREDOC, $message['text']);
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 
@@ -142,7 +142,7 @@ HEREDOC, $message['text']);
         self::assertEquals([
             [[
                 'text' => 'Встать в лист ожидания',
-                'callback_data' => 'join_waiting_list:' . $speakingClub->getId()
+                'callback_data' => 'join_waiting_list:' . $speakingClub->getId(),
             ]],
             [[
                 'text' => '<< Перейти к списку ближайших клубов',

@@ -14,6 +14,7 @@ interface UserWarningRepository
     public function remove(UserWarning $userWarning): void;
 
     public function findById(UuidInterface $id): ?UserWarning;
+
     /**
      * @return array<UserWarning>|null
      */

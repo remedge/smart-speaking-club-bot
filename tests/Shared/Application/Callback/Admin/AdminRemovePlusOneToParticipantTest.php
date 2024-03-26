@@ -51,9 +51,9 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Вернуться к списку участников',
+                    'text' => '<< Вернуться к списку участников',
                     'callback_data' => 'show_participants:' . $speakingClub->getId(),
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
 
@@ -70,9 +70,9 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => 'Посмотреть информацию о клубе',
+                    'text' => 'Посмотреть информацию о клубе',
                     'callback_data' => 'show_speaking_club:' . $speakingClub->getId(),
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -88,9 +88,9 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Вернуться к списку клубов',
+                    'text' => '<< Вернуться к списку клубов',
                     'callback_data' => 'back_to_admin_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -106,9 +106,9 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Вернуться к списку клубов',
+                    'text' => '<< Вернуться к списку клубов',
                     'callback_data' => 'back_to_admin_list',
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }
@@ -131,9 +131,9 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
         self::assertEquals([
             [
                 [
-                    'text'          => '<< Вернуться к списку участников',
+                    'text' => '<< Вернуться к списку участников',
                     'callback_data' => 'show_participants:' . $speakingClub->getId(),
-                ]
+                ],
             ],
         ], $message['replyMarkup']);
     }

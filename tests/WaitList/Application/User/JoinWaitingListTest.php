@@ -28,7 +28,7 @@ class JoinWaitingListTest extends BaseApplicationTest
         ));
 
         $this->sendWebhookCallbackQuery(111111, 123, 'join_waiting_list:00000000-0000-0000-0000-000000000001');
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 
@@ -66,7 +66,7 @@ class JoinWaitingListTest extends BaseApplicationTest
         ));
 
         $this->sendWebhookCallbackQuery(111111, 123, 'join_waiting_list:00000000-0000-0000-0000-000000000001');
-        
+
         $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
         $messages = $this->getMessagesByChatId(self::CHAT_ID);
 

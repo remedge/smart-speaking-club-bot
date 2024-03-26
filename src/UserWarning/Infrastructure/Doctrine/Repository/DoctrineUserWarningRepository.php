@@ -47,6 +47,7 @@ class DoctrineUserWarningRepository extends ServiceEntityRepository implements U
             ->getQuery()
             ->getResult();
     }
+
     public function findUserUpcoming(UuidInterface $userId, DateTimeImmutable $now): array
     {
         return $this->createQueryBuilder('user_warning')

@@ -73,14 +73,12 @@ class AdminGenericTextCommandHandlerTest extends TestCase
             ->with([])
             ->willReturn([$user1, $user2]);
 
-
         $telegram = $this->createMock(TelegramInterface::class);
         $telegram
             ->expects(self::exactly(3))
             ->method('sendMessage')
             ->with(
-                ...
-                WithConsecutive::create(
+                ...WithConsecutive::create(
                     [$user1ChatId, $text, []],
                     [$user2ChatId, $text, []],
                     [
@@ -89,11 +87,11 @@ class AdminGenericTextCommandHandlerTest extends TestCase
                         [
                             [
                                 [
-                                    'text'          => 'Перейти к списку ближайших клубов',
+                                    'text' => 'Перейти к списку ближайших клубов',
                                     'callback_data' => 'back_to_admin_list',
                                 ],
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                 )
             );
@@ -115,16 +113,27 @@ class AdminGenericTextCommandHandlerTest extends TestCase
         MockObject $userBanRepository = null,
         MockObject $userWarningRepository = null,
     ): AdminGenericTextCommandHandler {
+        /** @var UserRepository $userRepository */
         $userRepository = $userRepository ?? $this->createMock(UserRepository::class);
+        /** @var SpeakingClubRepository $speakingClubRepository */
         $speakingClubRepository = $speakingClubRepository ?? $this->createMock(SpeakingClubRepository::class);
+        /** @var TelegramInterface $telegram */
         $telegram = $telegram ?? $this->createMock(TelegramInterface::class);
+        /** @var UuidProvider $uuidProvider */
         $uuidProvider = $uuidProvider ?? $this->createMock(UuidProvider::class);
+        /** @var ParticipationRepository $participationRepository */
         $participationRepository = $participationRepository ?? $this->createMock(ParticipationRepository::class);
+        /** @var Clock $clock */
         $clock = $clock ?? $this->createMock(Clock::class);
-        $eventDispatcherInterface = $eventDispatcher ?? $this->createMock(EventDispatcherInterface::class);
+        /** @var EventDispatcherInterface $eventDispatcher */
+        $eventDispatcherInterface = $this->createMock(EventDispatcherInterface::class);
+        /** @var UserRolesProvider $userRolesProvider */
         $userRolesProvider = $userRolesProvider ?? $this->createMock(UserRolesProvider::class);
+        /** @var WaitingUserRepository $waitingUserRepository */
         $waitingUserRepository = $waitingUserRepository ?? $this->createMock(WaitingUserRepository::class);
+        /** @var UserBanRepository $userBanRepository */
         $userBanRepository = $userBanRepository ?? $this->createMock(UserBanRepository::class);
+        /** @var UserWarningRepository $userWarningRepository */
         $userWarningRepository = $userWarningRepository ?? $this->createMock(UserWarningRepository::class);
         $loggerInterface = $this->createMock(LoggerInterface::class);
 
