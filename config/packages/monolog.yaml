@@ -66,6 +66,12 @@ when@prod:
                 level: info
                 channels: [ "!event", "!deprecation" ]
                 max_files: 5
+            application:
+                type: rotating_file
+                path: "%kernel.logs_dir%/%kernel.environment%.application-log"
+                level: info
+                channels: [ "application" ]
+                max_files: 5
             nested:
                 type: stream
                 path: php://stderr
