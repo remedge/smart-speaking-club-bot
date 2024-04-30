@@ -298,15 +298,16 @@ class AdminGenericTextCommandHandler
                 ],
             );
 
-            $this->logger->info(
-                'The speaking club has been changed.',
-                [
+            $log = [
+                'context' => print_r([
                     'admin_user_name' => $user->getUsername(),
                     'admin_chat_id'   => $command->chatId,
                     'old_data'        => $oldData,
                     'new_data'        => array_merge($data, ['date' => $command->text])
-                ]
-            );
+                ], true)
+            ];
+
+            $this->logger->info('The speaking club has been changed.', $log);
 
             return;
         }

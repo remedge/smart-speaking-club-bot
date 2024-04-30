@@ -134,6 +134,9 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->expects(self::once())
             ->method('setActualSpeakingClubData')
             ->with([]);
+        $adminUser
+            ->method('getUsername')
+            ->willReturn('@admin_user_name');
 
         $userRepository = $this->createMock(UserRepository::class);
         $userRepository
@@ -180,16 +183,20 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->willReturn($speakingClub);
 
         $newClubData['date'] = $text;
+
+        $log = [
+            'context' => print_r([
+                'admin_user_name' => $adminUser->getUsername(),
+                'admin_chat_id'   => $command->chatId,
+                'old_data'        => $oldClubData,
+                'new_data'        => $newClubData,
+            ], true)
+        ];
         $logger = $this->createMock(LoggerInterface::class);
         $logger
             ->expects(self::once())
             ->method('info')
-            ->with('The speaking club has been changed.', [
-                'admin_user_name' => $adminUser->getUsername(),
-                'admin_chat_id'   => $command->chatId,
-                'old_data' => $oldClubData,
-                'new_data' => $newClubData,
-            ]);
+            ->with('The speaking club has been changed.', $log);
 
         $telegram = $this->createMock(TelegramInterface::class);
         $telegram
