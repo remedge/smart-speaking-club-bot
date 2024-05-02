@@ -83,3 +83,8 @@ services:
         arguments:
             $spreadsheetId: '%env(CANCELED_CLUBS_SPREADSHEET_ID)%'
             $range: '%env(CANCELED_CLUBS_SPREADSHEET_RANGE)%'
+
+    # Logs
+    App\Shared\Application\Command\GenericText\AdminGenericTextCommandHandler:
+        arguments:
+            $logger: '@monolog.logger.application'

@@ -256,6 +256,14 @@ class AdminGenericTextCommandHandler
                 $this->telegram->sendMessage($command->chatId, 'Редактируемый Клуб не найден');
                 return;
             }
+            $oldData = [
+                'id'                     => $speakingClub->getId()->toString(),
+                'name'                   => $speakingClub->getName(),
+                'description'            => $speakingClub->getDescription(),
+                'min_participants_count' => $speakingClub->getMinParticipantsCount(),
+                'max_participants_count' => $speakingClub->getMaxParticipantsCount(),
+                'date'                   => $speakingClub->getDate()->format('d.m.Y H:i'),
+            ];
             $speakingClub->setName($data['name']);
             $speakingClub->setDescription($data['description']);
             $speakingClub->setMinParticipantsCount((int)$data['min_participants_count']);
@@ -289,6 +297,17 @@ class AdminGenericTextCommandHandler
                     ]
                 ],
             );
+
+            $this->logger->info(
+                'The speaking club has been changed.',
+                [
+                    'admin_user_name' => $user->getUsername(),
+                    'admin_chat_id'   => $command->chatId,
+                    'old_data'        => $oldData,
+                    'new_data'        => array_merge($data, ['date' => $command->text])
+                ]
+            );
+
             return;
         }
 
