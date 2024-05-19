@@ -36,11 +36,11 @@ class LeaveWaitingListTest extends BaseApplicationTest
 
         $this->sendWebhookCallbackQuery(111111, 123, 'leave_waiting_list:00000000-0000-0000-0000-000000000001');
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals('👌 Вы успешно вышли из списке ожидания', $message['text']);
         self::assertEquals([
@@ -66,11 +66,11 @@ class LeaveWaitingListTest extends BaseApplicationTest
 
         $this->sendWebhookCallbackQuery(111111, 123, 'leave_waiting_list:00000000-0000-0000-0000-000000000001');
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals('🤔 Вы не находитесь в списке ожидания этого клуба', $message['text']);
         self::assertEquals([

@@ -27,11 +27,11 @@ class SignInPlusOneTest extends BaseApplicationTest
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 👌 Вы успешно записаны на клуб c +1 человеком
@@ -53,11 +53,11 @@ HEREDOC, $message['text']);
             callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Такой клуб не найден
@@ -89,11 +89,11 @@ HEREDOC, $message['text']);
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Вы уже записаны на этот разговорный клуб
@@ -129,11 +129,11 @@ HEREDOC, $message['text']);
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 😔 К сожалению, все свободные места на данный клуб заняты
@@ -161,18 +161,18 @@ HEREDOC, $message['text']);
         $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
 
         $this->sendWebhookCallbackQuery(
-            chatId: self::CHAT_ID,
+            chatId: self::KYLE_REESE_CHAT_ID,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
 
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertStringContainsString(
             sprintf(
@@ -202,18 +202,18 @@ HEREDOC, $message['text']);
         );
 
         $this->sendWebhookCallbackQuery(
-            chatId: self::CHAT_ID,
+            chatId: self::KYLE_REESE_CHAT_ID,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
 
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertStringContainsString(
             sprintf(

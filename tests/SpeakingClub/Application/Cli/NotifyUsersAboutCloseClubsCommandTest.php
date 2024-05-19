@@ -79,8 +79,8 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 
         self::assertEquals(Command::SUCCESS, $result);
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         self::assertEquals(
             'Разговорный клуб "Test club 1" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',

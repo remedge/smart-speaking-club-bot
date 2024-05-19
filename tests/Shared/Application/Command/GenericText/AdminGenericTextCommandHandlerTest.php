@@ -105,6 +105,78 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
         $handler->__invoke($command);
     }
 
+    public function testReceivingUsernameToBlock(): void
+    {
+        $adminChatId = 123;
+        $text = 'someUserName';
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_USERNAME_TO_BLOCK);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::IDLE);
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+
+        $user1ChatId = 111;
+        $user1 = $this->createMock(User::class);
+        $user1
+            ->method('getChatId')
+            ->willReturn(
+                $user1ChatId
+            );
+        $user2ChatId = 222;
+        $user2 = $this->createMock(User::class);
+        $user2
+            ->method('getChatId')
+            ->willReturn($user2ChatId);
+        $userRepository
+            ->method('findAllExceptUsernames')
+            ->with([])
+            ->willReturn([$user1, $user2]);
+
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::exactly(3))
+            ->method('sendMessage')
+            ->with(
+                ...
+                WithConsecutive::create(
+                    [$user1ChatId, $text, []],
+                    [$user2ChatId, $text, []],
+                    [
+                        $adminChatId,
+                        '✅ Сообщение успешно отправлено всем пользователям',
+                        [
+                            [
+                                [
+                                    'text'          => 'Перейти к списку ближайших клубов',
+                                    'callback_data' => 'back_to_admin_list',
+                                ],
+                            ]
+                        ]
+                    ],
+                )
+            );
+
+        $handler = $this->getHandler(userRepository: $userRepository, telegram: $telegram);
+        $handler->__invoke($command);
+    }
+
     public function testReceivingDateForEditing(): void
     {
         $adminChatId = 123;

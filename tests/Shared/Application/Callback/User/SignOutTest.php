@@ -46,11 +46,11 @@ class SignOutTest extends BaseApplicationTest
 
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -98,11 +98,11 @@ HEREDOC,
             callbackData: 'sign_out:00000000-0000-0000-0000-000000000001'
         );
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -131,11 +131,11 @@ HEREDOC,
             callbackData: 'sign_out:' . $speakingClub->getId()
         );
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
+        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC

@@ -16,7 +16,7 @@ abstract class BaseApplicationTest extends WebTestCase
 {
     use TestCaseTrait;
 
-    const CHAT_ID = 111111;
+    public const KYLE_REESE_CHAT_ID = 111111;
     const MESSAGE_ID = 123;
 
     protected KernelBrowser $client;
@@ -39,7 +39,7 @@ abstract class BaseApplicationTest extends WebTestCase
     {
         MockTelegram::$messages = [];
 
-        if ($chatId === 666666) {
+        if ($chatId === self::KYLE_REESE_CHAT_ID) {
             $firstName = 'Kyle';
             $lastName = 'Reese';
             $username = 'kyle_reese';

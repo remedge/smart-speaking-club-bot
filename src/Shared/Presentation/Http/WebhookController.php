@@ -17,6 +17,7 @@ use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\Skip\SkipCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
 use App\User\Application\Command\User\UserGenericTextCommand;
+use App\UserBan\Application\Command\BlockUser\BlockUserCommand;
 use App\UserBan\Application\Command\ListBan\ListBanCommand;
 use App\UserWarning\Application\Command\ListWarning\ListWarningCommand;
 use Exception;
@@ -100,12 +101,14 @@ class WebhookController
             return new Response();
         }
 
-        $this->commandBus->dispatch(new CreateUserIfNotExistCommand(
-            chatId: $chatId,
-            firstName: $firstName,
-            lastName: $lastName,
-            userName: $username,
-        ));
+        $this->commandBus->dispatch(
+            new CreateUserIfNotExistCommand(
+                chatId: $chatId,
+                firstName: $firstName,
+                lastName: $lastName,
+                userName: $username,
+            )
+        );
 
         # main commands
         if ($text === '/start') {
@@ -134,23 +137,26 @@ class WebhookController
             };
 
             return new Response();
-        } else {
-            match ($text) {
-                AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new AdminListUpcomingSpeakingClubsCommand($chatId)
-                ),
-                InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new InitClubCreationCommand($chatId)
-                ),
-                ListBanCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new ListBanCommand($chatId)
-                ),
-                ListWarningCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new ListWarningCommand($chatId)
-                ),
-                default => $this->commandBus->dispatch(new AdminGenericTextCommand($chatId, $text)),
-            };
         }
+
+        match ($text) {
+            AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new AdminListUpcomingSpeakingClubsCommand($chatId)
+            ),
+            InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new InitClubCreationCommand($chatId)
+            ),
+            ListBanCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new ListBanCommand($chatId)
+            ),
+            ListWarningCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new ListWarningCommand($chatId)
+            ),
+            BlockUserCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new BlockUserCommand($chatId)
+            ),
+            default => $this->commandBus->dispatch(new AdminGenericTextCommand($chatId, $text)),
+        };
 
         return new Response();
     }
