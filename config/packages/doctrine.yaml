@@ -39,6 +39,10 @@ doctrine:
                 type: php
                 dir: "%kernel.project_dir%/src/UserWarning/Infrastructure/Doctrine/Mapping"
                 prefix: App\UserWarning\Domain\UserWarning
+            App\BlockedUser\Domain\BlockedUser:
+                type: php
+                dir: "%kernel.project_dir%/src/BlockedUser/Infrastructure/Doctrine/Mapping"
+                prefix: App\BlockedUser\Domain\BlockedUser
 
 when@test:
     doctrine:

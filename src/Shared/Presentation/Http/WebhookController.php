@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Presentation\Http;
 
+use App\BlockedUser\Application\Command\BlockUser\BlockUserCommand;
 use App\Shared\Application\CallbackResolver;
 use App\Shared\Application\Command\GenericText\AdminGenericTextCommand;
 use App\Shared\Application\Command\Help\HelpCommand;
@@ -17,7 +18,6 @@ use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
 use App\User\Application\Command\Admin\Skip\SkipCommand;
 use App\User\Application\Command\CreateUserIfNotExist\CreateUserIfNotExistCommand;
 use App\User\Application\Command\User\UserGenericTextCommand;
-use App\UserBan\Application\Command\BlockUser\BlockUserCommand;
 use App\UserBan\Application\Command\ListBan\ListBanCommand;
 use App\UserWarning\Application\Command\ListWarning\ListWarningCommand;
 use Exception;

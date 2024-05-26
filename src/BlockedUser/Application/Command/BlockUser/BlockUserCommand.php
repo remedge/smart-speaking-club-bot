@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\UserBan\Application\Command\BlockUser;
+namespace App\BlockedUser\Application\Command\BlockUser;
 
 class BlockUserCommand
 {

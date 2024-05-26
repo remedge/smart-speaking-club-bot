@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\UserBan\Application\Command\BlockUser;
+namespace App\BlockedUser\Application\Command\BlockUser;
 
 use App\Shared\Domain\TelegramInterface;
 use App\User\Domain\UserRepository;

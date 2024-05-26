@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Command\Help;
 
+use App\BlockedUser\Application\Command\BlockUser\BlockUserCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\User\Application\Command\Admin\InitClubCreation\InitClubCreationCommand;
-use App\UserBan\Application\Command\BlockUser\BlockUserCommand;
 use App\UserBan\Application\Command\ListBan\ListBanCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
