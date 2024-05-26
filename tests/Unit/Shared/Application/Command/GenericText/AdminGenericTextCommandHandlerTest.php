@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Shared\Application\Command\GenericText;
+namespace App\Tests\Unit\Shared\Application\Command\GenericText;
 
+use App\BlockedUser\Domain\BlockedUser;
+use App\BlockedUser\Domain\BlockedUserRepository;
 use App\Shared\Application\Clock;
 use App\Shared\Application\Command\GenericText\AdminGenericTextCommand;
-use App\Shared\Application\Command\GenericText\AdminGenericTextCommandHandler;
 use App\Shared\Application\UuidProvider;
 use App\Shared\Domain\TelegramInterface;
-use App\Shared\Domain\UserRolesProvider;
-use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
@@ -18,14 +17,10 @@ use App\Tests\WithConsecutive;
 use App\User\Domain\User;
 use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
-use App\UserBan\Domain\UserBanRepository;
-use App\UserWarning\Domain\UserWarningRepository;
-use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
-use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Ramsey\Uuid\UuidInterface;
 
 class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
 {
@@ -101,7 +96,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
                 )
             );
 
-        $handler = $this->getHandler(userRepository: $userRepository, telegram: $telegram);
+        $handler = $this->getAdminGenericTextCommandHandler(userRepository: $userRepository, telegram: $telegram);
         $handler->__invoke($command);
     }
 
@@ -120,6 +115,13 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->expects(self::once())
             ->method('setState')
             ->with(UserStateEnum::IDLE);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with([]);
+        $adminUser
+            ->method('getChatId')
+            ->willReturn($adminChatId);
 
         $userRepository = $this->createMock(UserRepository::class);
         $userRepository
@@ -131,49 +133,51 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->method('save')
             ->with($adminUser);
 
-        $user1ChatId = 111;
-        $user1 = $this->createMock(User::class);
-        $user1
-            ->method('getChatId')
-            ->willReturn(
-                $user1ChatId
-            );
-        $user2ChatId = 222;
-        $user2 = $this->createMock(User::class);
-        $user2
-            ->method('getChatId')
-            ->willReturn($user2ChatId);
-        $userRepository
-            ->method('findAllExceptUsernames')
-            ->with([])
-            ->willReturn([$user1, $user2]);
+        $userToBlockUuid = $this->createMock(UuidInterface::class);
+        $blockedUserUuid = $this->createMock(UuidInterface::class);
 
+        $uuidProvider = $this->createMock(UuidProvider::class);
+        $uuidProvider
+            ->method('provide')
+            ->willReturn($blockedUserUuid);
+
+        $userToBlock = $this->createMock(User::class);
+        $userToBlock
+            ->method('getId')
+            ->willReturn($userToBlockUuid);
+
+        $userRepository
+            ->method('findByUsername')
+            ->with($text)
+            ->willReturn($userToBlock);
+
+        $clock = $this->getContainer()->get(Clock::class);
+
+        $blockedUser = new BlockedUser(
+            id: $userToBlockUuid,
+            userId: $userToBlockUuid,
+            createdAt: $clock->now(),
+        );
+        $blockedUserRepository = $this->createMock(BlockedUserRepository::class);
+        $blockedUserRepository
+            ->method('save')
+            ->with($blockedUser);
 
         $telegram = $this->createMock(TelegramInterface::class);
         $telegram
-            ->expects(self::exactly(3))
+            ->expects(self::once())
             ->method('sendMessage')
             ->with(
-                ...
-                WithConsecutive::create(
-                    [$user1ChatId, $text, []],
-                    [$user2ChatId, $text, []],
-                    [
-                        $adminChatId,
-                        '✅ Сообщение успешно отправлено всем пользователям',
-                        [
-                            [
-                                [
-                                    'text'          => 'Перейти к списку ближайших клубов',
-                                    'callback_data' => 'back_to_admin_list',
-                                ],
-                            ]
-                        ]
-                    ],
-                )
+                $adminChatId,
+                'Пользователь успешно заблокирован'
             );
 
-        $handler = $this->getHandler(userRepository: $userRepository, telegram: $telegram);
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+            uuidProvider: $uuidProvider,
+            blockedUserRepository: $blockedUserRepository
+        );
         $handler->__invoke($command);
     }
 
@@ -262,8 +266,8 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->with('The speaking club has been changed.', [
                 'admin_user_name' => $adminUser->getUsername(),
                 'admin_chat_id'   => $command->chatId,
-                'old_data' => $oldClubData,
-                'new_data' => $newClubData,
+                'old_data'        => $oldClubData,
+                'new_data'        => $newClubData,
             ]);
 
         $telegram = $this->createMock(TelegramInterface::class);
@@ -272,54 +276,12 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->method('sendMessage')
             ->with($adminChatId, 'Клуб успешно изменен');
 
-        $handler = $this->getHandler(
+        $handler = $this->getAdminGenericTextCommandHandler(
             userRepository: $userRepository,
             speakingClubRepository: $speakingClubRepository,
             telegram: $telegram,
             logger: $logger
         );
         $handler->__invoke($command);
-    }
-
-    private function getHandler(
-        MockObject $userRepository = null,
-        MockObject $speakingClubRepository = null,
-        MockObject $telegram = null,
-        MockObject $uuidProvider = null,
-        MockObject $participationRepository = null,
-        MockObject $eventDispatcher = null,
-        MockObject $userRolesProvider = null,
-        MockObject $waitingUserRepository = null,
-        MockObject $userBanRepository = null,
-        MockObject $userWarningRepository = null,
-        MockObject $logger = null,
-    ): AdminGenericTextCommandHandler {
-        $userRepository = $userRepository ?? $this->createMock(UserRepository::class);
-        $speakingClubRepository = $speakingClubRepository ?? $this->createMock(SpeakingClubRepository::class);
-        $telegram = $telegram ?? $this->createMock(TelegramInterface::class);
-        $uuidProvider = $uuidProvider ?? $this->createMock(UuidProvider::class);
-        $participationRepository = $participationRepository ?? $this->createMock(ParticipationRepository::class);
-        $clock = $this->getContainer()->get(Clock::class);
-        $eventDispatcherInterface = $eventDispatcher ?? $this->createMock(EventDispatcherInterface::class);
-        $userRolesProvider = $userRolesProvider ?? $this->createMock(UserRolesProvider::class);
-        $waitingUserRepository = $waitingUserRepository ?? $this->createMock(WaitingUserRepository::class);
-        $userBanRepository = $userBanRepository ?? $this->createMock(UserBanRepository::class);
-        $userWarningRepository = $userWarningRepository ?? $this->createMock(UserWarningRepository::class);
-        $logger = $logger ?? $this->createMock(LoggerInterface::class);
-
-        return new AdminGenericTextCommandHandler(
-            $userRepository,
-            $speakingClubRepository,
-            $telegram,
-            $uuidProvider,
-            $participationRepository,
-            $clock,
-            $eventDispatcherInterface,
-            $userRolesProvider,
-            $waitingUserRepository,
-            $userBanRepository,
-            $userWarningRepository,
-            $logger
-        );
     }
 }

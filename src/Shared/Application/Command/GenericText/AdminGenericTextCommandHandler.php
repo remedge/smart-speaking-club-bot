@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Command\GenericText;
 
+use App\BlockedUser\Domain\BlockedUser;
+use App\BlockedUser\Domain\BlockedUserRepository;
 use App\Shared\Application\Clock;
 use App\Shared\Application\UuidProvider;
 use App\Shared\Domain\TelegramInterface;
@@ -43,6 +45,7 @@ class AdminGenericTextCommandHandler
         private WaitingUserRepository $waitingUserRepository,
         private UserBanRepository $userBanRepository,
         private UserWarningRepository $userWarningRepository,
+        private BlockedUserRepository $blockedUserRepository,
         private LoggerInterface $logger
     ) {
     }
@@ -748,6 +751,54 @@ class AdminGenericTextCommandHandler
                     $speakingClub->getDate()->format('d.m.Y H:i'),
                 ),
             );*/
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_USERNAME_TO_BLOCK) {
+            $userToBlock = $this->userRepository->findByUsername($command->text);
+
+            if ($userToBlock === null) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Такого пользователя нет в базе бота',
+                );
+                return;
+            }
+
+            if ($this->userRolesProvider->isUserAdmin($userToBlock->getUsername())) {
+                $user->setState(UserStateEnum::IDLE);
+                $user->setActualSpeakingClubData([]);
+                $this->userRepository->save($user);
+
+                $this->telegram->sendMessage(
+                    chatId: $command->chatId,
+                    text: 'Нельзя заблокировать администратора',
+                );
+                return;
+            }
+
+            $this->blockedUserRepository->save(
+                new BlockedUser(
+                    id: $this->uuidProvider->provide(),
+                    userId: $userToBlock->getId(),
+                    createdAt: $this->clock->now(),
+                )
+            );
+
+            $user->setState(UserStateEnum::IDLE);
+            $user->setActualSpeakingClubData([]);
+            $this->userRepository->save($user);
+
+            // Notify admin
+            $this->telegram->sendMessage(
+                chatId: $user->getChatId(),
+                text: 'Пользователь успешно заблокирован',
+            );
+
             return;
         }
 
