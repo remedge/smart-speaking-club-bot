@@ -19,7 +19,7 @@ class AddPlusOneTest extends BaseApplicationTest
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(
@@ -29,11 +29,11 @@ class AddPlusOneTest extends BaseApplicationTest
         );
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -60,11 +60,11 @@ HEREDOC,
             callbackData: 'add_plus_one:00000000-0000-0000-0000-000000000001'
         );
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -94,11 +94,11 @@ HEREDOC,
         );
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -123,7 +123,7 @@ HEREDOC,
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1,
+            UserFixtures::USER_ID_JOHN_CONNNOR,
             true
         );
 
@@ -134,11 +134,11 @@ HEREDOC,
         );
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -166,7 +166,7 @@ HEREDOC,
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(
@@ -176,11 +176,11 @@ HEREDOC,
         );
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC

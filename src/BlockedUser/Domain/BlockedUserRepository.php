@@ -14,6 +14,7 @@ interface BlockedUserRepository
     public function remove(BlockedUser $blockedUser): void;
 
     public function findById(UuidInterface $id): ?BlockedUser;
+    public function findByUserName(string $username): ?BlockedUser;
 
     /**
      * @param UuidInterface $userId

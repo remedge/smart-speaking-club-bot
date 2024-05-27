@@ -42,7 +42,7 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
         );
         $this->createParticipation(
             $speakingClub1->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $speakingClub2 = $this->createSpeakingClub(
@@ -51,7 +51,7 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
         );
         $this->createParticipation(
             $speakingClub2->getId(),
-            UserFixtures::USER_ID_2
+            UserFixtures::USER_ID_SARAH_CONNOR
         );
 
         $this->createSpeakingClub(
@@ -79,8 +79,8 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 
         self::assertEquals(Command::SUCCESS, $result);
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         self::assertEquals(
             'Разговорный клуб "Test club 1" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',

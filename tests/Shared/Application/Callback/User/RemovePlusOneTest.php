@@ -22,7 +22,7 @@ class RemovePlusOneTest extends BaseApplicationTest
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
         $participation = $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1,
+            UserFixtures::USER_ID_JOHN_CONNNOR,
             true
         );
 
@@ -30,7 +30,7 @@ class RemovePlusOneTest extends BaseApplicationTest
         $waitlistRepository = self::getContainer()->get(WaitingUserRepository::class);
         $waitlistRepository->save(new WaitingUser(
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_2),
+            userId: Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
             speakingClubId: $speakingClub->getId(),
         ));
 
@@ -41,11 +41,11 @@ class RemovePlusOneTest extends BaseApplicationTest
         );
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 👌Вы успешно убрали +1 человека с собой
@@ -86,11 +86,11 @@ HEREDOC, $message['text']);
             callbackData: 'remove_plus_one:00000000-0000-0000-0000-000000000001'
         );
         
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Разговорный клуб не найден
@@ -115,11 +115,11 @@ HEREDOC, $message['text']);
         );
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Вы не записаны на этот клуб
@@ -142,7 +142,7 @@ HEREDOC, $message['text']);
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(
@@ -152,11 +152,11 @@ HEREDOC, $message['text']);
         );
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Вы не добавляли +1 с собой на этот клуб

@@ -16,9 +16,12 @@ use App\Tests\Mock\MockTelegram;
 use App\Tests\Mock\MockUuidProvider;
 use App\Tests\TestCaseTrait;
 use App\User\Domain\UserRepository;
+use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\UserBan\Domain\UserBanRepository;
 use App\UserWarning\Domain\UserWarningRepository;
 use App\WaitList\Domain\WaitingUserRepository;
+use JsonException;
+use Longman\TelegramBot\Entities\Chat;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -29,7 +32,6 @@ abstract class BaseApplicationTest extends WebTestCase
 {
     use TestCaseTrait;
 
-    public const KYLE_REESE_CHAT_ID = 111111;
     const MESSAGE_ID = 123;
 
     protected KernelBrowser $client;
@@ -48,18 +50,33 @@ abstract class BaseApplicationTest extends WebTestCase
         $clock->setNow(date('Y-m-d H:i:s'));
     }
 
+    /**
+     * @throws JsonException
+     */
     protected function sendWebhookCommand(int $chatId, string $commandName): void
     {
         MockTelegram::$messages = [];
 
-        if ($chatId === self::KYLE_REESE_CHAT_ID) {
-            $firstName = 'Kyle';
-            $lastName = 'Reese';
-            $username = 'kyle_reese';
-        } else {
-            $firstName = 'John';
-            $lastName = 'Connor';
-            $username = 'john_connor';
+        switch ($chatId) {
+            case UserFixtures::ADMIN_CHAT_ID:
+                $firstName = 'Kyle';
+                $lastName = 'Reese';
+                $username = 'kyle_reese';
+                break;
+            case UserFixtures::USER_CHAT_ID_JOHN_CONNNOR:
+                $firstName = 'John';
+                $lastName = 'Connor';
+                $username = 'john_connor';
+                break;
+            case UserFixtures::USER_CHAT_ID_SARAH_CONNOR:
+                $firstName = 'Sarah';
+                $lastName = 'Connor';
+                $username = 'sarah_connor';
+                break;
+            default:
+                $firstName = 'Some';
+                $lastName = 'Name';
+                $username = 'some_name';
         }
 
         $body = [
@@ -99,7 +116,7 @@ abstract class BaseApplicationTest extends WebTestCase
             server: [
                 'CONTENT_TYPE' => 'application/json',
             ],
-            content: json_encode($body),
+            content: json_encode($body, JSON_THROW_ON_ERROR),
         );
     }
 

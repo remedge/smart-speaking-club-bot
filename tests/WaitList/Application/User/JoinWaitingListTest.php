@@ -7,6 +7,7 @@ namespace App\Tests\WaitList\Application\User;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
+use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
 use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
@@ -29,11 +30,11 @@ class JoinWaitingListTest extends BaseApplicationTest
 
         $this->sendWebhookCallbackQuery(111111, 123, 'join_waiting_list:00000000-0000-0000-0000-000000000001');
         
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals('Вы успешно добавлены в список ожидания, я сообщу вам, когда появится свободное место', $message['text']);
         self::assertEquals([
@@ -67,11 +68,11 @@ class JoinWaitingListTest extends BaseApplicationTest
 
         $this->sendWebhookCallbackQuery(111111, 123, 'join_waiting_list:00000000-0000-0000-0000-000000000001');
         
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals('Вы уже находитесь в списке ожидания', $message['text']);
         self::assertEquals([

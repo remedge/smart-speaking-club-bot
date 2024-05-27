@@ -39,11 +39,11 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
 
         $this->createParticipation(
             $speakingClub1->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
         $this->createParticipation(
             $speakingClub2->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCommand(111111, 'my_upcoming_clubs');

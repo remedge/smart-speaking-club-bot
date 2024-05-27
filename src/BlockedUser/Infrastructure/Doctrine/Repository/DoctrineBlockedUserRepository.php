@@ -6,6 +6,7 @@ namespace App\BlockedUser\Infrastructure\Doctrine\Repository;
 
 use App\BlockedUser\Domain\BlockedUser;
 use App\BlockedUser\Domain\BlockedUserRepository;
+use App\User\Domain\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -36,6 +37,16 @@ class DoctrineBlockedUserRepository extends ServiceEntityRepository implements B
     public function findById(UuidInterface $id): ?BlockedUser
     {
         return $this->find($id);
+    }
+
+    public function findByUsername(string $username): ?BlockedUser
+    {
+        $result = $this->createQueryBuilder('bu')
+            ->join(User::class, 'u', 'WITH', 'bu.userId = u.id')
+            ->getQuery()
+            ->getResult();
+
+        return current($result) ?: null;
     }
 
     public function findByUserId(UuidInterface $userId, DateTimeImmutable $now): ?BlockedUser

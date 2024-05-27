@@ -20,11 +20,11 @@ class ShowSpeakingClubTest extends BaseApplicationTest
         $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:' . $speakingClub->getId());
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             sprintf(
@@ -75,17 +75,17 @@ class ShowSpeakingClubTest extends BaseApplicationTest
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:' . $speakingClub->getId());
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             sprintf(
@@ -136,17 +136,17 @@ class ShowSpeakingClubTest extends BaseApplicationTest
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1,
+            UserFixtures::USER_ID_JOHN_CONNNOR,
             true
         );
 
         $this->sendWebhookCallbackQuery(111111, 123, 'show_speaking_club:' . $speakingClub->getId());
 
-        $this->assertArrayHasKey(self::KYLE_REESE_CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::KYLE_REESE_CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::KYLE_REESE_CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             sprintf(

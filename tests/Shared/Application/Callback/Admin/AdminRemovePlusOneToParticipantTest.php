@@ -23,7 +23,7 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
 
         $participation = $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1,
+            UserFixtures::USER_ID_JOHN_CONNNOR,
             true
         );
 
@@ -32,7 +32,7 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
         $waitingUserRepository->save(
             new WaitingUser(
                 id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                userId: Uuid::fromString(UserFixtures::USER_ID_2),
+                userId: Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
                 speakingClubId: $speakingClub->getId(),
             )
         );
@@ -119,7 +119,7 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
 
         $participation = $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(666666, 123, 'admin_remove_plus_one:' . $participation->getId());

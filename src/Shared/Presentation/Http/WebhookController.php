@@ -11,6 +11,7 @@ use App\Shared\Application\Command\Help\HelpCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
 use App\Shared\Domain\UserRolesProvider;
+use App\Shared\Domain\UserStatusChecker;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
@@ -34,6 +35,7 @@ class WebhookController
         private TelegramInterface $telegram,
         private UserRolesProvider $userRolesProvider,
         private CallbackResolver $callbackResolver,
+        private UserStatusChecker $userStatusChecker,
     ) {
     }
 
@@ -87,6 +89,14 @@ class WebhookController
         }
 
         $isAdmin = $this->userRolesProvider->isUserAdmin($username);
+        if (!$isAdmin && $this->userStatusChecker->checkIsBlocked($username)) {
+            $this->telegram->sendMessage(
+                $chatId,
+                'Вы были заблокированы.',
+            );
+            return new Response();
+        }
+
         $this->telegram->setCommandsMenu();
 
         if ($this->telegram->isCallbackQuery() === true) {
