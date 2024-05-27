@@ -25,7 +25,7 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
 
         $participation = $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(666666, 123, 'admin_add_plus_one:' . $participation->getId());
@@ -168,7 +168,7 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
 
         $participation = $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1,
+            UserFixtures::USER_ID_JOHN_CONNNOR,
             true
         );
 

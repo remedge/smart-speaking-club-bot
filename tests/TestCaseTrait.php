@@ -2,6 +2,8 @@
 
 namespace App\Tests;
 
+use App\BlockedUser\Domain\BlockedUser;
+use App\BlockedUser\Domain\BlockedUserRepository;
 use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
@@ -79,5 +81,20 @@ trait TestCaseTrait
         $userBanRepository->save($userBan);
 
         return $userBan;
+    }
+
+    protected function createBlockedUser(UuidInterface $userId): BlockedUser
+    {
+        $blockedUser = new BlockedUser(
+            id: $this->uuidProvider->provide(),
+            userId: $userId,
+            createdAt: new DateTimeImmutable()
+        );
+
+        /** @var BlockedUserRepository $blockedUserRepository */
+        $blockedUserRepository = self::getContainer()->get(BlockedUserRepository::class);
+        $blockedUserRepository->save($blockedUser);
+
+        return $blockedUser;
     }
 }

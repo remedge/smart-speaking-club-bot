@@ -27,11 +27,11 @@ class SignInPlusOneTest extends BaseApplicationTest
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 👌 Вы успешно записаны на клуб c +1 человеком
@@ -53,11 +53,11 @@ HEREDOC, $message['text']);
             callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Такой клуб не найден
@@ -80,7 +80,7 @@ HEREDOC, $message['text']);
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(
@@ -89,11 +89,11 @@ HEREDOC, $message['text']);
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 🤔 Вы уже записаны на этот разговорный клуб
@@ -118,7 +118,7 @@ HEREDOC, $message['text']);
         $participationRepository = self::getContainer()->get(ParticipationRepository::class);
         $participationRepository->save(new Participation(
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_2),
+            userId: Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
             speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
             isPlusOne: false,
         ));
@@ -129,11 +129,11 @@ HEREDOC, $message['text']);
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(<<<HEREDOC
 😔 К сожалению, все свободные места на данный клуб заняты
@@ -158,21 +158,21 @@ HEREDOC, $message['text']);
     {
         $speakingClub = $this->createSpeakingClub();
 
-        $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_1));
+        $userBan = $this->createBannedUser(Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR));
 
         $this->sendWebhookCallbackQuery(
-            chatId: self::CHAT_ID,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
 
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertStringContainsString(
             sprintf(
@@ -193,27 +193,27 @@ HEREDOC, $message['text']);
         $speakingClub = $this->createSpeakingClub();
 
         $this->createBannedUser(
-            Uuid::fromString(UserFixtures::USER_ID_1),
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
             (new DateTimeImmutable())->modify('+25 hours')
         );
         $userBan = $this->createBannedUser(
-            Uuid::fromString(UserFixtures::USER_ID_1),
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
             (new DateTimeImmutable())->modify('+2 days')
         );
 
         $this->sendWebhookCallbackQuery(
-            chatId: self::CHAT_ID,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
 
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertStringContainsString(
             sprintf(

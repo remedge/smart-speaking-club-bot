@@ -23,14 +23,14 @@ class AdminRemoveParticipantTest extends BaseApplicationTest
 
         $participation = $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         /** @var WaitingUserRepository $waitingUserRepository */
         $waitingUserRepository = self::getContainer()->get(WaitingUserRepository::class);
         $waitingUserRepository->save(new WaitingUser(
             id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_2),
+            userId: Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
             speakingClubId: $speakingClub->getId(),
         ));
 

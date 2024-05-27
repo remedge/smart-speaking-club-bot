@@ -30,6 +30,7 @@ enum UserStateEnum: string
 
     case RECEIVING_ADD_BAN = 'RECEIVING_ADD_BAN';
     case RECEIVING_ADD_WARNING = 'RECEIVING_ADD_WARNING';
+    case RECEIVING_USERNAME_TO_BLOCK = 'RECEIVING_USERNAME_TO_BLOCK';
 
     /**
      * @return array<string, string>
@@ -39,8 +40,8 @@ enum UserStateEnum: string
         return array_reduce(
             self::cases(),
             static fn (array $choices, UserStateEnum $type) => $choices + [
-                $type->name => $type->value,
-            ],
+                    $type->name => $type->value,
+                ],
             [],
         );
     }

@@ -19,7 +19,7 @@ class AdminListBanTest extends BaseApplicationTest
     public function testEmpty(): void
     {
         $this->createBannedUser(
-            Uuid::fromString(UserFixtures::USER_ID_1),
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
             new DateTimeImmutable('-1 minute')
         );
 
@@ -47,15 +47,15 @@ class AdminListBanTest extends BaseApplicationTest
     public function testSuccess(): void
     {
         $this->createBannedUser(
-            Uuid::fromString(UserFixtures::USER_ID_1),
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
             new DateTimeImmutable('-1 minute')
         );
         $this->createBannedUser(
-            Uuid::fromString(UserFixtures::USER_ID_1),
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
             new DateTimeImmutable('+3 days')
         );
         $this->createBannedUser(
-            Uuid::fromString(UserFixtures::USER_ID_2),
+            Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
             new DateTimeImmutable('+2 hours')
         );
 
@@ -65,8 +65,8 @@ class AdminListBanTest extends BaseApplicationTest
 
         /** @var UserRepository $userRepository */
         $userRepository = self::getContainer()->get(UserRepository::class);
-        $user1 = $userRepository->findById(Uuid::fromString(UserFixtures::USER_ID_1));
-        $user2 = $userRepository->findById(Uuid::fromString(UserFixtures::USER_ID_2));
+        $user1 = $userRepository->findById(Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR));
+        $user2 = $userRepository->findById(Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR));
 
         self::assertEquals('Список забаненных участников. Вы можете добавить или убрать участника', $message['text']);
         self::assertEquals(
@@ -79,7 +79,7 @@ class AdminListBanTest extends BaseApplicationTest
                             $user1->getLastName(),
                             $user1->getUsername()
                         ),
-                        'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_1),
+                        'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_JOHN_CONNNOR),
                     ]
                 ],
                 [
@@ -90,7 +90,7 @@ class AdminListBanTest extends BaseApplicationTest
                             $user2->getLastName(),
                             $user2->getUsername()
                         ),
-                        'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_2),
+                        'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_SARAH_CONNOR),
                     ]
                 ],
                 [

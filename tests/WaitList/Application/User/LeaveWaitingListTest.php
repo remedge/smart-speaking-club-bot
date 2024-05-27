@@ -7,6 +7,7 @@ namespace App\Tests\WaitList\Application\User;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
+use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
 use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
@@ -36,11 +37,11 @@ class LeaveWaitingListTest extends BaseApplicationTest
 
         $this->sendWebhookCallbackQuery(111111, 123, 'leave_waiting_list:00000000-0000-0000-0000-000000000001');
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals('👌 Вы успешно вышли из списке ожидания', $message['text']);
         self::assertEquals([
@@ -66,11 +67,11 @@ class LeaveWaitingListTest extends BaseApplicationTest
 
         $this->sendWebhookCallbackQuery(111111, 123, 'leave_waiting_list:00000000-0000-0000-0000-000000000001');
         
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals('🤔 Вы не находитесь в списке ожидания этого клуба', $message['text']);
         self::assertEquals([

@@ -12,16 +12,19 @@ use Ramsey\Uuid\Uuid;
 
 class UserFixtures extends Fixture
 {
-    public const USER_ID_1 = '00000000-0000-0000-0000-000000000001';
+    public const USER_ID_JOHN_CONNNOR = '00000000-0000-0000-0000-000000000001';
+    public const USER_CHAT_ID_JOHN_CONNNOR = 111111;
 
-    public const USER_ID_2 = '00000000-0000-0000-0000-000000000002';
+    public const USER_ID_SARAH_CONNOR = '00000000-0000-0000-0000-000000000002';
+    public const USER_CHAT_ID_SARAH_CONNOR = 222222;
 
     public const ADMIN_ID = '00000000-0000-0000-0000-000000000003';
+    public const ADMIN_CHAT_ID = 666666;
 
     public function load(ObjectManager $manager): void
     {
         $manager->persist(new User(
-            id: Uuid::fromString(self::USER_ID_1),
+            id: Uuid::fromString(self::USER_ID_JOHN_CONNNOR),
             chatId: 111111,
             firstName: 'John',
             lastName: 'Connnor',
@@ -29,7 +32,7 @@ class UserFixtures extends Fixture
             createdAt: new DateTimeImmutable('2000-01-01 00:00'),
         ));
         $manager->persist(new User(
-            id: Uuid::fromString(self::USER_ID_2),
+            id: Uuid::fromString(self::USER_ID_SARAH_CONNOR),
             chatId: 222222,
             firstName: 'Sarah',
             lastName: 'Connor',
