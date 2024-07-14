@@ -50,11 +50,11 @@ class AdminListBanTest extends BaseApplicationTest
             Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
             new DateTimeImmutable('-1 minute')
         );
-        $this->createBannedUser(
+        $bannedUser2 = $this->createBannedUser(
             Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
             new DateTimeImmutable('+3 days')
         );
-        $this->createBannedUser(
+        $bannedUser3 = $this->createBannedUser(
             Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
             new DateTimeImmutable('+2 hours')
         );
@@ -79,7 +79,7 @@ class AdminListBanTest extends BaseApplicationTest
                             $user1->getLastName(),
                             $user1->getUsername()
                         ),
-                        'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_JOHN_CONNNOR),
+                        'callback_data' => sprintf('remove_ban:%s', $bannedUser2->getId()->toString()),
                     ]
                 ],
                 [
@@ -90,7 +90,7 @@ class AdminListBanTest extends BaseApplicationTest
                             $user2->getLastName(),
                             $user2->getUsername()
                         ),
-                        'callback_data' => sprintf('remove_ban:%s', UserFixtures::USER_ID_SARAH_CONNOR),
+                        'callback_data' => sprintf('remove_ban:%s', $bannedUser3->getId()->toString()),
                     ]
                 ],
                 [

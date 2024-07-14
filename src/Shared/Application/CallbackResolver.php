@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application;
 
 use App\BlockedUser\Application\Command\BlockUser\BlockUserCommand;
+use App\BlockedUser\Application\Command\RemoveBlock\RemoveBlockCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminAddParticipant\AdminAddParticipantCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminAddPlusOneToParticipant\AdminAddPlusOneToParticipantCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
@@ -132,6 +133,11 @@ class CallbackResolver
                 'block_user' => $this->commandBus->dispatch(new BlockUserCommand(
                     chatId: $chatId,
                     messageId: $messageId,
+                )),
+                'remove_block' => $this->commandBus->dispatch(new RemoveBlockCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
+                    blockId: Uuid::fromString($objectId),
                 )),
                 default => throw new Exception(sprintf('Unknown admin callback "%s', $action)),
             };

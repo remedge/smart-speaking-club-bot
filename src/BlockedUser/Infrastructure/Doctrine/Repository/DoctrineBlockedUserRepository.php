@@ -62,7 +62,7 @@ class DoctrineBlockedUserRepository extends ServiceEntityRepository implements B
     public function findAll(): array
     {
         return $this->createQueryBuilder('bu')
-            ->select('bu.id as blocked_user_id, bu.userId, u.username, u.chatId, u.firstName, u.lastName')
+            ->select('bu.id, bu.userId, u.username, u.chatId, u.firstName, u.lastName')
             ->join(User::class, 'u', 'WITH', 'bu.userId = u.id')
             ->orderBy('bu.id', 'DESC')
             ->getQuery()

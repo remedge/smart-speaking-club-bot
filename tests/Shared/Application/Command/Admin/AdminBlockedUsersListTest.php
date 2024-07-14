@@ -37,10 +37,10 @@ class AdminBlockedUsersListTest extends BaseApplicationTest
 
     public function testGetList(): void
     {
-        $this->createBlockedUser(
+        $blockedUser1 = $this->createBlockedUser(
             Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR)
         );
-        $this->createBlockedUser(
+        $blockedUser2 = $this->createBlockedUser(
             Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR)
         );
 
@@ -67,7 +67,7 @@ class AdminBlockedUsersListTest extends BaseApplicationTest
                             $userSarah->getLastName(),
                             $userSarah->getUsername(),
                         ),
-                        'callback_data' => sprintf('remove_block:%s', $userSarah->getId()->toString()),
+                        'callback_data' => sprintf('remove_block:%s', $blockedUser2->getId()->toString()),
                     ]
                 ],
                 [
@@ -78,7 +78,7 @@ class AdminBlockedUsersListTest extends BaseApplicationTest
                             $userJohn->getLastName(),
                             $userJohn->getUsername(),
                         ),
-                        'callback_data' => sprintf('remove_block:%s', $userJohn->getId()->toString()),
+                        'callback_data' => sprintf('remove_block:%s', $blockedUser1->getId()->toString()),
                     ],
                 ],
                 [

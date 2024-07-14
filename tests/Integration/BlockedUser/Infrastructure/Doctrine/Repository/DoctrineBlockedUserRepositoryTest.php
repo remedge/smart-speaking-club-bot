@@ -56,8 +56,8 @@ class DoctrineBlockedUserRepositoryTest extends BaseApplicationTest
 
         $this->assertCount(2, $blockedUsers);
 
-        $this->assertSame($blockedUser2->getId()->toString(), $blockedUsers[0]['blocked_user_id']->toString());
-        $this->assertSame($blockedUser1->getId()->toString(), $blockedUsers[1]['blocked_user_id']->toString());
+        $this->assertSame($blockedUser2->getId()->toString(), $blockedUsers[0]['id']->toString());
+        $this->assertSame($blockedUser1->getId()->toString(), $blockedUsers[1]['id']->toString());
     }
 
     public function testFindByUserId(): void

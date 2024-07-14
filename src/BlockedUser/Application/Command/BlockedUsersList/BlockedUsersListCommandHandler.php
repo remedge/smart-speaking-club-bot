@@ -31,7 +31,7 @@ class BlockedUsersListCommandHandler
                         $blockedUser['lastName'],
                         $blockedUser['username'],
                     ),
-                    'callback_data' => sprintf('remove_block:%s', $blockedUser['user_id']->toString()),
+                    'callback_data' => sprintf('remove_block:%s', $blockedUser['id']->toString()),
                 ]
             ];
         }
