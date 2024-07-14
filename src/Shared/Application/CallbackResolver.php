@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application;
 
+use App\BlockedUser\Application\Command\BlockUser\BlockUserCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminAddParticipant\AdminAddParticipantCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminAddPlusOneToParticipant\AdminAddPlusOneToParticipantCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
@@ -127,6 +128,10 @@ class CallbackResolver
                     chatId: $chatId,
                     messageId: $messageId,
                     warningId: Uuid::fromString($objectId),
+                )),
+                'block_user' => $this->commandBus->dispatch(new BlockUserCommand(
+                    chatId: $chatId,
+                    messageId: $messageId,
                 )),
                 default => throw new Exception(sprintf('Unknown admin callback "%s', $action)),
             };
