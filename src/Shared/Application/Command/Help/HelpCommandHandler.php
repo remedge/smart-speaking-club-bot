@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Command\Help;
 
+use App\BlockedUser\Application\Command\BlockedUsersList\BlockedUsersListCommand;
 use App\BlockedUser\Application\Command\BlockUser\BlockUserCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
@@ -55,6 +56,11 @@ class HelpCommandHandler
                 '%s - %s',
                 BlockUserCommand::COMMAND_NAME,
                 BlockUserCommand::COMMAND_DESCRIPTION
+            ),
+            sprintf(
+                '%s - %s',
+                BlockedUsersListCommand::COMMAND_NAME,
+                BlockedUsersListCommand::COMMAND_DESCRIPTION
             )
         ];
 

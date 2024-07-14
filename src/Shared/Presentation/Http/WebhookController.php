@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Presentation\Http;
 
+use App\BlockedUser\Application\Command\BlockedUsersList\BlockedUsersListCommand;
 use App\BlockedUser\Application\Command\BlockUser\BlockUserCommand;
 use App\Shared\Application\CallbackResolver;
 use App\Shared\Application\Command\GenericText\AdminGenericTextCommand;
@@ -164,6 +165,9 @@ class WebhookController
             ),
             BlockUserCommand::COMMAND_NAME => $this->commandBus->dispatch(
                 new BlockUserCommand($chatId)
+            ),
+            BlockedUsersListCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new BlockedUsersListCommand($chatId)
             ),
             default => $this->commandBus->dispatch(new AdminGenericTextCommand($chatId, $text)),
         };

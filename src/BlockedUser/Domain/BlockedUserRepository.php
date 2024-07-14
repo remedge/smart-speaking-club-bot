@@ -13,17 +13,18 @@ interface BlockedUserRepository
 
     public function remove(BlockedUser $blockedUser): void;
 
+    /**
+     * @param UuidInterface $id
+     * @return BlockedUser|null
+     */
     public function findById(UuidInterface $id): ?BlockedUser;
     public function findByUserName(string $username): ?BlockedUser;
 
     /**
      * @param UuidInterface $userId
-     * @param DateTimeImmutable $now
+     * @return BlockedUser|null
      */
-    public function findByUserId(UuidInterface $userId, DateTimeImmutable $now): ?BlockedUser;
+    public function findByUserId(UuidInterface $userId): ?BlockedUser;
 
-    /**
-     * @return array<BlockedUser>|null
-     */
     public function findAll(): ?array;
 }

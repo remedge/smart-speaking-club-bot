@@ -37,4 +37,42 @@ class DoctrineBlockedUserRepositoryTest extends BaseApplicationTest
         $this->assertSame($blockedUser->getId(), $savedBlockedUser->getId());
         $this->assertSame($blockedUser->getUserId(), $savedBlockedUser->getUserId());
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testFindAll(): void
+    {
+        $blockedUser1 = $this->createBlockedUser(
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR)
+        );
+        $blockedUser2 = $this->createBlockedUser(
+            Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR)
+        );
+
+        /** @var DoctrineBlockedUserRepository $blockedUserRepository */
+        $blockedUserRepository = self::getContainer()->get(DoctrineBlockedUserRepository::class);
+        $blockedUsers = $blockedUserRepository->findAll();
+
+        $this->assertCount(2, $blockedUsers);
+
+        $this->assertSame($blockedUser2->getId()->toString(), $blockedUsers[0]['blocked_user_id']->toString());
+        $this->assertSame($blockedUser1->getId()->toString(), $blockedUsers[1]['blocked_user_id']->toString());
+    }
+
+    public function testFindByUserId(): void
+    {
+        $this->createBlockedUser(
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR)
+        );
+        $this->createBlockedUser(
+            Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR)
+        );
+
+        /** @var DoctrineBlockedUserRepository $blockedUserRepository */
+        $blockedUserRepository = self::getContainer()->get(DoctrineBlockedUserRepository::class);
+        $blockedUser = $blockedUserRepository->findByUserId(Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR));
+
+        $this->assertSame(UserFixtures::USER_ID_SARAH_CONNOR, $blockedUser->getUserId()->toString());
+    }
 }

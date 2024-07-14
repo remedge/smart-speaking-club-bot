@@ -44,6 +44,7 @@ HEREDOC,
 /admin_create_club - Создать новый разговорный клуб
 /bans - Список забаненных пользователей
 /block_user - Заблокировать пользователя
+/blocked_users - Список заблокированных пользователей
 
 HEREDOC,
             $message['text']

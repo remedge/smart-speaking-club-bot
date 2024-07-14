@@ -7,7 +7,6 @@ namespace App\BlockedUser\Infrastructure\Doctrine\Repository;
 use App\BlockedUser\Domain\BlockedUser;
 use App\BlockedUser\Domain\BlockedUserRepository;
 use App\User\Domain\User;
-use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Ramsey\Uuid\UuidInterface;
@@ -49,26 +48,24 @@ class DoctrineBlockedUserRepository extends ServiceEntityRepository implements B
         return current($result) ?: null;
     }
 
-    public function findByUserId(UuidInterface $userId, DateTimeImmutable $now): ?BlockedUser
+    public function findByUserId(UuidInterface $userId): ?BlockedUser
     {
-//        $result = $this->createQueryBuilder('ub')
-//            ->andWhere('ub.userId = :userId')
-//            ->andWhere('ub.endDate > :now')
-//            ->setParameter('userId', $userId)
-//            ->setParameter('now', $now)
-//            ->orderBy('ub.endDate', 'desc')
-//            ->getQuery()
-//            ->getResult();
-//
-//        return current($result) ?: null;
+        $result = $this->createQueryBuilder('ub')
+            ->andWhere('ub.userId = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+
+        return current($result) ?: null;
     }
 
-    public function findAll(): ?array
+    public function findAll(): array
     {
-//        return $this->createQueryBuilder('ub')
-//            ->select('ub.id, u.username, u.chatId, u.firstName, u.lastName, ub.endDate')
-//            ->join(User::class, 'u', 'WITH', 'ub.userId = u.id')
-//            ->getQuery()
-//            ->getResult();
+        return $this->createQueryBuilder('bu')
+            ->select('bu.id as blocked_user_id, bu.userId, u.username, u.chatId, u.firstName, u.lastName')
+            ->join(User::class, 'u', 'WITH', 'bu.userId = u.id')
+            ->orderBy('bu.id', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 }
