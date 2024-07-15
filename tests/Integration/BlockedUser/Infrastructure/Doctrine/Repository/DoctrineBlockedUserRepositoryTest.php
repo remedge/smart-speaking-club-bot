@@ -75,4 +75,20 @@ class DoctrineBlockedUserRepositoryTest extends BaseApplicationTest
 
         $this->assertSame(UserFixtures::USER_ID_SARAH_CONNOR, $blockedUser->getUserId()->toString());
     }
+
+    public function testFindByUsername(): void
+    {
+        $this->createBlockedUser(
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR)
+        );
+        $this->createBlockedUser(
+            Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR)
+        );
+
+        /** @var DoctrineBlockedUserRepository $blockedUserRepository */
+        $blockedUserRepository = self::getContainer()->get(DoctrineBlockedUserRepository::class);
+        $blockedUser = $blockedUserRepository->findByUsername('sarah_connor');
+
+        $this->assertSame(UserFixtures::USER_ID_SARAH_CONNOR, $blockedUser->getUserId()->toString());
+    }
 }

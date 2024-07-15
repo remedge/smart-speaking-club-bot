@@ -25,7 +25,7 @@ class UserFixtures extends Fixture
     {
         $manager->persist(new User(
             id: Uuid::fromString(self::USER_ID_JOHN_CONNNOR),
-            chatId: 111111,
+            chatId: self::USER_CHAT_ID_JOHN_CONNNOR,
             firstName: 'John',
             lastName: 'Connnor',
             username: 'john_connor',
@@ -33,7 +33,7 @@ class UserFixtures extends Fixture
         ));
         $manager->persist(new User(
             id: Uuid::fromString(self::USER_ID_SARAH_CONNOR),
-            chatId: 222222,
+            chatId: self::USER_CHAT_ID_SARAH_CONNOR,
             firstName: 'Sarah',
             lastName: 'Connor',
             username: 'sarah_connor',

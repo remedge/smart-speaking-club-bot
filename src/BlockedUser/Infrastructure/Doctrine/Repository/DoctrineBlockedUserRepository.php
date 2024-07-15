@@ -42,6 +42,8 @@ class DoctrineBlockedUserRepository extends ServiceEntityRepository implements B
     {
         $result = $this->createQueryBuilder('bu')
             ->join(User::class, 'u', 'WITH', 'bu.userId = u.id')
+            ->andWhere('u.username = :username')
+            ->setParameter('username', $username)
             ->getQuery()
             ->getResult();
 

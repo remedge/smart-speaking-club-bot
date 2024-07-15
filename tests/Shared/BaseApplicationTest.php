@@ -120,18 +120,25 @@ abstract class BaseApplicationTest extends WebTestCase
         );
     }
 
+    /**
+     * @throws JsonException
+     */
     protected function sendWebhookCallbackQuery(int $chatId, int $messageId, string $callbackData): void
     {
         MockTelegram::$messages = [];
 
-        if ($chatId === 666666) {
+        if ($chatId === UserFixtures::ADMIN_CHAT_ID) {
             $firstName = 'Kyle';
             $lastName = 'Reese';
             $username = 'kyle_reese';
-        } else {
+        } elseif ($chatId === UserFixtures::USER_CHAT_ID_JOHN_CONNNOR) {
             $firstName = 'John';
             $lastName = 'Connor';
             $username = 'john_connor';
+        } else {
+            $firstName = 'Sarah';
+            $lastName = 'Connor';
+            $username = 'sarah_connor';
         }
 
         $body = [
@@ -187,7 +194,7 @@ abstract class BaseApplicationTest extends WebTestCase
             server: [
                 'CONTENT_TYPE' => 'application/json',
             ],
-            content: json_encode($body),
+            content: json_encode($body, JSON_THROW_ON_ERROR),
         );
     }
 
@@ -204,7 +211,7 @@ abstract class BaseApplicationTest extends WebTestCase
      */
     public function getFirstMessage(int $chatId): array
     {
-        return MockTelegram::$messages[$chatId][0];
+        return current(MockTelegram::$messages[$chatId]);
     }
 
     /**
