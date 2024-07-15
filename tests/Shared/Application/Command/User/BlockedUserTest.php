@@ -39,7 +39,7 @@ class BlockedUserTest extends BaseApplicationTest
         $message = $this->getFirstMessage(UserFixtures::USER_CHAT_ID_SARAH_CONNOR);
 
         self::assertEquals(
-            'Вы были заблокированы.',
+            'Ваш доступ к записи на разговорные клубы временно ограничен. Если вы считаете, что это произошло по ошибке, пожалуйста, свяжитесь с нами для решения этого вопроса @NoviSad_Smartlab',
             $message['text']
         );
         self::assertNull($message['replyMarkup']);

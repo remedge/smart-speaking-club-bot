@@ -93,7 +93,7 @@ class WebhookController
         if (!$isAdmin && $this->userStatusChecker->checkIsBlocked($username)) {
             $this->telegram->sendMessage(
                 $chatId,
-                'Вы были заблокированы.',
+                'Ваш доступ к записи на разговорные клубы временно ограничен. Если вы считаете, что это произошло по ошибке, пожалуйста, свяжитесь с нами для решения этого вопроса @NoviSad_Smartlab',
             );
             return new Response();
         }
