@@ -14,14 +14,17 @@ class HelpCommandTest extends BaseApplicationTest
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(111111);
 
-        self::assertEquals(<<<HEREDOC
+        self::assertEquals(
+            <<<HEREDOC
 Список команд:
 /start - Начать работу с ботом
 /help - Показать список команд
 /upcoming_clubs - Список клубов, которые будут в ближайшее время
 /my_upcoming_clubs - Список клубов, в которых вы будете участвовать
 
-HEREDOC, $message['text']);
+HEREDOC,
+            $message['text']
+        );
 
         self::assertNull($message['replyMarkup']);
     }
@@ -32,15 +35,20 @@ HEREDOC, $message['text']);
         $this->assertResponseIsSuccessful();
         $message = $this->getFirstMessage(666666);
 
-        self::assertEquals(<<<HEREDOC
+        self::assertEquals(
+            <<<HEREDOC
 Список команд администратора:
 /start - Начать работу с ботом
 /help - Показать список команд
 /admin_upcoming_clubs - Список клубов, которые будут в ближайшее время
 /admin_create_club - Создать новый разговорный клуб
 /bans - Список забаненных пользователей
+/block_user - Заблокировать пользователя
+/blocked_users - Список заблокированных пользователей
 
-HEREDOC, $message['text']);
+HEREDOC,
+            $message['text']
+        );
 
         self::assertNull($message['replyMarkup']);
     }

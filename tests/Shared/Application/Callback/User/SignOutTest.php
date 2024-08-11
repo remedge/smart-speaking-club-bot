@@ -25,7 +25,7 @@ class SignOutTest extends BaseApplicationTest
 
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_1
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         /** @var WaitingUserRepository $waitlistRepository */
@@ -33,7 +33,7 @@ class SignOutTest extends BaseApplicationTest
         $waitlistRepository->save(
             new WaitingUser(
                 id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-                userId: Uuid::fromString(UserFixtures::USER_ID_2),
+                userId: Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
                 speakingClubId: $speakingClub->getId(),
             )
         );
@@ -46,11 +46,11 @@ class SignOutTest extends BaseApplicationTest
 
         $this->assertResponseIsSuccessful();
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -98,11 +98,11 @@ HEREDOC,
             callbackData: 'sign_out:00000000-0000-0000-0000-000000000001'
         );
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC
@@ -131,11 +131,11 @@ HEREDOC,
             callbackData: 'sign_out:' . $speakingClub->getId()
         );
 
-        $this->assertArrayHasKey(self::CHAT_ID, $this->getMessages());
-        $messages = $this->getMessagesByChatId(self::CHAT_ID);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(self::CHAT_ID, self::MESSAGE_ID);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals(
             <<<HEREDOC

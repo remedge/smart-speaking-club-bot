@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Presentation\Http;
 
+use App\BlockedUser\Application\Command\BlockedUsersList\BlockedUsersListCommand;
+use App\BlockedUser\Application\Command\BlockUser\BlockUserCommand;
 use App\Shared\Application\CallbackResolver;
 use App\Shared\Application\Command\GenericText\AdminGenericTextCommand;
 use App\Shared\Application\Command\Help\HelpCommand;
 use App\Shared\Application\Command\Start\StartCommand;
 use App\Shared\Domain\TelegramInterface;
 use App\Shared\Domain\UserRolesProvider;
+use App\Shared\Domain\UserStatusChecker;
 use App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingClubs\AdminListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
@@ -33,6 +36,7 @@ class WebhookController
         private TelegramInterface $telegram,
         private UserRolesProvider $userRolesProvider,
         private CallbackResolver $callbackResolver,
+        private UserStatusChecker $userStatusChecker,
     ) {
     }
 
@@ -86,6 +90,14 @@ class WebhookController
         }
 
         $isAdmin = $this->userRolesProvider->isUserAdmin($username);
+        if (!$isAdmin && $this->userStatusChecker->checkIsBlocked($username)) {
+            $this->telegram->sendMessage(
+                $chatId,
+                'Ваш доступ к записи на разговорные клубы временно ограничен. Если вы считаете, что это произошло по ошибке, пожалуйста, свяжитесь с нами для решения этого вопроса @NoviSad_Smartlab',
+            );
+            return new Response();
+        }
+
         $this->telegram->setCommandsMenu();
 
         if ($this->telegram->isCallbackQuery() === true) {
@@ -100,12 +112,14 @@ class WebhookController
             return new Response();
         }
 
-        $this->commandBus->dispatch(new CreateUserIfNotExistCommand(
-            chatId: $chatId,
-            firstName: $firstName,
-            lastName: $lastName,
-            userName: $username,
-        ));
+        $this->commandBus->dispatch(
+            new CreateUserIfNotExistCommand(
+                chatId: $chatId,
+                firstName: $firstName,
+                lastName: $lastName,
+                userName: $username,
+            )
+        );
 
         # main commands
         if ($text === '/start') {
@@ -134,23 +148,29 @@ class WebhookController
             };
 
             return new Response();
-        } else {
-            match ($text) {
-                AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new AdminListUpcomingSpeakingClubsCommand($chatId)
-                ),
-                InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new InitClubCreationCommand($chatId)
-                ),
-                ListBanCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new ListBanCommand($chatId)
-                ),
-                ListWarningCommand::COMMAND_NAME => $this->commandBus->dispatch(
-                    new ListWarningCommand($chatId)
-                ),
-                default => $this->commandBus->dispatch(new AdminGenericTextCommand($chatId, $text)),
-            };
         }
+
+        match ($text) {
+            AdminListUpcomingSpeakingClubsCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new AdminListUpcomingSpeakingClubsCommand($chatId)
+            ),
+            InitClubCreationCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new InitClubCreationCommand($chatId)
+            ),
+            ListBanCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new ListBanCommand($chatId)
+            ),
+            ListWarningCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new ListWarningCommand($chatId)
+            ),
+            BlockUserCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new BlockUserCommand($chatId)
+            ),
+            BlockedUsersListCommand::COMMAND_NAME => $this->commandBus->dispatch(
+                new BlockedUsersListCommand($chatId)
+            ),
+            default => $this->commandBus->dispatch(new AdminGenericTextCommand($chatId, $text)),
+        };
 
         return new Response();
     }
