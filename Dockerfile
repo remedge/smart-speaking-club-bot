@@ -22,6 +22,7 @@ RUN apk add --no-cache \
 		file \
 		gettext \
 		git \
+		docker-compose \
 	;
 
 RUN set -eux; \
