@@ -13,8 +13,9 @@ framework:
                     max_retries: 0
 
         routing:
-            # Route your messages to the transports
             # 'App\Message\YourMessage': async
+            # Route your messages to the transports
+            'App\Shared\Application\Command\GenericText\AdminGenericTextCommand': sync
 
 # when@test:
 #    framework:
