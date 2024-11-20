@@ -3,6 +3,12 @@ framework:
         # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
         # failure_transport: failed
 
+        serializer:
+            default_serializer: messenger.transport.symfony_serializer
+            symfony_serializer:
+                format: json
+                context: { }
+
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             # async: '%env(MESSENGER_TRANSPORT_DSN)%'
@@ -12,10 +18,12 @@ framework:
                 retry_strategy:
                     max_retries: 0
 
+            async: "%env(MESSENGER_TRANSPORT_DSN)%"
+
         routing:
             # 'App\Message\YourMessage': async
             # Route your messages to the transports
-            'App\Shared\Application\Command\GenericText\AdminGenericTextCommand': sync
+            'App\User\Application\Command\Admin\Notifications\SendMessageToAllUsersCommand': async
 
 # when@test:
 #    framework:
