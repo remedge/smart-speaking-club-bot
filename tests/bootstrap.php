@@ -53,12 +53,12 @@ passthru(
     ),
     $schemaValidateResult
 );
-//if (0 !== $schemaValidateResult) {
-//    passthru(
-//        sprintf(
-//            'php "%s/../bin/console" doctrine:schema:create --env=test',
-//            __DIR__
-//        )
-//    );
-//}
+if (0 !== $schemaValidateResult) {
+    passthru(
+        sprintf(
+            'php "%s/../bin/console" doctrine:schema:create --env=test',
+            __DIR__
+        )
+    );
+}
 
