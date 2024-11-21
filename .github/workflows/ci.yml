@@ -44,7 +44,7 @@ jobs:
         run: cp phpunit.xml.dist phpunit.xml
       -
         name: Start services
-        run: docker compose up -d --no-build
+        run: docker-compose up -d --no-build
       -
         name: Waiting for containers to start
         run: sleep 10
