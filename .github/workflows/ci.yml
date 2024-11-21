@@ -14,7 +14,8 @@ concurrency:
 jobs:
   tests:
     name: Tests
-    runs-on: prevedka/smart-bot-php
+    runs-on: ubuntu-latest
+    container: prevedka/smart-bot-php
     steps:
       -
         name: Checkout
