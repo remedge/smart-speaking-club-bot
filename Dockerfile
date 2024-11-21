@@ -32,6 +32,9 @@ RUN set -eux; \
 		zip \
 	;
 
+# install docker
+RUN apk add --update docker openrc
+
 ###> recipes ###
 ###< recipes ###
 
