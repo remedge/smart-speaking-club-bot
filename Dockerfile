@@ -33,10 +33,10 @@ RUN set -eux; \
 	;
 
 # install docker
-RUN apk add --update docker openrc
+RUN apk add --no-cache --update docker openrc
 
 #install docker-compose
-RUN apk add docker docker-compose
+RUN apk add --no-cache docker docker-compose
 
 ###> recipes ###
 ###< recipes ###

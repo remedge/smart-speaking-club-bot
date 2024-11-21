@@ -15,7 +15,7 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
-    container: prevedka/smart-bot-php
+#    container: prevedka/smart-bot-php
     steps:
       -
         name: Checkout
