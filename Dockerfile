@@ -35,6 +35,9 @@ RUN set -eux; \
 # install docker
 RUN apk add --update docker openrc
 
+#install docker-compose
+RUN apk add docker docker-compose
+
 ###> recipes ###
 ###< recipes ###
 
