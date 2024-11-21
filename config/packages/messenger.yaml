@@ -18,7 +18,7 @@ framework:
                 retry_strategy:
                     max_retries: 0
 
-        async: "%env(MESSENGER_TRANSPORT_DSN)%"
+            async: "%env(MESSENGER_TRANSPORT_DSN)%"
 
         routing:
             # 'App\Message\YourMessage': async
