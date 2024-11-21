@@ -39,6 +39,9 @@ jobs:
         name: Copy .env.locals
         run: cp .env.local.example .env.local && cp .env.test.local.example .env.test.local
       -
+        name: Copy phpunit.xml
+        run: cp phpunit.xml.dist phpunit.xml
+      -
         name: Start services
         run: docker compose up -d --no-build
       -
@@ -46,7 +49,7 @@ jobs:
         run: sleep 10
       -
         name: Run PHPUnit
-        run: docker compose exec -T php bin/phpunit
+        run: docker compose exec -T php bin/phpunit -c phpunit.xml
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
