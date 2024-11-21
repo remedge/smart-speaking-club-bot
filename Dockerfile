@@ -32,12 +32,6 @@ RUN set -eux; \
 		zip \
 	;
 
-# install docker
-RUN apk add --no-cache --update docker openrc
-
-#install docker-compose
-RUN apk add --no-cache docker docker-compose
-
 ###> recipes ###
 ###< recipes ###
 
