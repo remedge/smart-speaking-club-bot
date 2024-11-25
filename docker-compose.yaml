@@ -1,6 +1,8 @@
 services:
     php:
-        image: ${IMAGES_PREFIX:-}app-php
+        # Old version
+        # image: ${IMAGES_PREFIX:-}app-php
+        image: prevedka/smart-bot-php
         container_name: bot-app
         depends_on:
             db:
@@ -20,6 +22,7 @@ services:
             # The two next lines can be removed after initial installation
             SYMFONY_VERSION: ${SYMFONY_VERSION:-}
             STABILITY: ${STABILITY:-stable}
+            MESSENGER_TRANSPORT_DSN: doctrine://default?auto_setup=false
         volumes:
             - caddy_data:/data
             - caddy_config:/config

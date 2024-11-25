@@ -16,6 +16,7 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\User\Application\Command\Admin\Notifications\SendMessageToAllUsersCommand;
 use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
 use App\UserBan\Domain\UserBan;
@@ -28,6 +29,7 @@ use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Throwable;
 
 #[AsMessageHandler]
@@ -46,6 +48,7 @@ class AdminGenericTextCommandHandler
         private UserBanRepository $userBanRepository,
         private UserWarningRepository $userWarningRepository,
         private BlockedUserRepository $blockedUserRepository,
+        private MessageBusInterface $commandBus,
         private LoggerInterface $logger
     ) {
     }
@@ -467,14 +470,9 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_MESSAGE_FOR_EVERYONE) {
-            $recipients = $this->userRepository->findAllExceptUsernames($this->userRolesProvider->getAdminUsernames());
-
-            foreach ($recipients as $recipient) {
-                $this->telegram->sendMessage(
-                    chatId: $recipient->getChatId(),
-                    text: $command->text,
-                );
-            }
+            $this->commandBus->dispatch(
+                new SendMessageToAllUsersCommand($command->text, $command->chatId)
+            );
 
             $user->setState(UserStateEnum::IDLE);
             $user->setActualSpeakingClubData([]);
@@ -482,7 +480,7 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
-                text: '✅ Сообщение успешно отправлено всем пользователям',
+                text: '✅ Сообщение отправлено в очередь рассылки всем пользователям',
                 replyMarkup: [
                     [
                         [
@@ -492,11 +490,7 @@ class AdminGenericTextCommandHandler
                     ]
                 ],
             );
-            $this->logger->info('Message sent to all users', [
-                'adminChatId' => $command->chatId,
-                'adminState'  => $user->getState(),
-                'text'        => $command->text,
-            ]);
+
             return;
         }
 

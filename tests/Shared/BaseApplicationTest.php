@@ -21,12 +21,12 @@ use App\UserBan\Domain\UserBanRepository;
 use App\UserWarning\Domain\UserWarningRepository;
 use App\WaitList\Domain\WaitingUserRepository;
 use JsonException;
-use Longman\TelegramBot\Entities\Chat;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 abstract class BaseApplicationTest extends WebTestCase
 {
@@ -242,6 +242,7 @@ abstract class BaseApplicationTest extends WebTestCase
         MockObject $userBanRepository = null,
         MockObject $userWarningRepository = null,
         MockObject $blockedUserRepository = null,
+        MockObject $commandBus = null,
         MockObject $logger = null,
     ): AdminGenericTextCommandHandler {
         $userRepository = $userRepository ?? $this->createMock(UserRepository::class);
@@ -256,6 +257,7 @@ abstract class BaseApplicationTest extends WebTestCase
         $userBanRepository = $userBanRepository ?? $this->createMock(UserBanRepository::class);
         $userWarningRepository = $userWarningRepository ?? $this->createMock(UserWarningRepository::class);
         $blockedUserRepository = $blockedUserRepository ?? $this->createMock(BlockedUserRepository::class);
+        $commandBus = $commandBus ?? $this->createMock(MessageBusInterface::class);
         $logger = $logger ?? $this->createMock(LoggerInterface::class);
 
         return new AdminGenericTextCommandHandler(
@@ -271,6 +273,7 @@ abstract class BaseApplicationTest extends WebTestCase
             $userBanRepository,
             $userWarningRepository,
             $blockedUserRepository,
+            $commandBus,
             $logger
         );
     }

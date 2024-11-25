@@ -13,7 +13,7 @@ use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
-use App\Tests\WithConsecutive;
+use App\User\Application\Command\Admin\Notifications\SendMessageToAllUsersCommand;
 use App\User\Domain\User;
 use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
@@ -21,6 +21,9 @@ use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use stdClass;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
 {
@@ -54,49 +57,37 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->method('save')
             ->with($adminUser);
 
-        $user1ChatId = 111;
-        $user1 = $this->createMock(User::class);
-        $user1
-            ->method('getChatId')
-            ->willReturn(
-                $user1ChatId
-            );
-        $user2ChatId = 222;
-        $user2 = $this->createMock(User::class);
-        $user2
-            ->method('getChatId')
-            ->willReturn($user2ChatId);
-        $userRepository
-            ->method('findAllExceptUsernames')
-            ->with([])
-            ->willReturn([$user1, $user2]);
-
+        $envelope = new Envelope(new stdClass());
+        $sendMessageCommand = new SendMessageToAllUsersCommand($text, $adminChatId);
+        $commandBus = $this->createMock(MessageBusInterface::class);
+        $commandBus
+            ->expects(self::once())
+            ->method('dispatch')
+            ->with($sendMessageCommand)
+            ->willReturn($envelope);
 
         $telegram = $this->createMock(TelegramInterface::class);
         $telegram
-            ->expects(self::exactly(3))
+            ->expects(self::once())
             ->method('sendMessage')
             ->with(
-                ...
-                WithConsecutive::create(
-                    [$user1ChatId, $text, []],
-                    [$user2ChatId, $text, []],
+                $adminChatId,
+                '✅ Сообщение отправлено в очередь рассылки всем пользователям',
+                [
                     [
-                        $adminChatId,
-                        '✅ Сообщение успешно отправлено всем пользователям',
                         [
-                            [
-                                [
-                                    'text'          => 'Перейти к списку ближайших клубов',
-                                    'callback_data' => 'back_to_admin_list',
-                                ],
-                            ]
-                        ]
-                    ],
-                )
+                            'text'          => 'Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]
+                ]
             );
 
-        $handler = $this->getAdminGenericTextCommandHandler(userRepository: $userRepository, telegram: $telegram);
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+            commandBus: $commandBus
+        );
         $handler->__invoke($command);
     }
 
