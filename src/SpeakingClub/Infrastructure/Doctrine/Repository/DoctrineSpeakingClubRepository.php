@@ -50,7 +50,12 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
     public function findUserUpcoming(UuidInterface $userId, DateTimeImmutable $now): array
     {
         return $this->createQueryBuilder('speaking_club')
-            ->innerJoin(Participation::class, 'participation', 'WITH', 'participation.speakingClubId = speaking_club.id')
+            ->innerJoin(
+                Participation::class,
+                'participation',
+                'WITH',
+                'participation.speakingClubId = speaking_club.id'
+            )
             ->andWhere('speaking_club.date > :now')
             ->andWhere('participation.userId = :user')
             ->andWhere('speaking_club.isCancelled = false')
@@ -61,16 +66,23 @@ class DoctrineSpeakingClubRepository extends ServiceEntityRepository implements 
             ->getResult();
     }
 
-    public function findBetweenDates(DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
-    {
-        return $this->createQueryBuilder('speaking_club')
+    public function findBetweenDates(
+        DateTimeImmutable $startDate,
+        DateTimeImmutable $endDate,
+        bool $withLinks = false,
+    ): array {
+        $query = $this->createQueryBuilder('speaking_club')
             ->andWhere('speaking_club.date BETWEEN :startDate AND :endDate')
             ->andWhere('speaking_club.isCancelled = false')
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
-            ->orderBy('speaking_club.date', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->orderBy('speaking_club.date', 'ASC');
+
+        if ($withLinks) {
+            $query->andWhere('speaking_club.link  IS NOT NULL');
+        }
+
+        return $query->getQuery()->getResult();
     }
 
     public function findAllPastNotArchived(DateTimeImmutable $now): array

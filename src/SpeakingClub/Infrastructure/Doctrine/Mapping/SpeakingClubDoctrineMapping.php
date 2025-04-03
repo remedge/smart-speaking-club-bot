@@ -38,5 +38,6 @@ class SpeakingClubDoctrineMapping extends DoctrineMapping
         $builder->addField('isRatingAsked', 'boolean', [
             'default' => false,
         ]);
+        $builder->addField('link', 'text', ['nullable' => true, 'default' => null]);
     }
 }

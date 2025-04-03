@@ -19,6 +19,7 @@ class SpeakingClub
         private bool $isCancelled = false,
         private bool $isArchived = false,
         private bool $isRatingAsked = false,
+        private ?string $link = null
     ) {
     }
 
@@ -105,5 +106,15 @@ class SpeakingClub
     public function isRatingAsked(): bool
     {
         return $this->isRatingAsked;
+    }
+
+    public function setLink(?string $link): void
+    {
+        $this->link = $link;
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
     }
 }

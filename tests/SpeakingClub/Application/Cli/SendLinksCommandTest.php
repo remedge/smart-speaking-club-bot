@@ -8,7 +8,7 @@ use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
-use App\SpeakingClub\Presentation\Cli\NotifyUsersAboutCloseClubsCommand;
+use App\SpeakingClub\Presentation\Cli\SendLinksCommand;
 use App\Tests\Mock\MockTelegram;
 use App\Tests\Shared\BaseApplicationTest;
 use App\Tests\TestCaseTrait;
@@ -19,7 +19,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
+class SendLinksCommandTest extends BaseApplicationTest
 {
     use TestCaseTrait;
 
@@ -31,6 +31,8 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
         $application = new Application();
         MockTelegram::$messages = [];
 
+        $link1 = 'some-link';
+        $link2 = 'some-another-link';
         /** @var SpeakingClubRepository $speakingClubRepository */
         $speakingClubRepository = $this->getContainer()->get(SpeakingClubRepository::class);
         /** @var ParticipationRepository $participationRepository */
@@ -38,21 +40,17 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 
         $speakingClub1 = $this->createSpeakingClub(
             'Test club 1',
-            date: (new DateTimeImmutable())->modify('+27 hours')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:00'),
+            link: $link1
         );
-        $this->createParticipation(
-            $speakingClub1->getId(),
-            UserFixtures::USER_ID_JOHN_CONNNOR
-        );
+        $this->createParticipation($speakingClub1->getId(),UserFixtures::USER_ID_JOHN_CONNNOR);
 
         $speakingClub2 = $this->createSpeakingClub(
             'Test club 2',
-            date: (new DateTimeImmutable())->modify('+2 hours')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:00'),
+            link: $link2
         );
-        $this->createParticipation(
-            $speakingClub2->getId(),
-            UserFixtures::USER_ID_SARAH_CONNOR
-        );
+        $this->createParticipation($speakingClub2->getId(), UserFixtures::USER_ID_SARAH_CONNOR);
 
         $speakingClub3 = $this->createSpeakingClub(
             'Test club 3',
@@ -62,12 +60,17 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
 
         $speakingClub4 = $this->createSpeakingClub(
             'Test club 4',
-            date: (new DateTimeImmutable())->modify('+14 minutes')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable())->modify('+14 minutes')->format('Y-m-d H:i:00')
         );
         $this->createParticipation($speakingClub4->getId(),UserFixtures::USER_ID_JOHN_CONNNOR);
+        $speakingClub5 = $this->createSpeakingClub(
+            'Test club 5',
+            date: (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:00')
+        );
+        $this->createParticipation($speakingClub5->getId(),UserFixtures::USER_ID_JOHN_CONNNOR);
 
         $application->add(
-            new NotifyUsersAboutCloseClubsCommand(
+            new SendLinksCommand(
                 speakingClubRepository: $speakingClubRepository,
                 participationRepository: $participationRepository,
                 clock: $this->getContainer()->get(Clock::class),
@@ -75,7 +78,7 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
             )
         );
 
-        $command = $application->find('app:notify-users');
+        $command = $application->find('app:send-links');
         $commandTester = new CommandTester($command);
 
         $result = $commandTester->execute([]);
@@ -86,7 +89,8 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
         $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         self::assertEquals(
-            'Разговорный клуб "Test club 1" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',
+            'Разговорный клуб "Test club 1" начнется через 15 минут! ' .
+            'Ждём вас по ссылке ниже. Приятного общения! 😊' . "\n" . $link1,
             $messages[0]['text']
         );
 
@@ -94,7 +98,8 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
         $messages = $this->getMessagesByChatId(222222);
 
         self::assertEquals(
-            'Разговорный клуб "Test club 2" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.',
+            'Разговорный клуб "Test club 2" начнется через 15 минут! ' .
+            'Ждём вас по ссылке ниже. Приятного общения! 😊' . "\n" . $link2,
             $messages[0]['text']
         );
     }
