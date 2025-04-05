@@ -12,6 +12,7 @@ use App\SpeakingClub\Presentation\Cli\SendLinksCommand;
 use App\Tests\Mock\MockTelegram;
 use App\Tests\Shared\BaseApplicationTest;
 use App\Tests\TestCaseTrait;
+use App\User\Domain\UserRepository;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
 use Exception;
@@ -37,13 +38,15 @@ class SendLinksCommandTest extends BaseApplicationTest
         $speakingClubRepository = $this->getContainer()->get(SpeakingClubRepository::class);
         /** @var ParticipationRepository $participationRepository */
         $participationRepository = $this->getContainer()->get(ParticipationRepository::class);
+        /** @var UserRepository $userRepository */
+        $userRepository = self::getContainer()->get(UserRepository::class);
 
         $speakingClub1 = $this->createSpeakingClub(
             'Test club 1',
             date: (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:00'),
             link: $link1
         );
-        $this->createParticipation($speakingClub1->getId(),UserFixtures::USER_ID_JOHN_CONNNOR);
+        $this->createParticipation($speakingClub1->getId(), UserFixtures::USER_ID_JOHN_CONNNOR);
 
         $speakingClub2 = $this->createSpeakingClub(
             'Test club 2',
@@ -62,17 +65,18 @@ class SendLinksCommandTest extends BaseApplicationTest
             'Test club 4',
             date: (new DateTimeImmutable())->modify('+14 minutes')->format('Y-m-d H:i:00')
         );
-        $this->createParticipation($speakingClub4->getId(),UserFixtures::USER_ID_JOHN_CONNNOR);
+        $this->createParticipation($speakingClub4->getId(), UserFixtures::USER_ID_JOHN_CONNNOR);
         $speakingClub5 = $this->createSpeakingClub(
             'Test club 5',
             date: (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:00')
         );
-        $this->createParticipation($speakingClub5->getId(),UserFixtures::USER_ID_JOHN_CONNNOR);
+        $this->createParticipation($speakingClub5->getId(), UserFixtures::USER_ID_JOHN_CONNNOR);
 
         $application->add(
             new SendLinksCommand(
                 speakingClubRepository: $speakingClubRepository,
                 participationRepository: $participationRepository,
+                userRepository: $userRepository,
                 clock: $this->getContainer()->get(Clock::class),
                 telegram: $this->getContainer()->get(TelegramInterface::class),
             )
@@ -94,12 +98,74 @@ class SendLinksCommandTest extends BaseApplicationTest
             $messages[0]['text']
         );
 
-        $this->assertArrayHasKey(222222, $this->getMessages());
-        $messages = $this->getMessagesByChatId(222222);
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_SARAH_CONNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_SARAH_CONNOR);
 
         self::assertEquals(
             'Разговорный клуб "Test club 2" начнется через 15 минут! ' .
             'Ждём вас по ссылке ниже. Приятного общения! 😊' . "\n" . $link2,
+            $messages[0]['text']
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSuccessWhenUserWithTeacherUsernameExists(): void
+    {
+        $application = new Application();
+        MockTelegram::$messages = [];
+
+        $link = 'some-link';
+        $teacherUsername = UserFixtures::USER_USERNAME_SARAH_CONNOR;
+
+        /** @var SpeakingClubRepository $speakingClubRepository */
+        $speakingClubRepository = $this->getContainer()->get(SpeakingClubRepository::class);
+        /** @var ParticipationRepository $participationRepository */
+        $participationRepository = $this->getContainer()->get(ParticipationRepository::class);
+        /** @var UserRepository $userRepository */
+        $userRepository = self::getContainer()->get(UserRepository::class);
+
+        $speakingClub = $this->createSpeakingClub(
+            'Test club',
+            date: (new DateTimeImmutable())->modify('+15 minutes')->format('Y-m-d H:i:00'),
+            link: $link,
+            teacherUsername: $teacherUsername
+        );
+        $this->createParticipation($speakingClub->getId(), UserFixtures::USER_ID_JOHN_CONNNOR);
+
+        $application->add(
+            new SendLinksCommand(
+                speakingClubRepository: $speakingClubRepository,
+                participationRepository: $participationRepository,
+                userRepository: $userRepository,
+                clock: $this->getContainer()->get(Clock::class),
+                telegram: $this->getContainer()->get(TelegramInterface::class),
+            )
+        );
+
+        $command = $application->find('app:send-links');
+        $commandTester = new CommandTester($command);
+
+        $result = $commandTester->execute([]);
+
+        self::assertEquals(Command::SUCCESS, $result);
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        self::assertEquals(
+            'Разговорный клуб "Test club" начнется через 15 минут! ' .
+            'Ждём вас по ссылке ниже. Приятного общения! 😊' . "\n" . $link,
+            $messages[0]['text']
+        );
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_SARAH_CONNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_SARAH_CONNOR);
+
+        self::assertEquals(
+            'Разговорный клуб "Test club" начнется через 15 минут! ' .
+            'Ждём вас по ссылке ниже. Приятного общения! 😊' . "\n" . $link,
             $messages[0]['text']
         );
     }

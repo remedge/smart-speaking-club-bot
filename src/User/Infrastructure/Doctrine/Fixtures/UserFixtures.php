@@ -14,12 +14,15 @@ class UserFixtures extends Fixture
 {
     public const USER_ID_JOHN_CONNNOR = '00000000-0000-0000-0000-000000000001';
     public const USER_CHAT_ID_JOHN_CONNNOR = 111111;
+    public const USER_USERNAME_JOHN_CONNNOR = 'john_connor';
 
     public const USER_ID_SARAH_CONNOR = '00000000-0000-0000-0000-000000000002';
     public const USER_CHAT_ID_SARAH_CONNOR = 222222;
+    public const USER_USERNAME_SARAH_CONNOR = 'sarah_connor';
 
     public const ADMIN_ID = '00000000-0000-0000-0000-000000000003';
     public const ADMIN_CHAT_ID = 666666;
+    public const ADMIN_USERNAME = 'kyle_reese';
 
     public function load(ObjectManager $manager): void
     {

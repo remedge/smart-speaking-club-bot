@@ -39,5 +39,6 @@ class SpeakingClubDoctrineMapping extends DoctrineMapping
             'default' => false,
         ]);
         $builder->addField('link', 'text', ['nullable' => true, 'default' => null]);
+        $builder->addField('teacherUsername', 'text', ['nullable' => true, 'default' => null]);
     }
 }

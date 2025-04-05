@@ -21,11 +21,13 @@ final class Version20250403153025 extends AbstractMigration
     {
         $table = $schema->getTable('speaking_clubs');
         $table->addColumn('link', 'text', ['notnull' => false]);
+        $table->addColumn('teacher_username', 'text', ['notnull' => false]);
     }
 
     public function down(Schema $schema): void
     {
         $table = $schema->getTable('speaking_clubs');
         $table->dropColumn('link');
+        $table->dropColumn('teacher_username');
     }
 }

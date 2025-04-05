@@ -19,7 +19,8 @@ class SpeakingClub
         private bool $isCancelled = false,
         private bool $isArchived = false,
         private bool $isRatingAsked = false,
-        private ?string $link = null
+        private ?string $link = null,
+        private ?string $teacherUsername = null,
     ) {
     }
 
@@ -116,5 +117,15 @@ class SpeakingClub
     public function getLink(): ?string
     {
         return $this->link;
+    }
+
+    public function setTeacherUsername(?string $teacherUsername): void
+    {
+        $this->teacherUsername = $teacherUsername;
+    }
+
+    public function getTeacherUsername(): ?string
+    {
+        return $this->teacherUsername;
     }
 }

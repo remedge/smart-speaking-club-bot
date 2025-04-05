@@ -9,6 +9,7 @@ use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\User\Domain\UserRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,6 +21,7 @@ class SendLinksCommand extends Command
     public function __construct(
         private SpeakingClubRepository $speakingClubRepository,
         private ParticipationRepository $participationRepository,
+        private UserRepository $userRepository,
         private Clock $clock,
         private TelegramInterface $telegram,
     ) {
@@ -52,15 +54,20 @@ class SendLinksCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
 
             foreach ($participations as $participation) {
-                $this->telegram->sendMessage(
-                    (int)$participation['chatId'],
-                    sprintf(
-                        $text,
-                        $speakingClub->getName(),
-                        $speakingClub->getLink()
-                    )
-                );
+                $this->sendMessage((int)$participation['chatId'], $text, $speakingClub->getName(), $speakingClub->getLink());
+            }
+
+            if (!is_null($speakingClub->getTeacherUsername())) {
+                $teacher = $this->userRepository->findByUsername($speakingClub->getTeacherUsername());
+                if ($teacher) {
+                    $this->sendMessage($teacher->getChatId(), $text, $speakingClub->getName(), $speakingClub->getLink());
+                }
             }
         }
+    }
+
+    private function sendMessage(int $chatId, string $text, string $speakingClubName, string $speakingClubLink): void
+    {
+        $this->telegram->sendMessage($chatId, sprintf($text, $speakingClubName, $speakingClubLink));
     }
 }
