@@ -172,6 +172,460 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
         $handler->__invoke($command);
     }
 
+    public function testReceivingDescriptionForCreation(): void
+    {
+        $adminChatId = 123;
+        $text = 'some description';
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $actualClubData = [
+            'id'   => '00000000-0000-0000-0000-000000000001',
+            'name' => 'name',
+        ];
+        $newClubData = [
+            'id'          => '00000000-0000-0000-0000-000000000001',
+            'name'        => 'name',
+            'description' => $text,
+        ];
+
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_DESCRIPTION_FOR_CREATION);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::RECEIVING_TEACHER_USERNAME);
+        $adminUser
+            ->method('getActualSpeakingClubData')
+            ->willReturn($actualClubData);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with($newClubData);
+        $adminUser
+            ->method('getChatId')
+            ->willReturn($adminChatId);
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::once())
+            ->method('sendMessage')
+            ->with(
+                $adminChatId,
+                'Введите username преподавателя(без @) или "пропустить" чтобы пропустить'
+            );
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+        );
+        $handler->__invoke($command);
+    }
+
+    public function testReceivingTeacherUsername(): void
+    {
+        $adminChatId = 123;
+        $text = 'teacherUsername';
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $actualClubData = [
+            'id'          => '00000000-0000-0000-0000-000000000001',
+            'name'        => 'name',
+            'description' => 'description',
+        ];
+        $newClubData = [
+            'id'               => '00000000-0000-0000-0000-000000000001',
+            'name'             => 'name',
+            'description'      => 'description',
+            'teacher_username' => $text,
+        ];
+
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_TEACHER_USERNAME);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::RECEIVING_LINK_TO_CLUB);
+        $adminUser
+            ->method('getActualSpeakingClubData')
+            ->willReturn($actualClubData);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with($newClubData);
+        $adminUser
+            ->method('getChatId')
+            ->willReturn($adminChatId);
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::once())
+            ->method('sendMessage')
+            ->with(
+                $adminChatId,
+                'Введите ссылку на разговорный клуб или "пропустить" чтобы пропустить'
+            );
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+        );
+        $handler->__invoke($command);
+    }
+
+    /**
+     * @dataProvider skipVersionsDataProvider
+     * @param string $skipText
+     * @return void
+     */
+    public function testReceivingTeacherUsernameWhenSkip(string $skipText): void
+    {
+        $adminChatId = 123;
+        $text = $skipText;
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_TEACHER_USERNAME);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::RECEIVING_LINK_TO_CLUB);
+        $adminUser
+            ->expects(self::never())
+            ->method('setActualSpeakingClubData');
+        $adminUser
+            ->method('getChatId')
+            ->willReturn($adminChatId);
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::once())
+            ->method('sendMessage')
+            ->with(
+                $adminChatId,
+                'Введите ссылку на разговорный клуб или "пропустить" чтобы пропустить'
+            );
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+        );
+        $handler->__invoke($command);
+    }
+
+    public static function skipVersionsDataProvider(): array
+    {
+        return [
+            ['пропустить'],
+            ['Пропустить'],
+            [' пропустить '],
+            [' проПустИть '],
+            ["пропустить\n"],
+        ];
+    }
+
+    public function testReceivingLinkToClub(): void
+    {
+        $adminChatId = 123;
+        $text = 'some url';
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $actualClubData = [
+            'id'               => '00000000-0000-0000-0000-000000000001',
+            'name'             => 'name',
+            'description'      => 'description',
+            'teacher_username' => 'teacher_username',
+        ];
+        $newClubData = [
+            'id'               => '00000000-0000-0000-0000-000000000001',
+            'name'             => 'name',
+            'description'      => 'description',
+            'teacher_username' => 'teacher_username',
+            'link'             => $text,
+        ];
+
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_LINK_TO_CLUB);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+        $adminUser
+            ->method('getActualSpeakingClubData')
+            ->willReturn($actualClubData);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with($newClubData);
+        $adminUser
+            ->method('getChatId')
+            ->willReturn($adminChatId);
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::once())
+            ->method('sendMessage')
+            ->with(
+                $adminChatId,
+                'Введите минимальное количество участников'
+            );
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+        );
+        $handler->__invoke($command);
+    }
+
+    /**
+     * @dataProvider skipVersionsDataProvider
+     * @param string $skipText
+     * @return void
+     */
+    public function testReceivingLinkToClubWhenSkip(string $skipText): void
+    {
+        $adminChatId = 123;
+        $text = $skipText;
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_LINK_TO_CLUB);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+        $adminUser
+            ->expects(self::never())
+            ->method('setActualSpeakingClubData');
+        $adminUser
+            ->method('getChatId')
+            ->willReturn($adminChatId);
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::once())
+            ->method('sendMessage')
+            ->with(
+                $adminChatId,
+                'Введите минимальное количество участников'
+            );
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+        );
+        $handler->__invoke($command);
+    }
+
+    public function testReceivingMinParticipantsCountForCreation(): void
+    {
+        $adminChatId = 123;
+        $text = '4';
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $actualClubData = [
+            'id'               => '00000000-0000-0000-0000-000000000001',
+            'name'             => 'name',
+            'description'      => 'description',
+            'teacher_username' => 'teacher_username',
+            'link'             => 'link',
+        ];
+        $newClubData = [
+            'id'                     => '00000000-0000-0000-0000-000000000001',
+            'name'                   => 'name',
+            'description'            => 'description',
+            'teacher_username'       => 'teacher_username',
+            'link'                   => 'link',
+            'min_participants_count' => $text
+        ];
+
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::RECEIVING_MAX_PARTICIPANTS_COUNT_FOR_CREATION);
+        $adminUser
+            ->method('getActualSpeakingClubData')
+            ->willReturn($actualClubData);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with($newClubData);
+        $adminUser
+            ->method('getChatId')
+            ->willReturn($adminChatId);
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::once())
+            ->method('sendMessage')
+            ->with(
+                $adminChatId,
+                'Введите максимальное количество участников'
+            );
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            telegram: $telegram,
+        );
+        $handler->__invoke($command);
+    }
+
+    public function testReceivingDateForCreation(): void
+    {
+        $adminChatId = 123;
+        $text = (new DateTimeImmutable())->modify('+5 hours')->format('d.m.Y H:i');
+        $date = DateTimeImmutable::createFromFormat('d.m.Y H:i', $text);
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $data = [
+            'id'                     => '00000000-0000-0000-0000-000000000001',
+            'name'                   => 'new name',
+            'description'            => 'new description',
+            'teacher_username'       => 'teacher_username',
+            'link'                   => 'link',
+            'min_participants_count' => 12,
+            'max_participants_count' => 12
+        ];
+        $adminUser = $this->createMock(User::class);
+        $adminUser
+            ->method('getState')
+            ->willReturn(UserStateEnum::RECEIVING_DATE_FOR_EDITING);
+        $adminUser
+            ->expects(self::once())
+            ->method('setState')
+            ->with(UserStateEnum::IDLE);
+        $adminUser
+            ->method('getActualSpeakingClubData')
+            ->willReturn($data);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with([]);
+        $adminUser
+            ->method('getUsername')
+            ->willReturn('@admin_user_name');
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($adminUser);
+        $userRepository
+            ->method('findByChatId')
+            ->with($adminChatId)
+            ->willReturn($adminUser);
+
+        $speakingClub = new SpeakingClub(
+            id: Uuid::fromString($data['id']),
+            name: $data['name'],
+            description: $data['description'],
+            minParticipantsCount: $data['min_participants_count'],
+            maxParticipantsCount: $data['max_participants_count'],
+            date: $date,
+            link: $data['link'],
+            teacherUsername: $data['teacher_username'],
+        );
+
+        $speakingClubRepository = $this->createMock(SpeakingClubRepository::class);
+        $speakingClubRepository
+            ->expects(self::once())
+            ->method('save')
+            ->with($speakingClub);
+
+        $telegram = $this->createMock(TelegramInterface::class);
+        $telegram
+            ->expects(self::once())
+            ->method('sendMessage')
+            ->with($adminChatId, 'Клуб успешно создан');
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            speakingClubRepository: $speakingClubRepository,
+            telegram: $telegram,
+        );
+        $handler->__invoke($command);
+    }
+
     public function testReceivingDateForEditing(): void
     {
         $adminChatId = 123;
@@ -183,6 +637,8 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'new name',
             'description'            => 'new description',
+            'teacher_username'       => 'teacher_username',
+            'link'                   => 'link',
             'min_participants_count' => 12,
             'max_participants_count' => 12
         ];
@@ -219,6 +675,8 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'old name',
             'description'            => 'old description',
+            'teacher_username'       => 'old_teacher_username',
+            'link'                   => 'old_link',
             'min_participants_count' => 11,
             'max_participants_count' => 11,
             'date'                   => date('d.m.2023 H:i'),

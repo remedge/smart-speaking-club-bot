@@ -76,11 +76,48 @@ class AdminGenericTextCommandHandler
             $data = $user->getActualSpeakingClubData();
             $data['description'] = $command->text;
 
-            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+            $user->setState(UserStateEnum::RECEIVING_TEACHER_USERNAME);
             $user->setActualSpeakingClubData($data);
             $this->userRepository->save($user);
 
-            $this->telegram->sendMessage($command->chatId, 'Введите минимальное количество участников');
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите username преподавателя(без @) или "пропустить" чтобы пропустить'
+            );
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME) {
+            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+                $data = $user->getActualSpeakingClubData();
+                $data['teacher_username'] = $command->text;
+                $user->setActualSpeakingClubData($data);
+            }
+
+            $user->setState(UserStateEnum::RECEIVING_LINK_TO_CLUB);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите ссылку на разговорный клуб или "пропустить" чтобы пропустить'
+            );
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB) {
+            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+                $data = $user->getActualSpeakingClubData();
+                $data['link'] = $command->text;
+                $user->setActualSpeakingClubData($data);
+            }
+
+            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите минимальное количество участников'
+            );
             return;
         }
 
