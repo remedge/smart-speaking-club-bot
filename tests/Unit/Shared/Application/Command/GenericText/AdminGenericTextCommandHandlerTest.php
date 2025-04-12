@@ -10,6 +10,7 @@ use App\Shared\Application\Clock;
 use App\Shared\Application\Command\GenericText\AdminGenericTextCommand;
 use App\Shared\Application\UuidProvider;
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Event\SpeakingClubScheduleChangedEvent;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\Tests\Shared\BaseApplicationTest;
@@ -22,6 +23,7 @@ use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use stdClass;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -846,6 +848,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
     public function testReceivingDateForEditing(): void
     {
         $adminChatId = 123;
+        $oldDate = (new DateTimeImmutable())->modify('+2 hours')->format('d.m.Y H:i');
         $text = (new DateTimeImmutable())->modify('+5 hours')->format('d.m.Y H:i');
 
         $command = new AdminGenericTextCommand($adminChatId, $text);
@@ -894,9 +897,9 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'description'            => 'old description',
             'teacher_username'       => 'old_teacher_username',
             'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
+            'min_participants_count' => 12,
+            'max_participants_count' => 12,
+            'date'                   => $oldDate,
         ];
         $speakingClub = $this->createMock(SpeakingClub::class);
         $speakingClub->method('getId')->willReturn(Uuid::fromString($oldClubData['id']));
@@ -933,6 +936,12 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
 
         $speakingClubRepository->expects(self::once())->method('save')->with($speakingClub);
 
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher
+            ->expects(self::once())
+            ->method('dispatch')
+            ->with(new SpeakingClubScheduleChangedEvent($speakingClub->getId()));
+
         $newClubData['date'] = $text;
         $logger = $this->createMock(LoggerInterface::class);
         $logger
@@ -955,6 +964,75 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             userRepository: $userRepository,
             speakingClubRepository: $speakingClubRepository,
             telegram: $telegram,
+            eventDispatcher: $eventDispatcher,
+            logger: $logger
+        );
+        $handler->__invoke($command);
+    }
+
+    public function testReceivingDateForEditingWhenSameDate(): void
+    {
+        $adminChatId = 123;
+        $text = (new DateTimeImmutable())->modify('+5 hours')->format('d.m.Y H:i');
+
+        $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $newClubData = [
+            'id'                     => '00000000-0000-0000-0000-000000000001',
+            'name'                   => 'new name',
+            'description'            => 'new description',
+            'teacher_username'       => 'new_teacher_username',
+            'link'                   => 'new_link',
+            'min_participants_count' => 12,
+            'max_participants_count' => 12
+        ];
+        $adminUser = $this->createMock(User::class);
+        $adminUser->method('getState')->willReturn(UserStateEnum::RECEIVING_DATE_FOR_EDITING);
+        $adminUser->method('getActualSpeakingClubData')->willReturn($newClubData);
+        $adminUser->method('getUsername')->willReturn('@admin_user_name');
+
+        $userRepository = $this->createMock(UserRepository::class);
+        $userRepository->method('findByChatId')->with($adminChatId)->willReturn($adminUser);
+
+        $oldClubData = [
+            'id'                     => '00000000-0000-0000-0000-000000000001',
+            'name'                   => 'old name',
+            'description'            => 'old description',
+            'teacher_username'       => 'old_teacher_username',
+            'link'                   => 'old_link',
+            'min_participants_count' => 12,
+            'max_participants_count' => 12,
+            'date'                   => $text,
+        ];
+        $speakingClub = $this->createMock(SpeakingClub::class);
+        $speakingClub->method('getId')->willReturn(Uuid::fromString($oldClubData['id']));
+        $speakingClub->method('getName')->willReturn($oldClubData['name']);
+        $speakingClub->method('getDescription')->willReturn($oldClubData['description']);
+        $speakingClub->method('getTeacherUsername')->willReturn($oldClubData['teacher_username']);
+        $speakingClub->method('getLink')->willReturn($oldClubData['link']);
+        $speakingClub->method('getMinParticipantsCount')->willReturn($oldClubData['min_participants_count']);
+        $speakingClub->method('getMaxParticipantsCount')->willReturn($oldClubData['max_participants_count']);
+        $speakingClub
+            ->method('getDate')
+            ->willReturn(DateTimeImmutable::createFromFormat('d.m.Y H:i', $oldClubData['date']));
+
+        $speakingClubRepository = $this->createMock(SpeakingClubRepository::class);
+        $speakingClubRepository
+            ->method('findById')
+            ->with('00000000-0000-0000-0000-000000000001')
+            ->willReturn($speakingClub);
+
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher->expects(self::never())->method('dispatch');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $telegram = $this->createMock(TelegramInterface::class);
+
+        $handler = $this->getAdminGenericTextCommandHandler(
+            userRepository: $userRepository,
+            speakingClubRepository: $speakingClubRepository,
+            telegram: $telegram,
+            eventDispatcher: $eventDispatcher,
             logger: $logger
         );
         $handler->__invoke($command);

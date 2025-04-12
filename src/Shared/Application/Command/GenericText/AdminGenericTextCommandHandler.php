@@ -353,7 +353,7 @@ class AdminGenericTextCommandHandler
 
             $speakingClub->setMaxParticipantsCount((int)$data['max_participants_count']);
 
-            if ($speakingClub->getDate() !== $date) {
+            if ($speakingClub->getDate()->format('d.m.Y H:i') !== $date->format('d.m.Y H:i')) {
                 $this->eventDispatcher->dispatch(new SpeakingClubScheduleChangedEvent($speakingClub->getId()));
             }
             $speakingClub->setDate($date);
