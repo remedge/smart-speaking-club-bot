@@ -10,6 +10,7 @@ class SpeakingClubScheduleChangedEvent
 {
     public function __construct(
         public UuidInterface $speakingClubId,
+        public string $date,
     ) {
     }
 }

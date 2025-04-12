@@ -6,6 +6,7 @@ namespace App\User\Application\EventListener;
 
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Event\SpeakingClubScheduleChangedEvent;
+use App\SpeakingClub\Application\Exception\SpeakingClubNotFoundException;
 use App\SpeakingClub\Application\Query\ParticipationQuery;
 use App\SpeakingClub\Application\Query\SpeakingClubQuery;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -20,6 +21,9 @@ class ScheduleChangedEventListener
     ) {
     }
 
+    /**
+     * @throws SpeakingClubNotFoundException
+     */
     public function __invoke(SpeakingClubScheduleChangedEvent $event): void
     {
         $speakingClubDTO = $this->speakingClubQuery->getById($event->speakingClubId);
@@ -32,7 +36,7 @@ class ScheduleChangedEventListener
                 text: sprintf(
                     'Изменилось время проведения для клуба "%s", новое время: %s',
                     $speakingClubDTO->name,
-                    $speakingClubDTO->date->format('d.m.Y H:i')
+                    $event->date
                 ),
                 replyMarkup: [[
                     [
