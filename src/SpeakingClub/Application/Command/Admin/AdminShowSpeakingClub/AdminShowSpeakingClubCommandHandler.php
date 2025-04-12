@@ -32,12 +32,14 @@ class AdminShowSpeakingClubCommandHandler
                 chatId: $command->chatId,
                 messageId: $command->messageId,
                 text: 'Такого клуба не существует',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_admin_list',
-                    ],
-                ]]
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_admin_list',
+                        ],
+                    ]
+                ]
             );
             return;
         }
@@ -75,8 +77,8 @@ class AdminShowSpeakingClubCommandHandler
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
                 $speakingClub->getTeacherUsername() ? '@' . $speakingClub->getTeacherUsername() : '',
-                $speakingClub->getLink() ?? '',
                 $speakingClub->getDate()->format('d.m.Y H:i'),
+                $speakingClub->getLink() ?? '',
                 $speakingClub->getMinParticipantsCount(),
                 $speakingClub->getMaxParticipantsCount(),
                 $totalParticipantsCount,
@@ -84,26 +86,36 @@ class AdminShowSpeakingClubCommandHandler
                 $waitingUsersString === '' ? 'Нет ожидающих' : $waitingUsersString,
             ),
             replyMarkup: [
-                [[
-                    'text' => 'Редактировать данные клуба',
-                    'callback_data' => sprintf('edit_club:%s', $speakingClub->getId()->toString()),
-                ]],
-                [[
-                    'text' => 'Редактировать список участников клуба',
-                    'callback_data' => sprintf('show_participants:%s', $speakingClub->getId()->toString()),
-                ]],
-                [[
-                    'text' => 'Отменить разговорный клуб',
-                    'callback_data' => sprintf('cancel_club:%s', $speakingClub->getId()->toString()),
-                ]],
-                [[
-                    'text' => 'Отправить сообщение всем участникам клуба',
-                    'callback_data' => sprintf('notify_participants:%s', $speakingClub->getId()->toString()),
-                ]],
-                [[
-                    'text' => '<< Вернуться к списку клубов',
-                    'callback_data' => 'back_to_admin_list',
-                ]],
+                [
+                    [
+                        'text'          => 'Редактировать данные клуба',
+                        'callback_data' => sprintf('edit_club:%s', $speakingClub->getId()->toString()),
+                    ]
+                ],
+                [
+                    [
+                        'text'          => 'Редактировать список участников клуба',
+                        'callback_data' => sprintf('show_participants:%s', $speakingClub->getId()->toString()),
+                    ]
+                ],
+                [
+                    [
+                        'text'          => 'Отменить разговорный клуб',
+                        'callback_data' => sprintf('cancel_club:%s', $speakingClub->getId()->toString()),
+                    ]
+                ],
+                [
+                    [
+                        'text'          => 'Отправить сообщение всем участникам клуба',
+                        'callback_data' => sprintf('notify_participants:%s', $speakingClub->getId()->toString()),
+                    ]
+                ],
+                [
+                    [
+                        'text'          => '<< Вернуться к списку клубов',
+                        'callback_data' => 'back_to_admin_list',
+                    ]
+                ],
             ],
         );
     }
