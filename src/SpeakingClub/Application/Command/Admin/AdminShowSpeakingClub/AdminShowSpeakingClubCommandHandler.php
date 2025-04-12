@@ -62,7 +62,9 @@ class AdminShowSpeakingClubCommandHandler
             text: sprintf(
                 'Название: %s'
                 . PHP_EOL . 'Описание: %s'
+                . PHP_EOL . 'Ник преподавателя в telegram: @%s'
                 . PHP_EOL . 'Дата: %s'
+                . PHP_EOL . 'Ссылка на клуб: %s'
                 . PHP_EOL
                 . PHP_EOL . 'Минимальное количество участников: %s'
                 . PHP_EOL . 'Максимальное количество участников: %s'
@@ -72,6 +74,8 @@ class AdminShowSpeakingClubCommandHandler
                 . PHP_EOL . 'Список ожидающих: ' . PHP_EOL . '%s',
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
+                $speakingClub->getTeacherUsername() ?? '',
+                $speakingClub->getLink() ?? '',
                 $speakingClub->getDate()->format('d.m.Y H:i'),
                 $speakingClub->getMinParticipantsCount(),
                 $speakingClub->getMaxParticipantsCount(),
