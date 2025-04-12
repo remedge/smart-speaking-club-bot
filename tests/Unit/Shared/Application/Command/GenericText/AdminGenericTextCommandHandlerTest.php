@@ -940,7 +940,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
         $eventDispatcher
             ->expects(self::once())
             ->method('dispatch')
-            ->with(new SpeakingClubScheduleChangedEvent($speakingClub->getId()));
+            ->with(new SpeakingClubScheduleChangedEvent($speakingClub->getId(), $text));
 
         $newClubData['date'] = $text;
         $logger = $this->createMock(LoggerInterface::class);
