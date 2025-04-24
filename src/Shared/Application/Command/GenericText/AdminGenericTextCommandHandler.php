@@ -239,11 +239,12 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_EDITING) {
-            if ('стереть' === trim(mb_strtolower($command->text))) {
-                $data = $user->getActualSpeakingClubData();
-                $data['teacher_username'] = null;
-                $user->setActualSpeakingClubData($data);
-            } else if ('пропустить' !== trim(mb_strtolower($command->text))) {
+//            if ('стереть' === trim(mb_strtolower($command->text))) {
+//                $data = $user->getActualSpeakingClubData();
+//                $data['teacher_username'] = null;
+//                $user->setActualSpeakingClubData($data);
+//            } else
+                if ('пропустить' !== trim(mb_strtolower($command->text))) {
                 $data = $user->getActualSpeakingClubData();
                 $data['teacher_username'] = $command->text;
                 $user->setActualSpeakingClubData($data);
