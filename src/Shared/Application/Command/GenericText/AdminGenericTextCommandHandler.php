@@ -239,6 +239,7 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_EDITING) {
+            $tmp = $user->getActualSpeakingClubData();
 //            if ('стереть' === trim(mb_strtolower($command->text))) {
 //                $data = $user->getActualSpeakingClubData();
 //                $data['teacher_username'] = null;
@@ -250,7 +251,6 @@ class AdminGenericTextCommandHandler
                 $user->setActualSpeakingClubData($data);
             }
 
-            $tmp = $user->getActualSpeakingClubData();
             $user->setState(UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING);
             $this->userRepository->save($user);
 
