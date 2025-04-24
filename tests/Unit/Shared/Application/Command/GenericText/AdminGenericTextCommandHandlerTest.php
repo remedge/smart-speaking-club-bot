@@ -778,7 +778,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->method('sendMessage')
             ->with(
                 $adminChatId,
-                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
+                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
             );
 
         $handler = $this->getAdminGenericTextCommandHandler(
@@ -853,7 +853,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->method('sendMessage')
             ->with(
                 $adminChatId,
-                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
+                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
             );
 
         $handler = $this->getAdminGenericTextCommandHandler(
@@ -901,7 +901,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->method('sendMessage')
             ->with(
                 $adminChatId,
-                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
+                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
             );
 
         $handler = $this->getAdminGenericTextCommandHandler(
