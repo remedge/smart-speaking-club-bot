@@ -658,22 +658,11 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
         $oldClubData = [
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'old name',
-            'description'            => 'old description',
-            'teacher_username'       => 'old_teacher_username',
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
         $newClubData = [
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'old name',
             'description'            => $text,
-            'teacher_username'       => 'old_teacher_username',
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
 
         $adminUser = $this->createMock(User::class);
@@ -729,21 +718,12 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'old name',
             'description'            => 'old description',
-            'teacher_username'       => 'old_teacher_username',
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
         $newClubData = [
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'old name',
             'description'            => 'old description',
             'teacher_username'       => $text,
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
 
         $adminUser = $this->createMock(User::class);
@@ -804,21 +784,12 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'old name',
             'description'            => 'old description',
-            'teacher_username'       => 'old_teacher_username',
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
         $newClubData = [
             'id'                     => '00000000-0000-0000-0000-000000000001',
             'name'                   => 'old name',
             'description'            => 'old description',
             'teacher_username'       => null,
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
 
         $adminUser = $this->createMock(User::class);
@@ -872,8 +843,31 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
     {
         $adminChatId = 123;
         $text = $skipText;
+        $speakingClubId = '00000000-0000-0000-0000-000000000001';
 
         $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $existingTeacherUsername = 'some_teacher_username';
+        $speakingClub = $this->createMock(SpeakingClub::class);
+        $speakingClub->method('getTeacherUsername')->willReturn($existingTeacherUsername);
+
+        $speakingClubRepository = $this->createMock(SpeakingClubRepository::class);
+        $speakingClubRepository
+            ->method('findById')
+            ->with()
+            ->willReturn($speakingClub);
+
+        $oldClubData = [
+            'id'                     => $speakingClubId,
+            'name'                   => 'old name',
+            'description'            => 'old description',
+        ];
+        $newClubData = [
+            'id'                     => $speakingClubId,
+            'name'                   => 'old name',
+            'description'            => 'old description',
+            'teacher_username'       => $existingTeacherUsername,
+        ];
 
         $adminUser = $this->createMock(User::class);
         $adminUser
@@ -883,7 +877,13 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->expects(self::once())
             ->method('setState')
             ->with(UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING);
-        $adminUser->expects(self::never())->method('setActualSpeakingClubData');
+        $adminUser
+            ->method('getActualSpeakingClubData')
+            ->willReturn($oldClubData);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with($newClubData);
 
         $userRepository = $this->createMock(UserRepository::class);
         $userRepository
@@ -906,6 +906,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
 
         $handler = $this->getAdminGenericTextCommandHandler(
             userRepository: $userRepository,
+            speakingClubRepository: $speakingClubRepository,
             telegram: $telegram,
         );
         $handler->__invoke($command);
@@ -923,10 +924,6 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'name'                   => 'old name',
             'description'            => 'old description',
             'teacher_username'       => 'old_teacher_username',
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
         $newClubData = [
             'id'                     => '00000000-0000-0000-0000-000000000001',
@@ -934,9 +931,6 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'description'            => 'old description',
             'teacher_username'       => 'old_teacher_username',
             'link'                   => $text,
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
 
         $adminUser = $this->createMock(User::class);
@@ -998,10 +992,6 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'name'                   => 'old name',
             'description'            => 'old description',
             'teacher_username'       => 'old_teacher_username',
-            'link'                   => 'old_link',
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
         $newClubData = [
             'id'                     => '00000000-0000-0000-0000-000000000001',
@@ -1009,9 +999,6 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             'description'            => 'old description',
             'teacher_username'       => 'old_teacher_username',
             'link'                   => null,
-            'min_participants_count' => 11,
-            'max_participants_count' => 11,
-            'date'                   => date('d.m.2023 H:i'),
         ];
 
         $adminUser = $this->createMock(User::class);
@@ -1065,8 +1052,33 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
     {
         $adminChatId = 123;
         $text = $skipText;
+        $speakingClubId = '00000000-0000-0000-0000-000000000001';
 
         $command = new AdminGenericTextCommand($adminChatId, $text);
+
+        $existingLink = 'link';
+        $speakingClub = $this->createMock(SpeakingClub::class);
+        $speakingClub->method('getLink')->willReturn($existingLink);
+
+        $speakingClubRepository = $this->createMock(SpeakingClubRepository::class);
+        $speakingClubRepository
+            ->method('findById')
+            ->with()
+            ->willReturn($speakingClub);
+
+        $oldClubData = [
+            'id'                     => $speakingClubId,
+            'name'                   => 'old name',
+            'description'            => 'old description',
+            'teacher_username'       => 'old_teacher_username',
+        ];
+        $newClubData = [
+            'id'                     => $speakingClubId,
+            'name'                   => 'old name',
+            'description'            => 'old description',
+            'teacher_username'       => 'old_teacher_username',
+            'link'                   => $existingLink,
+        ];
 
         $adminUser = $this->createMock(User::class);
         $adminUser
@@ -1076,7 +1088,13 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
             ->expects(self::once())
             ->method('setState')
             ->with(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING);
-        $adminUser->expects(self::never())->method('setActualSpeakingClubData');
+        $adminUser
+            ->method('getActualSpeakingClubData')
+            ->willReturn($oldClubData);
+        $adminUser
+            ->expects(self::once())
+            ->method('setActualSpeakingClubData')
+            ->with($newClubData);
 
         $userRepository = $this->createMock(UserRepository::class);
         $userRepository
@@ -1099,6 +1117,7 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
 
         $handler = $this->getAdminGenericTextCommandHandler(
             userRepository: $userRepository,
+            speakingClubRepository: $speakingClubRepository,
             telegram: $telegram,
         );
         $handler->__invoke($command);

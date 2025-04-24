@@ -239,40 +239,40 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_EDITING) {
-            $tmp = $user->getActualSpeakingClubData();
-//            if ('стереть' === trim(mb_strtolower($command->text))) {
-//                $data = $user->getActualSpeakingClubData();
-//                $data['teacher_username'] = null;
-//                $user->setActualSpeakingClubData($data);
-//            } else
-            if ('пропустить' !== trim(mb_strtolower($command->text))) {
-                $data = $user->getActualSpeakingClubData();
+            $data = $user->getActualSpeakingClubData();
+            if ('пропустить' === trim(mb_strtolower($command->text))) {
+                $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
+                $data['teacher_username'] = $speakingClub->getTeacherUsername();
+            } else if ('стереть' === trim(mb_strtolower($command->text))) {
+                $data['teacher_username'] = null;
+            } else {
                 $data['teacher_username'] = $command->text;
-                $user->setActualSpeakingClubData($data);
             }
+
+            $user->setActualSpeakingClubData($data);
 
             $user->setState(UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING);
             $this->userRepository->save($user);
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                print_r($tmp, true)
+                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
             );
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING) {
-            if ('стереть' === trim(mb_strtolower($command->text))) {
-                $data = $user->getActualSpeakingClubData();
+            $data = $user->getActualSpeakingClubData();
+            if ('пропустить' === trim(mb_strtolower($command->text))) {
+                $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
+                $data['link'] = $speakingClub->getLink();
+            } else if ('стереть' === trim(mb_strtolower($command->text))) {
                 $data['link'] = null;
-                $user->setActualSpeakingClubData($data);
             } else {
-                if ('пропустить' !== trim(mb_strtolower($command->text))) {
-                    $data = $user->getActualSpeakingClubData();
-                    $data['link'] = $command->text;
-                    $user->setActualSpeakingClubData($data);
-                }
+                $data['link'] = $command->text;
             }
+
+            $user->setActualSpeakingClubData($data);
 
             $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING);
             $this->userRepository->save($user);
