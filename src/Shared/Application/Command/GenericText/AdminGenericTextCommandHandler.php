@@ -244,18 +244,19 @@ class AdminGenericTextCommandHandler
 //                $data['teacher_username'] = null;
 //                $user->setActualSpeakingClubData($data);
 //            } else
-                if ('пропустить' !== trim(mb_strtolower($command->text))) {
+            if ('пропустить' !== trim(mb_strtolower($command->text))) {
                 $data = $user->getActualSpeakingClubData();
                 $data['teacher_username'] = $command->text;
                 $user->setActualSpeakingClubData($data);
             }
 
+            $tmp = $user->getActualSpeakingClubData();
             $user->setState(UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING);
             $this->userRepository->save($user);
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
+                print_r($tmp, true)
             );
             return;
         }
@@ -265,10 +266,12 @@ class AdminGenericTextCommandHandler
                 $data = $user->getActualSpeakingClubData();
                 $data['link'] = null;
                 $user->setActualSpeakingClubData($data);
-            } else if ('пропустить' !== trim(mb_strtolower($command->text))) {
-                $data = $user->getActualSpeakingClubData();
-                $data['link'] = $command->text;
-                $user->setActualSpeakingClubData($data);
+            } else {
+                if ('пропустить' !== trim(mb_strtolower($command->text))) {
+                    $data = $user->getActualSpeakingClubData();
+                    $data['link'] = $command->text;
+                    $user->setActualSpeakingClubData($data);
+                }
             }
 
             $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING);
