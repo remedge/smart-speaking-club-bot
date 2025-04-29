@@ -27,38 +27,37 @@ class NotifyUsersAboutCloseClubsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $startDate = $this->clock->now()->modify('+27 hours');
-        $startDate = $startDate->setTime((int) $startDate->format('H'), 0, 0);
-
-        $endDate = $this->clock->now()->modify('+27 hours');
-        $endDate = $endDate->setTime((int) $endDate->format('H'), 59, 0);
-
-        $speakingClubs = $this->speakingClubRepository->findBetweenDates($startDate, $endDate);
-
-        foreach ($speakingClubs as $speakingClub) {
-            $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
-
-            foreach ($participations as $participation) {
-                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 27 часов. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $speakingClub->getName()));
-            }
-        }
-
-        $startDate = $this->clock->now()->modify('+2 hours');
-        $startDate = $startDate->setTime((int) $startDate->format('H'), 0, 0);
-
-        $endDate = $this->clock->now()->modify('+2 hours');
-        $endDate = $endDate->setTime((int) $endDate->format('H'), 59, 0);
-
-        $speakingClubs = $this->speakingClubRepository->findBetweenDates($startDate, $endDate);
-
-        foreach ($speakingClubs as $speakingClub) {
-            $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
-
-            foreach ($participations as $participation) {
-                $this->telegram->sendMessage((int) $participation['chatId'], sprintf('Разговорный клуб "%s" начнется через 2 часа. Если у вас не получается прийти, пожалуйста, отмените вашу запись, чтобы мы предложили ваше место другим.', $speakingClub->getName()));
-            }
-        }
+        $this->notify(27, '27 часов');
+        $this->notify(2, '2 часа');
 
         return Command::SUCCESS;
+    }
+
+    private function notify(int $addHours, string $timeMessage): void
+    {
+        $startDate = $this->clock->now()->modify('+' . $addHours . ' hours');
+        $startDate = $startDate->setTime((int)$startDate->format('H'), 0, 0);
+
+        $endDate = $this->clock->now()->modify('+' . $addHours . ' hours');
+        $endDate = $endDate->setTime((int)$endDate->format('H'), 59, 0);
+
+        $speakingClubs = $this->speakingClubRepository->findBetweenDates($startDate, $endDate);
+
+        $text = 'Разговорный клуб "%s" начнется через %s. Если у вас не получается прийти, пожалуйста, ' .
+            'отмените вашу запись, чтобы мы предложили ваше место другим.';
+        foreach ($speakingClubs as $speakingClub) {
+            $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
+
+            foreach ($participations as $participation) {
+                $this->telegram->sendMessage(
+                    (int)$participation['chatId'],
+                    sprintf(
+                        $text,
+                        $speakingClub->getName(),
+                        $timeMessage
+                    )
+                );
+            }
+        }
     }
 }

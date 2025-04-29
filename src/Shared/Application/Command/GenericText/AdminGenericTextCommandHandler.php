@@ -76,11 +76,48 @@ class AdminGenericTextCommandHandler
             $data = $user->getActualSpeakingClubData();
             $data['description'] = $command->text;
 
-            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+            $user->setState(UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_CREATION);
             $user->setActualSpeakingClubData($data);
             $this->userRepository->save($user);
 
-            $this->telegram->sendMessage($command->chatId, 'Введите минимальное количество участников');
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите username преподавателя(без @) или "пропустить" чтобы пропустить'
+            );
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_CREATION) {
+            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+                $data = $user->getActualSpeakingClubData();
+                $data['teacher_username'] = $command->text;
+                $user->setActualSpeakingClubData($data);
+            }
+
+            $user->setState(UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_CREATION);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите ссылку на разговорный клуб или "пропустить" чтобы пропустить'
+            );
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_CREATION) {
+            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+                $data = $user->getActualSpeakingClubData();
+                $data['link'] = $command->text;
+                $user->setActualSpeakingClubData($data);
+            }
+
+            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_CREATION);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите минимальное количество участников'
+            );
             return;
         }
 
@@ -139,6 +176,8 @@ class AdminGenericTextCommandHandler
                 minParticipantsCount: $data['min_participants_count'],
                 maxParticipantsCount: $data['max_participants_count'],
                 date: $date,
+                link: $data['link'],
+                teacherUsername: $data['teacher_username'],
             );
             try {
                 $this->speakingClubRepository->save($speakingClub);
@@ -188,8 +227,54 @@ class AdminGenericTextCommandHandler
             $data = $user->getActualSpeakingClubData();
             $data['description'] = $command->text;
 
-            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING);
+            $user->setState(UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_EDITING);
             $user->setActualSpeakingClubData($data);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите новый username преподавателя(без @) ИЛИ "пропустить" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
+            );
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_EDITING) {
+            $data = $user->getActualSpeakingClubData();
+            if ('пропустить' === trim(mb_strtolower($command->text))) {
+                $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
+                $data['teacher_username'] = $speakingClub->getTeacherUsername();
+            } else if ('стереть' === trim(mb_strtolower($command->text))) {
+                $data['teacher_username'] = null;
+            } else {
+                $data['teacher_username'] = $command->text;
+            }
+
+            $user->setActualSpeakingClubData($data);
+
+            $user->setState(UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING);
+            $this->userRepository->save($user);
+
+            $this->telegram->sendMessage(
+                $command->chatId,
+                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
+            );
+            return;
+        }
+
+        if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING) {
+            $data = $user->getActualSpeakingClubData();
+            if ('пропустить' === trim(mb_strtolower($command->text))) {
+                $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
+                $data['link'] = $speakingClub->getLink();
+            } else if ('стереть' === trim(mb_strtolower($command->text))) {
+                $data['link'] = null;
+            } else {
+                $data['link'] = $command->text;
+            }
+
+            $user->setActualSpeakingClubData($data);
+
+            $user->setState(UserStateEnum::RECEIVING_MIN_PARTICIPANTS_COUNT_FOR_EDITING);
             $this->userRepository->save($user);
 
             $this->telegram->sendMessage($command->chatId, 'Введите новое минимальное количество участников');
@@ -266,12 +351,16 @@ class AdminGenericTextCommandHandler
                 'id'                     => $speakingClub->getId()->toString(),
                 'name'                   => $speakingClub->getName(),
                 'description'            => $speakingClub->getDescription(),
+                'teacher_username'       => $speakingClub->getTeacherUsername(),
+                'link'                   => $speakingClub->getLink(),
                 'min_participants_count' => $speakingClub->getMinParticipantsCount(),
                 'max_participants_count' => $speakingClub->getMaxParticipantsCount(),
                 'date'                   => $speakingClub->getDate()->format('d.m.Y H:i'),
             ];
             $speakingClub->setName($data['name']);
             $speakingClub->setDescription($data['description']);
+            $speakingClub->setTeacherUsername($data['teacher_username']);
+            $speakingClub->setLink($data['link']);
             $speakingClub->setMinParticipantsCount((int)$data['min_participants_count']);
 
             if ($speakingClub->getMaxParticipantsCount() < $data['max_participants_count']) {
@@ -280,8 +369,10 @@ class AdminGenericTextCommandHandler
 
             $speakingClub->setMaxParticipantsCount((int)$data['max_participants_count']);
 
-            if ($speakingClub->getDate() !== $date) {
-                $this->eventDispatcher->dispatch(new SpeakingClubScheduleChangedEvent($speakingClub->getId()));
+            if ($speakingClub->getDate()->format('d.m.Y H:i') !== $date->format('d.m.Y H:i')) {
+                $this->eventDispatcher->dispatch(
+                    new SpeakingClubScheduleChangedEvent($speakingClub->getId(), $date->format('d.m.Y H:i'))
+                );
             }
             $speakingClub->setDate($date);
 

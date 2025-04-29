@@ -54,14 +54,17 @@ class NotifyUsersAboutCloseClubsCommandTest extends BaseApplicationTest
             UserFixtures::USER_ID_SARAH_CONNOR
         );
 
-        $this->createSpeakingClub(
+        $speakingClub3 = $this->createSpeakingClub(
             'Test club 3',
-            date: (new DateTimeImmutable())->modify('+26 hours 59 minutes 59 seconds')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable())->modify('+16 minutes')->format('Y-m-d H:i:00')
         );
-        $this->createSpeakingClub(
+        $this->createParticipation($speakingClub3->getId(), UserFixtures::USER_ID_SARAH_CONNOR);
+
+        $speakingClub4 = $this->createSpeakingClub(
             'Test club 4',
-            date: (new DateTimeImmutable())->modify('+1 hours  59 minutes 59 seconds')->format('Y-m-d H:i:s')
+            date: (new DateTimeImmutable())->modify('+14 minutes')->format('Y-m-d H:i:s')
         );
+        $this->createParticipation($speakingClub4->getId(),UserFixtures::USER_ID_JOHN_CONNNOR);
 
         $application->add(
             new NotifyUsersAboutCloseClubsCommand(

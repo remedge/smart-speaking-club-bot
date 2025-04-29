@@ -6,6 +6,7 @@ namespace App\WaitList\Application\EventListener;
 
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
+use App\SpeakingClub\Application\Exception\SpeakingClubNotFoundException;
 use App\SpeakingClub\Application\Query\SpeakingClubQuery;
 use App\User\Application\Query\UserQuery;
 use App\WaitList\Domain\WaitingUserRepository;
@@ -22,6 +23,9 @@ class SpeakingClubFreeSpaceAvailableEventListener
     ) {
     }
 
+    /**
+     * @throws SpeakingClubNotFoundException
+     */
     public function __invoke(SpeakingClubFreeSpaceAvailableEvent $event): void
     {
         $speakingClub = $this->speakingClubQuery->getById($event->speakingClubId);

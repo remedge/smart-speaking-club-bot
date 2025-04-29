@@ -26,6 +26,8 @@ trait TestCaseTrait
         int $minParticipantsCount = 5,
         int $maxParticipantsCount = 10,
         bool $isCancelled = false,
+        string $link = null,
+        string $teacherUsername = null
     ): SpeakingClub {
         $date = $date ?: date('Y-m-d H:i:s', timestamp: strtotime('+1 hour'));
         $speakingClub = new SpeakingClub(
@@ -35,7 +37,9 @@ trait TestCaseTrait
             minParticipantsCount: $minParticipantsCount,
             maxParticipantsCount: $maxParticipantsCount,
             date: new DateTimeImmutable($date),
-            isCancelled: $isCancelled
+            isCancelled: $isCancelled,
+            link: $link,
+            teacherUsername: $teacherUsername
         );
 
         /** @var SpeakingClubRepository $clubRepository */

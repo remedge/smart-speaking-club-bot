@@ -44,21 +44,3 @@ passthru(
         __DIR__
     )
 );
-
-$schemaValidateResult = null;
-passthru(
-    sprintf(
-        'php "%s/../bin/console" doctrine:schema:validate --env=test',
-        __DIR__
-    ),
-    $schemaValidateResult
-);
-if (0 !== $schemaValidateResult) {
-    passthru(
-        sprintf(
-            'php "%s/../bin/console" doctrine:schema:create --env=test',
-            __DIR__
-        )
-    );
-}
-
