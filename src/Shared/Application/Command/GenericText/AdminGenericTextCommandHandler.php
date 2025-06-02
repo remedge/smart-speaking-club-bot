@@ -82,7 +82,7 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите username преподавателя(без @) или "пропустить" чтобы пропустить'
+                'Введите username преподавателя(без @) или "нет" чтобы пропустить'
             );
             return;
         }
@@ -99,7 +99,7 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите ссылку на разговорный клуб или "пропустить" чтобы пропустить'
+                'Введите ссылку на разговорный клуб или "нет" чтобы пропустить'
             );
             return;
         }
@@ -233,7 +233,7 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите новый username преподавателя(без @) ИЛИ "пропустить" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
+                'Введите новый username преподавателя(без @) ИЛИ "нет" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
             );
             return;
         }
@@ -256,7 +256,7 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
+                'Введите новую ссылку на разговорный клуб ИЛИ "нет" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
             );
             return;
         }
