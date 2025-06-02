@@ -356,12 +356,12 @@ class AdminGenericTextCommandHandlerTest extends BaseApplicationTest
     public static function skipVersionsDataProvider(): array
     {
         return [
-            ['пропустить'],
-            ['Пропустить'],
-            ['ПРОПУСТИТЬ'],
-            [' пропустить '],
-            [' проПустИть '],
-            ["пропустить\n"],
+            ['нет'],
+            ['Нет'],
+            ['НЕТ'],
+            [' нет '],
+            [' нЕт '],
+            ["нет\n"],
         ];
     }
 

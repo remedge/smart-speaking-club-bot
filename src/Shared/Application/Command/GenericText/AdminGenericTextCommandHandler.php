@@ -88,7 +88,7 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_CREATION) {
-            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+            if ('нет' !== trim(mb_strtolower($command->text))) {
                 $data = $user->getActualSpeakingClubData();
                 $data['teacher_username'] = $command->text;
                 $user->setActualSpeakingClubData($data);
@@ -105,7 +105,7 @@ class AdminGenericTextCommandHandler
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_CREATION) {
-            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+            if ('нет' !== trim(mb_strtolower($command->text))) {
                 $data = $user->getActualSpeakingClubData();
                 $data['link'] = $command->text;
                 $user->setActualSpeakingClubData($data);
@@ -240,7 +240,7 @@ class AdminGenericTextCommandHandler
 
         if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_EDITING) {
             $data = $user->getActualSpeakingClubData();
-            if ('пропустить' === trim(mb_strtolower($command->text))) {
+            if ('нет' === trim(mb_strtolower($command->text))) {
                 $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
                 $data['teacher_username'] = $speakingClub->getTeacherUsername();
             } else if ('стереть' === trim(mb_strtolower($command->text))) {
@@ -263,7 +263,7 @@ class AdminGenericTextCommandHandler
 
         if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING) {
             $data = $user->getActualSpeakingClubData();
-            if ('пропустить' === trim(mb_strtolower($command->text))) {
+            if ('нет' === trim(mb_strtolower($command->text))) {
                 $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
                 $data['link'] = $speakingClub->getLink();
             } else if ('стереть' === trim(mb_strtolower($command->text))) {
