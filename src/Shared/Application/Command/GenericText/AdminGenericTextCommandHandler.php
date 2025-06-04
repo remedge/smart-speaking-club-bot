@@ -82,13 +82,13 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите username преподавателя(без @) или "пропустить" чтобы пропустить'
+                'Введите username преподавателя(без @) или "нет" чтобы пропустить'
             );
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_CREATION) {
-            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+            if ('нет' !== trim(mb_strtolower($command->text))) {
                 $data = $user->getActualSpeakingClubData();
                 $data['teacher_username'] = $command->text;
                 $user->setActualSpeakingClubData($data);
@@ -99,13 +99,13 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите ссылку на разговорный клуб или "пропустить" чтобы пропустить'
+                'Введите ссылку на разговорный клуб или "нет" чтобы пропустить'
             );
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_CREATION) {
-            if ('пропустить' !== trim(mb_strtolower($command->text))) {
+            if ('нет' !== trim(mb_strtolower($command->text))) {
                 $data = $user->getActualSpeakingClubData();
                 $data['link'] = $command->text;
                 $user->setActualSpeakingClubData($data);
@@ -233,14 +233,14 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите новый username преподавателя(без @) ИЛИ "пропустить" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
+                'Введите новый username преподавателя(без @) ИЛИ "нет" чтобы оставить старый username ИЛИ "стереть", чтобы стереть'
             );
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_TEACHER_USERNAME_FOR_EDITING) {
             $data = $user->getActualSpeakingClubData();
-            if ('пропустить' === trim(mb_strtolower($command->text))) {
+            if ('нет' === trim(mb_strtolower($command->text))) {
                 $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
                 $data['teacher_username'] = $speakingClub->getTeacherUsername();
             } else if ('стереть' === trim(mb_strtolower($command->text))) {
@@ -256,14 +256,14 @@ class AdminGenericTextCommandHandler
 
             $this->telegram->sendMessage(
                 $command->chatId,
-                'Введите новую ссылку на разговорный клуб ИЛИ "пропустить" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
+                'Введите новую ссылку на разговорный клуб ИЛИ "нет" чтобы оставить старую ссылку ИЛИ "стереть", чтобы стереть'
             );
             return;
         }
 
         if ($user->getState() === UserStateEnum::RECEIVING_LINK_TO_CLUB_FOR_EDITING) {
             $data = $user->getActualSpeakingClubData();
-            if ('пропустить' === trim(mb_strtolower($command->text))) {
+            if ('нет' === trim(mb_strtolower($command->text))) {
                 $speakingClub = $this->speakingClubRepository->findById(Uuid::fromString($data['id']));
                 $data['link'] = $speakingClub->getLink();
             } else if ('стереть' === trim(mb_strtolower($command->text))) {
