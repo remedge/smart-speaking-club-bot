@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Application\Command\Admin\AdminRemovePlusOneToPartici
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\User\Application\Query\UserQuery;
 use App\WaitList\Application\Query\WaitingUserQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -103,7 +104,9 @@ class AdminRemovePlusOneToParticipantCommandHandler
                 text: sprintf(
                     'Администратор убрал вам +1 к участию в клубе "%s" %s',
                     $speakingClub->getName(),
-                    $speakingClub->getDate()->format('d.m.Y H:i')
+                    $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                        $speakingClub->getDate()->format('d.m.Y')
+                    )
                 ),
                 replyMarkup: [
                     [[
@@ -126,7 +129,9 @@ class AdminRemovePlusOneToParticipantCommandHandler
                 text: sprintf(
                     'Появилось свободное место в клубе "%s" %s, спешите записаться!',
                     $speakingClub->getName(),
-                    $speakingClub->getDate()->format('d.m.Y H:i')
+                    $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                        $speakingClub->getDate()->format('d.m.Y')
+                    )
                 ),
                 replyMarkup: [
                     [[

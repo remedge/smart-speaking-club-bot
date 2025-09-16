@@ -8,6 +8,7 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use DateTimeImmutable;
@@ -49,7 +50,9 @@ class AdminAddPlusOneToParticipantTest extends BaseApplicationTest
                 'Администратор добавил вам +1 к участию в клубе "%s" %s %s',
                 $speakingClub->getName(),
                 $speakingClub->getDate()->format('d.m.Y'),
-                $speakingClub->getDate()->format('H:i'),
+                $speakingClub->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
             ),
             $message['text']
         );

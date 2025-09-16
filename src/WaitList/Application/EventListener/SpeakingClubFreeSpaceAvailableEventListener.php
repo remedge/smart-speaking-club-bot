@@ -8,6 +8,7 @@ use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
 use App\SpeakingClub\Application\Exception\SpeakingClubNotFoundException;
 use App\SpeakingClub\Application\Query\SpeakingClubQuery;
+use App\System\DateHelper;
 use App\User\Application\Query\UserQuery;
 use App\WaitList\Domain\WaitingUserRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -44,7 +45,9 @@ class SpeakingClubFreeSpaceAvailableEventListener
                 text: sprintf(
                     'В клубе "%s" %s появилось свободное место. Перейдите к описанию клуба, чтобы записаться',
                     $speakingClub->name,
-                    $speakingClub->date->format('d.m.Y H:i'),
+                    $speakingClub->date->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                        $speakingClub->date->format('d.m.Y')
+                    ),
                 ),
                 replyMarkup: [[
                     [

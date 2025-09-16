@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Presentation\Cli;
 use App\Shared\Application\Clock;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use Google_Client;
 use Google_Service_Sheets;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -44,7 +45,9 @@ class DumpCanceledClubsCommand extends Command
             $participations = $this->participationRepository->findBySpeakingClubId($speakingClub->getId());
             $participationsCount = count($participations);
             $newRow = [
-                $speakingClub->getDate()->format('d.m.Y H:i'),
+                $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
                 $speakingClub->getMinParticipantsCount(),

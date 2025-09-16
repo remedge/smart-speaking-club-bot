@@ -10,6 +10,7 @@ use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\User\Application\Exception\UserNotFoundException;
 use App\User\Application\Query\UserQuery;
 use App\UserBan\Domain\UserBanRepository;
@@ -149,7 +150,9 @@ class SignInCommandHandler
                 '👌 Вы успешно записаны на разговорный клуб "%s", который состоится %s в %s',
                 $speakingClub->getName(),
                 $speakingClub->getDate()->format('d.m.Y'),
-                $speakingClub->getDate()->format('H:i'),
+                $speakingClub->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
             ),
             replyMarkup: [
                 [

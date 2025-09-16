@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Presentation\Cli;
 use App\Shared\Application\Clock;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\WaitList\Domain\WaitingUserRepository;
 use Google_Client;
 use Google_Service_Sheets;
@@ -50,7 +51,9 @@ class ArchivePastSpeakingClubsCommand extends Command
             $waitingUsersCount = count($waitingUsers);
 
             $newRow = [
-                $speakingClub->getDate()->format('d.m.Y H:i'),
+                $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
                 $speakingClub->getName(),
                 $speakingClub->getDescription(),
                 $speakingClub->getMinParticipantsCount(),

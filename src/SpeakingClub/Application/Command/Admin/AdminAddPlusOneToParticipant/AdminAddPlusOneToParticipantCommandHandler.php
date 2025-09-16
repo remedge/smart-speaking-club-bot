@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Application\Command\Admin\AdminAddPlusOneToParticipan
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\User\Application\Query\UserQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -124,7 +125,9 @@ class AdminAddPlusOneToParticipantCommandHandler
                 text: sprintf(
                     'Администратор добавил вам +1 к участию в клубе "%s" %s',
                     $speakingClub->getName(),
-                    $speakingClub->getDate()->format('d.m.Y H:i')
+                    $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                        $speakingClub->getDate()->format('d.m.Y')
+                    )
                 ),
                 replyMarkup: [
                     [[

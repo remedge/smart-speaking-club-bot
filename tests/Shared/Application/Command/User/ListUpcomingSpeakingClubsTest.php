@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Command\User;
 
+use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
 use DateTimeImmutable;
 use Exception;
@@ -46,7 +47,9 @@ class ListUpcomingSpeakingClubsTest extends BaseApplicationTest
                     'text'          => sprintf(
                         '%s %s - %s',
                         $speakingClub1->getDate()->format('d.m'),
-                        $speakingClub1->getDate()->format('H:i'),
+                        $speakingClub1->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                            $speakingClub1->getDate()->format('d.m.Y')
+                        ),
                         $speakingClub1->getName()
                     ),
                     'callback_data' => 'show_speaking_club:' . $speakingClub1->getId(),
@@ -57,7 +60,9 @@ class ListUpcomingSpeakingClubsTest extends BaseApplicationTest
                     'text'          => sprintf(
                         '%s %s - %s',
                         $speakingClub2->getDate()->format('d.m'),
-                        $speakingClub2->getDate()->format('H:i'),
+                        $speakingClub2->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                            $speakingClub2->getDate()->format('d.m.Y')
+                        ),
                         $speakingClub2->getName()
                     ),
                     'callback_data' => 'show_speaking_club:' . $speakingClub2->getId(),

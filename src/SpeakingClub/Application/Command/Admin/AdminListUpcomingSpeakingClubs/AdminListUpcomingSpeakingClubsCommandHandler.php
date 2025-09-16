@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Application\Command\Admin\AdminListUpcomingSpeakingCl
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -27,7 +28,13 @@ class AdminListUpcomingSpeakingClubsCommandHandler
         foreach ($speakingClubs as $speakingClub) {
             $buttons[] = [
                 [
-                    'text' => sprintf('%s - %s', $speakingClub->getDate()->format('d.m H:i'), $speakingClub->getName()),
+                    'text' => sprintf(
+                        '%s - %s',
+                        $speakingClub->getDate()->format('d.m H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                            $speakingClub->getDate()->format('d.m.Y')
+                        ),
+                        $speakingClub->getName()
+                    ),
                     'callback_data' => sprintf('admin_show_speaking_club:%s', $speakingClub->getId()->toString()),
                 ],
             ];
