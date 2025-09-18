@@ -16,6 +16,7 @@ use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\User\Application\Command\Admin\Notifications\SendMessageToAllUsersCommand;
 use App\User\Domain\UserRepository;
 use App\User\Domain\UserStateEnum;
@@ -533,7 +534,9 @@ class AdminGenericTextCommandHandler
                 text: sprintf(
                     'Администратор добавил вас в клуб "%s" %s',
                     $speakingClub->getName(),
-                    $speakingClub->getDate()->format('d.m.Y H:i'),
+                    $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                        $speakingClub->getDate()->format('d.m.Y')
+                    ),
                 ),
                 replyMarkup: [
                     [
@@ -709,7 +712,9 @@ class AdminGenericTextCommandHandler
                     text: sprintf(
                         'К сожалению, клуб "%s" %s был отменен',
                         $speakingClub->getName(),
-                        $speakingClub->getDate()->format('d.m.Y H:i')
+                        $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                            $speakingClub->getDate()->format('d.m.Y')
+                        )
                     ),
                     replyMarkup: [
                         [
@@ -733,7 +738,9 @@ class AdminGenericTextCommandHandler
                         text: sprintf(
                             'К сожалению, клуб "%s" %s был отменен',
                             $speakingClub->getName(),
-                            $speakingClub->getDate()->format('d.m.Y H:i')
+                            $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                                $speakingClub->getDate()->format('d.m.Y')
+                            )
                         ),
                         replyMarkup: [
                             [
@@ -760,7 +767,9 @@ class AdminGenericTextCommandHandler
                 text: sprintf(
                     'Клуб "%s" %s успешно отменен',
                     $speakingClub->getName(),
-                    $speakingClub->getDate()->format('d.m.Y H:i')
+                    $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                        $speakingClub->getDate()->format('d.m.Y')
+                    )
                 ),
                 replyMarkup: [
                     [

@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Application\Command\Admin\AdminShowParticipants;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Application\Query\ParticipationQuery;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -34,7 +35,7 @@ class AdminShowParticipantsCommandHandler
         foreach ($participants as $participant) {
             $buttons[] = [
                 [
-                    'text' => sprintf(
+                    'text'          => sprintf(
                         '%s %s (@%s) - Убрать',
                         $participant->firstName,
                         $participant->lastName,
@@ -43,13 +44,13 @@ class AdminShowParticipantsCommandHandler
                     'callback_data' => sprintf('remove_participant:%s', $participant->id->toString()),
                 ],
                 $participant->isPlusOne === true ? [
-                    'text' => 'Убрать +1',
+                    'text'          => 'Убрать +1',
                     'callback_data' => sprintf(
                         'admin_remove_plus_one:%s',
                         $participant->id->toString()
                     ),
                 ] : [
-                    'text' => 'Добавить +1',
+                    'text'          => 'Добавить +1',
                     'callback_data' => sprintf(
                         'admin_add_plus_one:%s',
                         $participant->id->toString()
@@ -58,15 +59,19 @@ class AdminShowParticipantsCommandHandler
             ];
         }
 
-        $buttons[] = [[
-            'text' => 'Добавить участника',
-            'callback_data' => sprintf('admin_add_participant:%s', $speakingClub->getId()->toString()),
-        ]];
+        $buttons[] = [
+            [
+                'text'          => 'Добавить участника',
+                'callback_data' => sprintf('admin_add_participant:%s', $speakingClub->getId()->toString()),
+            ]
+        ];
 
-        $buttons[] = [[
-            'text' => '<< Перейти описанию клуба',
-            'callback_data' => sprintf('admin_show_speaking_club:%s', $speakingClub->getId()->toString()),
-        ]];
+        $buttons[] = [
+            [
+                'text'          => '<< Перейти описанию клуба',
+                'callback_data' => sprintf('admin_show_speaking_club:%s', $speakingClub->getId()->toString()),
+            ]
+        ];
 
         $this->telegram->editMessageText(
             chatId: $command->chatId,
@@ -74,7 +79,9 @@ class AdminShowParticipantsCommandHandler
             text: sprintf(
                 'Список участников клуба "%s" %s. Вы можете добавить или убрать участника а также добавить или убрать +1 с ним',
                 $speakingClub->getName(),
-                $speakingClub->getDate()->format('d.m.Y H:i')
+                $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                )
             ),
             replyMarkup: $buttons
         );

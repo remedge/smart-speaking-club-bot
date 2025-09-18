@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
+use App\SpeakingClub\Domain\SpeakingClub;
+use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use Exception;
@@ -39,7 +41,9 @@ class ShowSpeakingClubTest extends BaseApplicationTest
 ',
                 $speakingClub->getName(),
                 $speakingClub->getDate()->format('d.m.Y'),
-                $speakingClub->getDate()->format('H:i'),
+                $speakingClub->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
             ),
             $message['text']
         );
@@ -100,7 +104,9 @@ class ShowSpeakingClubTest extends BaseApplicationTest
 ',
                 $speakingClub->getName(),
                 $speakingClub->getDate()->format('d.m.Y'),
-                $speakingClub->getDate()->format('H:i'),
+                $speakingClub->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
             ),
             $message['text']
         );
@@ -161,7 +167,9 @@ class ShowSpeakingClubTest extends BaseApplicationTest
 ',
                 $speakingClub->getName(),
                 $speakingClub->getDate()->format('d.m.Y'),
-                $speakingClub->getDate()->format('H:i'),
+                $speakingClub->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
             ),
             $message['text']
         );

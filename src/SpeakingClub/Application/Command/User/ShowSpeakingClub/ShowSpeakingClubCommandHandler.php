@@ -14,6 +14,7 @@ use App\SpeakingClub\Application\Command\User\SignOut\SignOutCommand;
 use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\User\Application\Query\UserQuery;
 use App\WaitList\Application\DTO\WaitingUserDTO;
 use App\WaitList\Application\Query\WaitingUserQuery;
@@ -43,24 +44,28 @@ class ShowSpeakingClubCommandHandler
                     chatId: $command->chatId,
                     messageId: $command->messageId,
                     text: '🤔 Такого клуба не существует',
-                    replyMarkup: [[
+                    replyMarkup: [
                         [
-                            'text' => '<< Перейти к списку ближайших клубов',
-                            'callback_data' => $command->backCallback,
-                        ],
-                    ]]
+                            [
+                                'text'          => '<< Перейти к списку ближайших клубов',
+                                'callback_data' => $command->backCallback,
+                            ],
+                        ]
+                    ]
                 );
                 return;
             } else {
                 $this->telegram->sendMessage(
                     chatId: $command->chatId,
                     text: '🤔 Такого клуба не существует',
-                    replyMarkup: [[
+                    replyMarkup: [
                         [
-                            'text' => '<< Перейти к списку ближайших клубов',
-                            'callback_data' => $command->backCallback,
-                        ],
-                    ]]
+                            [
+                                'text'          => '<< Перейти к списку ближайших клубов',
+                                'callback_data' => $command->backCallback,
+                            ],
+                        ]
+                    ]
                 );
                 return;
             }
@@ -70,12 +75,14 @@ class ShowSpeakingClubCommandHandler
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
                 text: '🤔 К сожалению, этот разговорный клуб уже прошел',
-                replyMarkup: [[
+                replyMarkup: [
                     [
-                        'text' => '<< Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_list',
-                    ],
-                ]]
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]
+                ]
             );
             return;
         }
@@ -103,7 +110,9 @@ class ShowSpeakingClubCommandHandler
             . PHP_EOL . '%s',
             $speakingClub->getName(),
             $speakingClub->getDescription(),
-            $speakingClub->getDate()->format('d.m.Y H:i'),
+            $speakingClub->getDate()->format('d.m.Y H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                $speakingClub->getDate()->format('d.m.Y')
+            ),
             $speakingClub->getMinParticipantsCount(),
             $speakingClub->getMaxParticipantsCount(),
             $totalParticipantsCount,
@@ -152,7 +161,7 @@ class ShowSpeakingClubCommandHandler
             if ($availablePlacesCount >= 1) {
                 $buttons[] = [
                     [
-                        'text' => 'Записаться',
+                        'text'          => 'Записаться',
                         'callback_data' => sprintf(
                             '%s:%s',
                             SignInCommand::CALLBACK_NAME,
@@ -164,7 +173,7 @@ class ShowSpeakingClubCommandHandler
             if ($availablePlacesCount >= 2) {
                 $buttons[] = [
                     [
-                        'text' => 'Записаться с +1 человеком',
+                        'text'          => 'Записаться с +1 человеком',
                         'callback_data' => sprintf(
                             '%s:%s',
                             SignInPlusOneCommand::CALLBACK_NAME,
@@ -176,7 +185,7 @@ class ShowSpeakingClubCommandHandler
         } else {
             $buttons[] = [
                 [
-                    'text' => 'Отменить запись',
+                    'text'          => 'Отменить запись',
                     'callback_data' => sprintf(
                         '%s:%s',
                         SignOutCommand::CALLBACK_NAME,
@@ -187,7 +196,7 @@ class ShowSpeakingClubCommandHandler
             if ($participation->isPlusOne() === true) {
                 $buttons[] = [
                     [
-                        'text' => 'Убрать +1 человека с собой',
+                        'text'          => 'Убрать +1 человека с собой',
                         'callback_data' => sprintf(
                             '%s:%s',
                             RemovePlusOneCommand::CALLBACK_NAME,
@@ -198,7 +207,7 @@ class ShowSpeakingClubCommandHandler
             } elseif ($availablePlacesCount >= 1) {
                 $buttons[] = [
                     [
-                        'text' => 'Добавить +1 человека с собой',
+                        'text'          => 'Добавить +1 человека с собой',
                         'callback_data' => sprintf(
                             '%s:%s',
                             AddPlusOneCommand::CALLBACK_NAME,
@@ -212,7 +221,7 @@ class ShowSpeakingClubCommandHandler
         if ($participation === null && $waitingUser === null && $availablePlacesCount === 0) {
             $buttons[] = [
                 [
-                    'text' => 'Встать в лист ожидания',
+                    'text'          => 'Встать в лист ожидания',
                     'callback_data' => 'join_waiting_list:' . $speakingClubId->toString(),
                 ],
             ];
@@ -221,7 +230,7 @@ class ShowSpeakingClubCommandHandler
         if ($waitingUser !== null) {
             $buttons[] = [
                 [
-                    'text' => 'Выйти из листа ожидания',
+                    'text'          => 'Выйти из листа ожидания',
                     'callback_data' => 'leave_waiting_list:' . $speakingClubId->toString(),
                 ],
             ];
@@ -229,7 +238,7 @@ class ShowSpeakingClubCommandHandler
 
         $buttons[] = [
             [
-                'text' => '<< Вернуться к списку клубов',
+                'text'          => '<< Вернуться к списку клубов',
                 'callback_data' => $backCallback,
             ],
         ];

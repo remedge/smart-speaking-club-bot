@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
+use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
@@ -54,7 +55,9 @@ class SignInTest extends BaseApplicationTest
                 '👌 Вы успешно записаны на разговорный клуб "%s", который состоится %s в %s',
                 $speakingClub->getName(),
                 $speakingClub->getDate()->format('d.m.Y'),
-                $speakingClub->getDate()->format('H:i'),
+                $speakingClub->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
             ),
             $message['text']
         );

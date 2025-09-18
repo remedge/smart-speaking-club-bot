@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClub
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\User\Application\Query\UserQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -30,7 +31,13 @@ class ListUserUpcomingSpeakingClubsCommandHandler
         foreach ($speakingClubs as $speakingClub) {
             $buttons[] = [
                 [
-                    'text' => sprintf('%s - %s', $speakingClub->getDate()->format('d.m H:i'), $speakingClub->getName()),
+                    'text'          => sprintf(
+                        '%s - %s',
+                        $speakingClub->getDate()->format('d.m H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                            $speakingClub->getDate()->format('d.m.Y')
+                        ),
+                        $speakingClub->getName()
+                    ),
                     'callback_data' => sprintf('show_my_speaking_club:%s', $speakingClub->getId()->toString()),
                 ],
             ];
@@ -38,12 +45,14 @@ class ListUserUpcomingSpeakingClubsCommandHandler
 
         if (count($speakingClubs) === 0) {
             $text = 'Вы не записаны ни на один клуб. Выберите клуб из списка, чтобы записаться.';
-            $buttons = [[
+            $buttons = [
                 [
-                    'text' => 'Перейти к списку ближайших клубов',
-                    'callback_data' => 'back_to_list',
-                ],
-            ]];
+                    [
+                        'text'          => 'Перейти к списку ближайших клубов',
+                        'callback_data' => 'back_to_list',
+                    ],
+                ]
+            ];
         } else {
             $text = 'Список ближайших клубов, куда вы записаны:';
         }

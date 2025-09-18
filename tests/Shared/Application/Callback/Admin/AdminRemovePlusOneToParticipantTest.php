@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Shared\Application\Callback\Admin;
 
 use App\SpeakingClub\Domain\ParticipationRepository;
+use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
@@ -63,7 +64,9 @@ class AdminRemovePlusOneToParticipantTest extends BaseApplicationTest
                 'Появилось свободное место в клубе "%s" %s %s, спешите записаться!',
                 $speakingClub->getName(),
                 $speakingClub->getDate()->format('d.m.Y'),
-                $speakingClub->getDate()->format('H:i'),
+                $speakingClub->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                    $speakingClub->getDate()->format('d.m.Y')
+                ),
             ),
             $message['text']
         );

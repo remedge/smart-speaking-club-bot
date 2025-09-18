@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Command\User;
 
+use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 
@@ -57,7 +58,9 @@ class ListUserUpcomingSpeakingClubsTest extends BaseApplicationTest
                     'text'          => sprintf(
                         '%s %s - %s',
                         $speakingClub1->getDate()->format('d.m'),
-                        $speakingClub1->getDate()->format('H:i'),
+                        $speakingClub1->getDate()->format('H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                            $speakingClub1->getDate()->format('d.m.Y')
+                        ),
                         $speakingClub1->getName()
                     ),
                     'callback_data' => 'show_my_speaking_club:' . $speakingClub1->getId(),
