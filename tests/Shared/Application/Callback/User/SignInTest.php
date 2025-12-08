@@ -273,4 +273,116 @@ HEREDOC,
             $message['text']
         );
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testMaxClubsReached(): void
+    {
+        $speakingClub = $this->createSpeakingClub();
+
+        // Создаем 5 участий для пользователя
+        $userClubs = [];
+        for ($i = 0; $i < 5; $i++) {
+            $club = $this->createSpeakingClub(
+                name: 'Test Club ' . ($i + 1),
+                date: date('Y-m-d H:i:s', strtotime('+' . ($i + 1) . ' day'))
+            );
+            $userClubs[] = $club;
+            $this->createParticipation(
+                $club->getId(),
+                UserFixtures::USER_ID_JOHN_CONNNOR
+            );
+        }
+
+        $this->sendWebhookCallbackQuery(
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
+            messageId: 123,
+            callbackData: 'sign_in:' . $speakingClub->getId()
+        );
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
+
+        self::assertEquals(
+            '🚫 Вы уже записаны на максимальное количество клубов (5). Чтобы записаться на новый клуб, сначала отмените участие в одном из ваших текущих клубов.',
+            $message['text']
+        );
+
+        $expectedButtons = [];
+        foreach ($userClubs as $club) {
+            $expectedButtons[] = [
+                [
+                    'text'          => sprintf(
+                        '%s - %s',
+                        $club->getDate()->format('d.m H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                            $club->getDate()->format('d.m.Y')
+                        ),
+                        $club->getName()
+                    ),
+                    'callback_data' => 'show_my_speaking_club:' . $club->getId(),
+                ]
+            ];
+        }
+
+        self::assertEquals($expectedButtons, $message['replyMarkup']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testMaxClubsReachedIgnoresPastClubs(): void
+    {
+        $speakingClub = $this->createSpeakingClub();
+
+        // Создаем 3 прошедших клуба
+        for ($i = 1; $i <= 3; $i++) {
+            $pastClub = $this->createSpeakingClub(
+                name: 'Past Club ' . $i,
+                date: date('Y-m-d H:i:s', strtotime('-' . $i . ' day'))
+            );
+            $this->createParticipation(
+                $pastClub->getId(),
+                UserFixtures::USER_ID_JOHN_CONNNOR
+            );
+        }
+
+        // Создаем 4 будущих клуба (всего 7, но будущих только 4)
+        $userClubs = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $club = $this->createSpeakingClub(
+                name: 'Future Club ' . $i,
+                date: date('Y-m-d H:i:s', strtotime('+' . $i . ' day'))
+            );
+            $userClubs[] = $club;
+            $this->createParticipation(
+                $club->getId(),
+                UserFixtures::USER_ID_JOHN_CONNNOR
+            );
+        }
+
+        // Пытаемся записаться на еще один клуб - должно получиться, так как будущих только 4
+        $this->sendWebhookCallbackQuery(
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
+            messageId: 123,
+            callbackData: 'sign_in:' . $speakingClub->getId()
+        );
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
+
+        // Должно быть сообщение об успешной записи, а не об ошибке лимита
+        self::assertStringContainsString(
+            '👌 Вы успешно записаны на разговорный клуб',
+            $message['text']
+        );
+    }
 }
