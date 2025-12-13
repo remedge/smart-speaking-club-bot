@@ -11,6 +11,7 @@ use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use App\WaitList\Domain\WaitingUser;
 use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 class JoinWaitingListTest extends BaseApplicationTest
@@ -75,6 +76,62 @@ class JoinWaitingListTest extends BaseApplicationTest
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
         self::assertEquals('Вы уже находитесь в списке ожидания', $message['text']);
+        self::assertEquals([
+            [[
+                'text' => 'Перейти к списку ближайших клубов',
+                'callback_data' => 'back_to_list',
+            ]],
+        ], $message['replyMarkup']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testCanJoinWaitingListEvenWithMaxClubs(): void
+    {
+        // Создаем клуб с 1 местом
+        $speakingClub = $this->createSpeakingClub(
+            name: 'Test club 1',
+            minParticipantsCount: 1,
+            maxParticipantsCount: 1,
+            date: date('Y-m-d H:i:s', strtotime('+1 day'))
+        );
+
+        // Занимаем все места в клубе другим пользователем
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_SARAH_CONNOR
+        );
+
+        // Создаем 5 участий для пользователя
+        for ($i = 0; $i < 5; $i++) {
+            $club = $this->createSpeakingClub(
+                name: 'Test Club ' . ($i + 1),
+                date: date('Y-m-d H:i:s', strtotime('+' . ($i + 2) . ' day'))
+            );
+            $this->createParticipation(
+                $club->getId(),
+                UserFixtures::USER_ID_JOHN_CONNNOR
+            );
+        }
+
+        $this->sendWebhookCallbackQuery(
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
+            messageId: 123,
+            callbackData: 'join_waiting_list:' . $speakingClub->getId()
+        );
+        
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
+
+        // Должно быть сообщение об успешном добавлении в лист ожидания, несмотря на 5 записей
+        self::assertEquals(
+            'Вы успешно добавлены в список ожидания, я сообщу вам, когда появится свободное место',
+            $message['text']
+        );
         self::assertEquals([
             [[
                 'text' => 'Перейти к списку ближайших клубов',

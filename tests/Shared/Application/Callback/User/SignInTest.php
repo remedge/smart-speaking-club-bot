@@ -385,4 +385,65 @@ HEREDOC,
             $message['text']
         );
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testNoFreeSpaceTakesPriorityOverMaxClubs(): void
+    {
+        // Создаем клуб с 1 местом
+        $speakingClub = $this->createSpeakingClub(minParticipantsCount: 1, maxParticipantsCount: 1);
+
+        // Занимаем это место другим пользователем
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_SARAH_CONNOR
+        );
+
+        // Создаем 5 участий для пользователя
+        for ($i = 0; $i < 5; $i++) {
+            $club = $this->createSpeakingClub(
+                name: 'Test Club ' . ($i + 1),
+                date: date('Y-m-d H:i:s', strtotime('+' . ($i + 1) . ' day'))
+            );
+            $this->createParticipation(
+                $club->getId(),
+                UserFixtures::USER_ID_JOHN_CONNNOR
+            );
+        }
+
+        $this->sendWebhookCallbackQuery(
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
+            messageId: 123,
+            callbackData: 'sign_in:' . $speakingClub->getId()
+        );
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
+
+        // Должно быть сообщение о занятых местах, а не о лимите в 5 клубов
+        self::assertEquals(
+            '😔 К сожалению, все свободные места на данный клуб заняты',
+            $message['text']
+        );
+
+        self::assertEquals([
+            [
+                [
+                    'text'          => 'Встать в лист ожидания',
+                    'callback_data' => 'join_waiting_list:' . $speakingClub->getId()
+                ]
+            ],
+            [
+                [
+                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'callback_data' => 'back_to_list',
+                ]
+            ],
+        ], $message['replyMarkup']);
+    }
 }
