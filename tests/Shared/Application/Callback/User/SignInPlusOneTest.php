@@ -9,6 +9,8 @@ use App\SpeakingClub\Domain\ParticipationRepository;
 use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
+use App\WaitList\Domain\WaitingUser;
+use App\WaitList\Domain\WaitingUserRepository;
 use DateTimeImmutable;
 use Exception;
 use Ramsey\Uuid\Uuid;
@@ -398,5 +400,62 @@ HEREDOC, $message['text']);
                 ]
             ],
         ], $message['replyMarkup']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testWaitingListDoesNotCountAsParticipation(): void
+    {
+        $speakingClub = $this->createSpeakingClub();
+
+        // Создаем 4 участия для пользователя
+        for ($i = 0; $i < 4; $i++) {
+            $club = $this->createSpeakingClub(
+                name: 'Test Club ' . ($i + 1),
+                date: date('Y-m-d H:i:s', strtotime('+' . ($i + 1) . ' day'))
+            );
+            $this->createParticipation(
+                $club->getId(),
+                UserFixtures::USER_ID_JOHN_CONNNOR
+            );
+        }
+
+        // Добавляем пользователя в лист ожидания для 2 других клубов
+        /** @var WaitingUserRepository $waitingUserRepository */
+        $waitingUserRepository = self::getContainer()->get(WaitingUserRepository::class);
+        for ($i = 0; $i < 2; $i++) {
+            $waitingClub = $this->createSpeakingClub(
+                name: 'Waiting Club ' . ($i + 1),
+                date: date('Y-m-d H:i:s', strtotime('+' . ($i + 5) . ' day'))
+            );
+            $waitingUserRepository->save(
+                new WaitingUser(
+                    id: $this->uuidProvider->provide(),
+                    userId: Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
+                    speakingClubId: $waitingClub->getId(),
+                )
+            );
+        }
+
+        // Пытаемся записаться на 5-й клуб с +1 - должно получиться, так как лист ожидания не считается
+        $this->sendWebhookCallbackQuery(
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
+            messageId: 123,
+            callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
+        );
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
+
+        // Должно быть сообщение об успешной записи, а не об ошибке лимита
+        self::assertStringContainsString(
+            '👌 Вы успешно записаны на клуб c +1 человеком',
+            $message['text']
+        );
     }
 }
