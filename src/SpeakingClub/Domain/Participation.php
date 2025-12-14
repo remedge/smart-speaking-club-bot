@@ -13,6 +13,7 @@ class Participation
         private UuidInterface $userId,
         private UuidInterface $speakingClubId,
         private bool $isPlusOne,
+        private ?string $plusOneName = null,
     ) {
     }
 
@@ -39,5 +40,15 @@ class Participation
     public function setIsPlusOne(bool $isPlusOne): void
     {
         $this->isPlusOne = $isPlusOne;
+    }
+
+    public function getPlusOneName(): ?string
+    {
+        return $this->plusOneName;
+    }
+
+    public function setPlusOneName(?string $plusOneName): void
+    {
+        $this->plusOneName = $plusOneName;
     }
 }

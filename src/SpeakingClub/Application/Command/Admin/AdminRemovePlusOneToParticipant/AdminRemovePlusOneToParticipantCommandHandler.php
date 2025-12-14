@@ -77,6 +77,7 @@ class AdminRemovePlusOneToParticipantCommandHandler
         }
 
         $participation->setIsPlusOne(false);
+        $participation->setPlusOneName(null);
         $this->participationRepository->save($participation);
 
         // Notify admin

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
-use App\SpeakingClub\Domain\ParticipationRepository;
 use App\Tests\Shared\BaseApplicationTest;
+use App\User\Domain\UserRepository;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use Exception;
 
-class AddPlusOneTest extends BaseApplicationTest
+class AddPlusOneNameTest extends BaseApplicationTest
 {
     /**
      * @throws Exception
@@ -18,15 +18,18 @@ class AddPlusOneTest extends BaseApplicationTest
     {
         $speakingClub = $this->createSpeakingClub();
 
-        $participation = $this->createParticipation(
+        // Создаем участие с +1 (пользователь уже записан с +1)
+        $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_JOHN_CONNNOR
+            UserFixtures::USER_ID_JOHN_CONNNOR,
+            isPlusOne: true,
+            plusOneName: null,
         );
 
         $this->sendWebhookCallbackQuery(
             chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
-            callbackData: 'add_plus_one:' . $speakingClub->getId()
+            callbackData: 'add_plus_one_name:' . $speakingClub->getId()
         );
         $this->assertResponseIsSuccessful();
 
@@ -36,32 +39,23 @@ class AddPlusOneTest extends BaseApplicationTest
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
-        self::assertStringContainsString('👌 Вы успешно добавили +1 человека с собой', $message['text']);
-        self::assertStringContainsString('Мы будем рады, если вы укажете имя второго участника', $message['text']);
+        self::assertEquals(
+            <<<HEREDOC
+Пожалуйста, укажите имя второго участника (+1):
+HEREDOC,
+            $message['text']
+        );
 
-        self::assertEquals([
-            [
-                [
-                    'text'          => 'Добавить имя участника',
-                    'callback_data' => sprintf('add_plus_one_name:%s', $speakingClub->getId()),
-                ],
-            ],
-            [
-                [
-                    'text'          => '<< Перейти к списку ваших клубов',
-                    'callback_data' => 'back_to_my_list',
-                ],
-            ],
-        ], $message['replyMarkup']);
+        self::assertEquals([], $message['replyMarkup']);
 
-        // Проверяем, что участие обновлено с isPlusOne: true
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $updatedParticipation = $participationRepository->findById($participation->getId());
+        // Проверяем, что пользователь находится в состоянии ожидания имени +1
+        /** @var UserRepository $userRepository */
+        $userRepository = self::getContainer()->get(UserRepository::class);
+        $user = $userRepository->findByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
-        self::assertNotNull($updatedParticipation);
-        self::assertTrue($updatedParticipation->isPlusOne());
-        self::assertNull($updatedParticipation->getPlusOneName());
+        self::assertNotNull($user);
+        self::assertEquals('RECEIVING_PLUS_ONE_NAME', $user->getState()->value);
+        self::assertEquals($speakingClub->getId()->toString(), $user->getActualSpeakingClubData()['speakingClubId']);
     }
 
     public function testClubNotFound(): void
@@ -69,7 +63,7 @@ class AddPlusOneTest extends BaseApplicationTest
         $this->sendWebhookCallbackQuery(
             chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
-            callbackData: 'add_plus_one:00000000-0000-0000-0000-000000000001'
+            callbackData: 'add_plus_one_name:00000000-0000-0000-0000-000000000001'
         );
 
         $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
@@ -95,54 +89,72 @@ HEREDOC,
         ], $message['replyMarkup']);
     }
 
-    public function testNotSigned(): void
+    /**
+     * @throws Exception
+     */
+    public function testClubAlreadyPassed(): void
     {
-        $speakingClub = $this->createSpeakingClub();
-
-        $this->sendWebhookCallbackQuery(
-            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
-            messageId: 123,
-            callbackData: 'add_plus_one:' . $speakingClub->getId()
-        );
-        $this->assertResponseIsSuccessful();
-
-        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
-        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
-
-        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
-
-        self::assertEquals(
-            <<<HEREDOC
-🤔 Вы не записаны на этот клуб
-HEREDOC,
-            $message['text']
+        // Создаем клуб с прошедшей датой
+        $speakingClub = $this->createSpeakingClub(
+            date: date('Y-m-d H:i:s', strtotime('-1 day'))
         );
 
-        self::assertEquals([
-            [
-                [
-                    'text'          => 'Перейти к списку ближайших клубов',
-                    'callback_data' => 'back_to_list',
-                ]
-            ],
-        ], $message['replyMarkup']);
-    }
-
-    public function testSignedPlusOne(): void
-    {
-        $speakingClub = $this->createSpeakingClub();
-
+        // Создаем участие с +1
         $this->createParticipation(
             $speakingClub->getId(),
             UserFixtures::USER_ID_JOHN_CONNNOR,
-            true
+            isPlusOne: true,
+            plusOneName: null,
         );
 
         $this->sendWebhookCallbackQuery(
             chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
-            callbackData: 'add_plus_one:' . $speakingClub->getId()
+            callbackData: 'add_plus_one_name:' . $speakingClub->getId()
+        );
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        // Должно быть новое сообщение (sendMessage, а не editMessageText)
+        $lastMessage = end($messages);
+
+        self::assertEquals(
+            <<<HEREDOC
+🤔 К сожалению, этот разговорный клуб уже прошел
+HEREDOC,
+            $lastMessage['text']
+        );
+
+        self::assertEquals([
+            [
+                [
+                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'callback_data' => 'back_to_list',
+                ]
+            ],
+        ], $lastMessage['replyMarkup']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testWhenParticipationDoesNotHavePlusOne(): void
+    {
+        $speakingClub = $this->createSpeakingClub();
+
+        // Создаем участие БЕЗ +1
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_JOHN_CONNNOR,
+            isPlusOne: false,
+        );
+
+        $this->sendWebhookCallbackQuery(
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
+            messageId: 123,
+            callbackData: 'add_plus_one_name:' . $speakingClub->getId()
         );
         $this->assertResponseIsSuccessful();
 
@@ -154,7 +166,7 @@ HEREDOC,
 
         self::assertEquals(
             <<<HEREDOC
-🤔 Вы уже добавили +1 с собой на этот клуб
+🤔 Вы не записаны с +1 на этот клуб
 HEREDOC,
             $message['text']
         );
@@ -162,7 +174,7 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к списку ближайших клубов',
+                    'text'          => '<< Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
                 ]
             ],
@@ -172,19 +184,16 @@ HEREDOC,
     /**
      * @throws Exception
      */
-    public function testNoFreeSpace(): void
+    public function testWhenUserNotSigned(): void
     {
-        $speakingClub = $this->createSpeakingClub(minParticipantsCount: 1, maxParticipantsCount: 1);
+        $speakingClub = $this->createSpeakingClub();
 
-        $this->createParticipation(
-            $speakingClub->getId(),
-            UserFixtures::USER_ID_JOHN_CONNNOR
-        );
+        // НЕ создаем участие - пользователь не записан на клуб
 
         $this->sendWebhookCallbackQuery(
             chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
-            callbackData: 'add_plus_one:' . $speakingClub->getId()
+            callbackData: 'add_plus_one_name:' . $speakingClub->getId()
         );
         $this->assertResponseIsSuccessful();
 
@@ -196,7 +205,7 @@ HEREDOC,
 
         self::assertEquals(
             <<<HEREDOC
-😔 К сожалению, все свободные места на данный клуб заняты и вы не можете добавить +1
+🤔 Вы не записаны с +1 на этот клуб
 HEREDOC,
             $message['text']
         );
@@ -204,8 +213,8 @@ HEREDOC,
         self::assertEquals([
             [
                 [
-                    'text'          => 'Перейти к списку ваших клубов',
-                    'callback_data' => 'back_to_my_list',
+                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'callback_data' => 'back_to_list',
                 ]
             ],
         ], $message['replyMarkup']);

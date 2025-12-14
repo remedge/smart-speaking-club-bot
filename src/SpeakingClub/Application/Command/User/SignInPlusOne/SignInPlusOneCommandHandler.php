@@ -7,6 +7,7 @@ namespace App\SpeakingClub\Application\Command\User\SignInPlusOne;
 use App\Shared\Application\Clock;
 use App\Shared\Application\UuidProvider;
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Command\User\AddPlusOneName\AddPlusOneNameCommand;
 use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
@@ -166,20 +167,33 @@ class SignInPlusOneCommandHandler
                 userId: $user->id,
                 speakingClubId: $command->speakingClubId,
                 isPlusOne: true,
+                plusOneName: null,
             )
         );
 
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: '👌 Вы успешно записаны на клуб c +1 человеком',
+            text: '👌 Вы успешно записаны на клуб c +1 человеком'
+                . PHP_EOL . PHP_EOL
+                . 'Мы будем рады, если вы укажете имя второго участника. Это поможет нам лучше организовать мероприятие.',
             replyMarkup: [
+                [
+                    [
+                        'text'          => 'Добавить имя участника',
+                        'callback_data' => sprintf(
+                            '%s:%s',
+                            AddPlusOneNameCommand::CALLBACK_NAME,
+                            $command->speakingClubId->toString()
+                        ),
+                    ],
+                ],
                 [
                     [
                         'text'          => '<< Перейти к списку ваших клубов',
                         'callback_data' => 'back_to_my_list',
                     ],
-                ]
+                ],
             ]
         );
 

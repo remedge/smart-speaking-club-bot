@@ -25,7 +25,7 @@ class SignInPlusOneTest extends BaseApplicationTest
         $speakingClub = $this->createSpeakingClub();
 
         $this->sendWebhookCallbackQuery(
-            chatId: 111111,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
@@ -36,16 +36,37 @@ class SignInPlusOneTest extends BaseApplicationTest
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
-        self::assertEquals(<<<HEREDOC
-👌 Вы успешно записаны на клуб c +1 человеком
-HEREDOC, $message['text']);
+        self::assertStringContainsString('👌 Вы успешно записаны на клуб c +1 человеком', $message['text']);
+        self::assertStringContainsString('Мы будем рады, если вы укажете имя второго участника', $message['text']);
 
         self::assertEquals([
-            [[
-                'text' => '<< Перейти к списку ваших клубов',
-                'callback_data' => 'back_to_my_list',
-            ]],
+            [
+                [
+                    'text'          => 'Добавить имя участника',
+                    'callback_data' => sprintf('add_plus_one_name:%s', $speakingClub->getId()),
+                ],
+            ],
+            [
+                [
+                    'text'          => '<< Перейти к списку ваших клубов',
+                    'callback_data' => 'back_to_my_list',
+                ],
+            ],
         ], $message['replyMarkup']);
+
+        // Проверяем, что участие создано сразу
+        // Находим участие через созданное участие из SignInPlusOneCommandHandler
+        // Но так как мы не можем получить id напрямую, используем findByUserIdAndSpeakingClubId
+        /** @var ParticipationRepository $participationRepository */
+        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
+        $participation = $participationRepository->findByUserIdAndSpeakingClubId(
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
+            $speakingClub->getId()
+        );
+
+        self::assertNotNull($participation);
+        self::assertTrue($participation->isPlusOne());
+        self::assertNull($participation->getPlusOneName());
     }
 
     public function testClubNotFound(): void
@@ -87,7 +108,7 @@ HEREDOC, $message['text']);
         );
 
         $this->sendWebhookCallbackQuery(
-            chatId: 111111,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
@@ -127,7 +148,7 @@ HEREDOC, $message['text']);
         ));
 
         $this->sendWebhookCallbackQuery(
-            chatId: 111111,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );

@@ -14,6 +14,7 @@ use App\SpeakingClub\Application\Command\Admin\AdminRemovePlusOneToParticipant\A
 use App\SpeakingClub\Application\Command\Admin\AdminShowParticipants\AdminShowParticipantsCommand;
 use App\SpeakingClub\Application\Command\Admin\AdminShowSpeakingClub\AdminShowSpeakingClubCommand;
 use App\SpeakingClub\Application\Command\User\AddPlusOne\AddPlusOneCommand;
+use App\SpeakingClub\Application\Command\User\AddPlusOneName\AddPlusOneNameCommand;
 use App\SpeakingClub\Application\Command\User\ListUpcomingSpeakingClubs\ListUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\ListUserUpcomingSpeakingClubs\ListUserUpcomingSpeakingClubsCommand;
 use App\SpeakingClub\Application\Command\User\RateSpeakingClub\RateSpeakingClubCommand;
@@ -194,6 +195,11 @@ class CallbackResolver
                 messageId: $messageId,
             )),
             RemovePlusOneCommand::CALLBACK_NAME => $this->commandBus->dispatch(new RemovePlusOneCommand(
+                chatId: $chatId,
+                speakingClubId: Uuid::fromString($objectId),
+                messageId: $messageId,
+            )),
+            AddPlusOneNameCommand::CALLBACK_NAME => $this->commandBus->dispatch(new AddPlusOneNameCommand(
                 chatId: $chatId,
                 speakingClubId: Uuid::fromString($objectId),
                 messageId: $messageId,

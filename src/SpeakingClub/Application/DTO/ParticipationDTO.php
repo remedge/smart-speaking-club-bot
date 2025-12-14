@@ -15,6 +15,7 @@ class ParticipationDTO
         public ?string $lastName,
         public int $chatId,
         public bool $isPlusOne,
+        public ?string $plusOneName = null,
     ) {
     }
 }

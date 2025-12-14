@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-namespace App\SpeakingClub\Application\Command\User\RemovePlusOne;
+namespace App\SpeakingClub\Application\Command\User\AddPlusOneName;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
-use App\SpeakingClub\Application\Event\SpeakingClubFreeSpaceAvailableEvent;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\User\Domain\UserRepository;
+use App\User\Domain\UserStateEnum;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class RemovePlusOneCommandHandler
+class AddPlusOneNameCommandHandler
 {
     public function __construct(
         private UserQuery $userQuery,
-        private ParticipationRepository $participationRepository,
+        private UserRepository $userRepository,
         private SpeakingClubRepository $speakingClubRepository,
+        private ParticipationRepository $participationRepository,
         private TelegramInterface $telegram,
-        private EventDispatcherInterface $eventDispatcher,
         private Clock $clock,
     ) {
     }
 
-    public function __invoke(RemovePlusOneCommand $command): void
+    public function __invoke(AddPlusOneNameCommand $command): void
     {
         $user = $this->userQuery->getByChatId($command->chatId);
         $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId);
@@ -38,7 +38,7 @@ class RemovePlusOneCommandHandler
                 text: '🤔 Разговорный клуб не найден',
                 replyMarkup: [[
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
+                        'text' => '<< Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_list',
                     ],
                 ]]
@@ -61,14 +61,14 @@ class RemovePlusOneCommandHandler
         }
 
         $participation = $this->participationRepository->findByUserIdAndSpeakingClubId($user->id, $command->speakingClubId);
-        if ($participation === null) {
+        if ($participation === null || $participation->isPlusOne() === false) {
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: '🤔 Вы не записаны на этот клуб',
+                text: '🤔 Вы не записаны с +1 на этот клуб',
                 replyMarkup: [[
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
+                        'text' => '<< Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_list',
                     ],
                 ]]
@@ -76,14 +76,15 @@ class RemovePlusOneCommandHandler
             return;
         }
 
-        if ($participation->isPlusOne() === false) {
+        $userEntity = $this->userRepository->findByChatId($command->chatId);
+        if ($userEntity === null) {
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: '🤔 Вы не добавляли +1 с собой на этот клуб',
+                text: 'Что-то пошло не так, попробуйте еще раз',
                 replyMarkup: [[
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
+                        'text' => '<< Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_list',
                     ],
                 ]]
@@ -91,22 +92,17 @@ class RemovePlusOneCommandHandler
             return;
         }
 
-        $participation->setIsPlusOne(false);
-        $participation->setPlusOneName(null);
-        $this->participationRepository->save($participation);
+        $userEntity->setState(UserStateEnum::RECEIVING_PLUS_ONE_NAME);
+        $userEntity->setActualSpeakingClubData([
+            'speakingClubId' => $command->speakingClubId->toString(),
+        ]);
+        $this->userRepository->save($userEntity);
 
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: '👌Вы успешно убрали +1 человека с собой',
-            replyMarkup: [[
-                [
-                    'text' => 'Перейти к списку ваших клубов',
-                    'callback_data' => 'back_to_my_list',
-                ],
-            ]]
+            text: 'Пожалуйста, укажите имя второго участника (+1):',
+            replyMarkup: []
         );
-
-        $this->eventDispatcher->dispatch(new SpeakingClubFreeSpaceAvailableEvent($speakingClub->getId()));
     }
 }

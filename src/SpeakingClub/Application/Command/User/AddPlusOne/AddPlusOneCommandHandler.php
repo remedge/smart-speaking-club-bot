@@ -6,6 +6,7 @@ namespace App\SpeakingClub\Application\Command\User\AddPlusOne;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Application\Command\User\AddPlusOneName\AddPlusOneNameCommand;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Query\UserQuery;
@@ -104,18 +105,34 @@ class AddPlusOneCommandHandler
             return;
         }
 
+        // Обновляем существующее участие, устанавливая isPlusOne: true
         $participation->setIsPlusOne(true);
+        $participation->setPlusOneName(null);
         $this->participationRepository->save($participation);
 
         $this->telegram->editMessageText(
             chatId: $command->chatId,
             messageId: $command->messageId,
-            text: '👌 Вы успешно добавили +1 человека с собой',
+            text: '👌 Вы успешно добавили +1 человека с собой'
+                . PHP_EOL . PHP_EOL
+                . 'Мы будем рады, если вы укажете имя второго участника. Это поможет нам лучше организовать мероприятие.',
             replyMarkup: [
-                [[
-                    'text' => 'Перейти к списку ваших клубов',
-                    'callback_data' => 'back_to_my_list',
-                ]],
+                [
+                    [
+                        'text'          => 'Добавить имя участника',
+                        'callback_data' => sprintf(
+                            '%s:%s',
+                            AddPlusOneNameCommand::CALLBACK_NAME,
+                            $command->speakingClubId->toString()
+                        ),
+                    ],
+                ],
+                [
+                    [
+                        'text'          => '<< Перейти к списку ваших клубов',
+                        'callback_data' => 'back_to_my_list',
+                    ],
+                ],
             ]
         );
     }
