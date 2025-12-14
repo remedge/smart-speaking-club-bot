@@ -10,6 +10,7 @@ use App\Shared\Domain\TelegramInterface;
 use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
 use App\User\Application\Query\UserQuery;
 use App\UserBan\Domain\UserBanRepository;
 use App\WaitList\Domain\WaitingUserRepository;
@@ -128,6 +129,33 @@ class SignInPlusOneCommandHandler
 Чтобы гарантировать комфортное общение и планирование для всех участников, мы временно ограничиваем вашу возможность записываться на новые сессии. Это ограничение будет действовать до %s',
                     $userBan->getEndDate()->format('d.m.Y H:i')
                 )
+            );
+            return;
+        }
+
+        $userClubs = $this->speakingClubRepository->findUserUpcoming($user->id, $this->clock->now());
+        if (count($userClubs) >= 5) {
+            $buttons = [];
+            foreach ($userClubs as $club) {
+                $buttons[] = [
+                    [
+                        'text'          => sprintf(
+                            '%s - %s',
+                            $club->getDate()->format('d.m H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                                $club->getDate()->format('d.m.Y')
+                            ),
+                            $club->getName()
+                        ),
+                        'callback_data' => sprintf('show_my_speaking_club:%s', $club->getId()->toString()),
+                    ],
+                ];
+            }
+
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: "Кажется, ваш календарь переполнен! 📅\n\nВы записаны сразу на 5 клубов вперед. Чтобы добавить шестой, нужно завершить одно из занятий или отменить менее важную бронь.\n\nТак мы даем шанс попасть на практику всем желающим. Спасибо за понимание! ❤️\n\nКакую запись отменим?",
+                replyMarkup: $buttons
             );
             return;
         }

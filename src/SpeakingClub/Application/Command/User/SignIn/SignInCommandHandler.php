@@ -134,6 +134,34 @@ class SignInCommandHandler
             return;
         }
 
+        $userClubs = $this->speakingClubRepository->findUserUpcoming($user->id, $this->clock->now());
+        if (count($userClubs) >= 5) {
+
+            $buttons = [];
+            foreach ($userClubs as $club) {
+                $buttons[] = [
+                    [
+                        'text'          => sprintf(
+                            '%s - %s',
+                            $club->getDate()->format('d.m H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                                $club->getDate()->format('d.m.Y')
+                            ),
+                            $club->getName()
+                        ),
+                        'callback_data' => sprintf('show_my_speaking_club:%s', $club->getId()->toString()),
+                    ],
+                ];
+            }
+
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: "Кажется, ваш календарь переполнен! 📅\n\nВы записаны сразу на 5 клубов вперед. Чтобы добавить шестой, нужно завершить одно из занятий или отменить менее важную бронь.\n\nТак мы даем шанс попасть на практику всем желающим. Спасибо за понимание! ❤️\n\nКакую запись отменим?",
+                replyMarkup: $buttons
+            );
+            return;
+        }
+
         $this->participationRepository->save(
             new Participation(
                 id: $this->uuidProvider->provide(),
