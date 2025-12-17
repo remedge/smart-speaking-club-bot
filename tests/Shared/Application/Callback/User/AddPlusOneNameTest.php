@@ -8,6 +8,7 @@ use App\Tests\Shared\BaseApplicationTest;
 use App\User\Domain\UserRepository;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use Exception;
+use JsonException;
 
 class AddPlusOneNameTest extends BaseApplicationTest
 {
@@ -165,6 +166,48 @@ HEREDOC,
                 [
                     'text'          => '<< Перейти к списку ближайших клубов',
                     'callback_data' => 'back_to_list',
+                ]
+            ],
+        ], $message['replyMarkup']);
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function testNoFreeSpace(): void
+    {
+        $speakingClub = $this->createSpeakingClub(minParticipantsCount: 1, maxParticipantsCount: 1);
+
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_JOHN_CONNNOR
+        );
+
+        $this->sendWebhookCallbackQuery(
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
+            messageId: 123,
+            callbackData: 'add_plus_one_name:' . $speakingClub->getId()
+        );
+        $this->assertResponseIsSuccessful();
+
+        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
+        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
+
+        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
+        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
+
+        self::assertEquals(
+            <<<HEREDOC
+😔 К сожалению, все свободные места на данный клуб заняты и вы не можете добавить +1
+HEREDOC,
+            $message['text']
+        );
+
+        self::assertEquals([
+            [
+                [
+                    'text'          => 'Перейти к списку ваших клубов',
+                    'callback_data' => 'back_to_my_list',
                 ]
             ],
         ], $message['replyMarkup']);

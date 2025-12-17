@@ -193,31 +193,14 @@ class UserGenericTextCommandHandler
                 return;
             }
 
-            if ($participation->isPlusOne() === false) {
-                $user->setState(UserStateEnum::IDLE);
-                $user->setActualSpeakingClubData([]);
-                $this->userRepository->save($user);
 
-                $this->telegram->sendMessage(
-                    chatId: $command->chatId,
-                    text: '🤔 Вы не записаны с +1 на этот клуб',
-                    replyMarkup: [[
-                        [
-                            'text' => '<< Перейти к списку ближайших клубов',
-                            'callback_data' => 'back_to_list',
-                        ],
-                    ]]
-                );
-                return;
-            }
-
-            // Updating existing participation (it was created during sign in with +1)
+            $participation->setIsPlusOne(true);
             $participation->setPlusOneName($plusOneName);
             $this->participationRepository->save($participation);
 
             $this->telegram->sendMessage(
                 chatId: $command->chatId,
-                text: sprintf('👌 Имя участника успешно добавлено: %s', $plusOneName),
+                text: sprintf('👌 Участник добавлен: %s', $plusOneName),
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ваших клубов',

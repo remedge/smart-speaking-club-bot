@@ -76,6 +76,22 @@ class AddPlusOneNameCommandHandler
             return;
         }
 
+        $participationCount = $this->participationRepository->countByClubId($command->speakingClubId);
+        if ($participationCount >= $speakingClub->getMaxParticipantsCount()) {
+            $this->telegram->editMessageText(
+                chatId: $command->chatId,
+                messageId: $command->messageId,
+                text: '😔 К сожалению, все свободные места на данный клуб заняты и вы не можете добавить +1',
+                replyMarkup: [
+                    [[
+                        'text' => 'Перейти к списку ваших клубов',
+                        'callback_data' => 'back_to_my_list',
+                    ]],
+                ]
+            );
+            return;
+        }
+
         $userEntity = $this->userRepository->findByChatId($command->chatId);
         if ($userEntity === null) {
             $this->telegram->editMessageText(

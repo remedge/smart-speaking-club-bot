@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
-use App\SpeakingClub\Domain\ParticipationRepository;
 use App\Tests\Shared\BaseApplicationTest;
+use App\User\Domain\UserRepository;
 use App\User\Infrastructure\Doctrine\Fixtures\UserFixtures;
 use Exception;
 
@@ -18,7 +18,7 @@ class AddPlusOneTest extends BaseApplicationTest
     {
         $speakingClub = $this->createSpeakingClub();
 
-        $participation = $this->createParticipation(
+        $this->createParticipation(
             $speakingClub->getId(),
             UserFixtures::USER_ID_JOHN_CONNNOR
         );
@@ -36,32 +36,23 @@ class AddPlusOneTest extends BaseApplicationTest
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
-        self::assertStringContainsString('👌 Вы успешно добавили +1 человека с собой', $message['text']);
-        self::assertStringContainsString('Мы будем рады, если вы укажете имя второго участника', $message['text']);
+        self::assertEquals(
+            <<<HEREDOC
+Пожалуйста, укажите имя второго участника (+1):
+HEREDOC,
+            $message['text']
+        );
 
-        self::assertEquals([
-            [
-                [
-                    'text'          => 'Добавить имя участника',
-                    'callback_data' => sprintf('add_plus_one_name:%s', $speakingClub->getId()),
-                ],
-            ],
-            [
-                [
-                    'text'          => '<< Перейти к списку ваших клубов',
-                    'callback_data' => 'back_to_my_list',
-                ],
-            ],
-        ], $message['replyMarkup']);
+        self::assertEquals([], $message['replyMarkup']);
 
-        // Проверяем, что участие обновлено с isPlusOne: true
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $updatedParticipation = $participationRepository->findById($participation->getId());
+        // Проверяем, что пользователь находится в состоянии ожидания имени +1
+        /** @var UserRepository $userRepository */
+        $userRepository = self::getContainer()->get(UserRepository::class);
+        $user = $userRepository->findByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
-        self::assertNotNull($updatedParticipation);
-        self::assertTrue($updatedParticipation->isPlusOne());
-        self::assertNull($updatedParticipation->getPlusOneName());
+        self::assertNotNull($user);
+        self::assertEquals('RECEIVING_PLUS_ONE_NAME', $user->getState()->value);
+        self::assertEquals($speakingClub->getId()->toString(), $user->getActualSpeakingClubData()['speakingClubId']);
     }
 
     public function testClubNotFound(): void
