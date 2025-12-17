@@ -18,12 +18,9 @@ class AddPlusOneNameTest extends BaseApplicationTest
     {
         $speakingClub = $this->createSpeakingClub();
 
-        // Создаем участие с +1 (пользователь уже записан с +1)
         $this->createParticipation(
             $speakingClub->getId(),
-            UserFixtures::USER_ID_JOHN_CONNNOR,
-            isPlusOne: true,
-            plusOneName: null,
+            UserFixtures::USER_ID_JOHN_CONNNOR
         );
 
         $this->sendWebhookCallbackQuery(
@@ -99,12 +96,9 @@ HEREDOC,
             date: date('Y-m-d H:i:s', strtotime('-1 day'))
         );
 
-        // Создаем участие с +1
         $this->createParticipation(
             $speakingClub->getId(),
             UserFixtures::USER_ID_JOHN_CONNNOR,
-            isPlusOne: true,
-            plusOneName: null,
         );
 
         $this->sendWebhookCallbackQuery(
@@ -140,50 +134,6 @@ HEREDOC,
     /**
      * @throws Exception
      */
-    public function testWhenParticipationDoesNotHavePlusOne(): void
-    {
-        $speakingClub = $this->createSpeakingClub();
-
-        // Создаем участие БЕЗ +1
-        $this->createParticipation(
-            $speakingClub->getId(),
-            UserFixtures::USER_ID_JOHN_CONNNOR,
-            isPlusOne: false,
-        );
-
-        $this->sendWebhookCallbackQuery(
-            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
-            messageId: 123,
-            callbackData: 'add_plus_one_name:' . $speakingClub->getId()
-        );
-        $this->assertResponseIsSuccessful();
-
-        $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
-        $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
-
-        $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
-        $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
-
-        self::assertEquals(
-            <<<HEREDOC
-🤔 Вы не записаны с +1 на этот клуб
-HEREDOC,
-            $message['text']
-        );
-
-        self::assertEquals([
-            [
-                [
-                    'text'          => '<< Перейти к списку ближайших клубов',
-                    'callback_data' => 'back_to_list',
-                ]
-            ],
-        ], $message['replyMarkup']);
-    }
-
-    /**
-     * @throws Exception
-     */
     public function testWhenUserNotSigned(): void
     {
         $speakingClub = $this->createSpeakingClub();
@@ -205,7 +155,7 @@ HEREDOC,
 
         self::assertEquals(
             <<<HEREDOC
-🤔 Вы не записаны с +1 на этот клуб
+🤔 Вы не записаны на этот клуб
 HEREDOC,
             $message['text']
         );

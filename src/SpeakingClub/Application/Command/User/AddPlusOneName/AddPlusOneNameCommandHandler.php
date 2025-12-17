@@ -61,11 +61,11 @@ class AddPlusOneNameCommandHandler
         }
 
         $participation = $this->participationRepository->findByUserIdAndSpeakingClubId($user->id, $command->speakingClubId);
-        if ($participation === null || $participation->isPlusOne() === false) {
+        if ($participation === null) {
             $this->telegram->editMessageText(
                 chatId: $command->chatId,
                 messageId: $command->messageId,
-                text: '🤔 Вы не записаны с +1 на этот клуб',
+                text: '🤔 Вы не записаны на этот клуб',
                 replyMarkup: [[
                     [
                         'text' => '<< Перейти к списку ближайших клубов',

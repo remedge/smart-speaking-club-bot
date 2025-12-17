@@ -10,7 +10,6 @@ use App\SpeakingClub\Domain\SpeakingClub;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\User\Application\Exception\UserNotFoundException;
 use App\User\Application\Query\UserQuery;
-use App\User\Domain\UserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
