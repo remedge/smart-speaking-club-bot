@@ -36,7 +36,7 @@ interface TelegramInterface
     /**
      * @param  array<int, array<int, array<string, string>>> $replyMarkup
      */
-    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void;
+    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = [], ?string $parseMode = null): void;
 
     public function setCommandsMenu(): void;
 }

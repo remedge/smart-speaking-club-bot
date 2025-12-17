@@ -37,7 +37,7 @@ class MockTelegram implements TelegramInterface
     {
     }
 
-    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void
+    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = [], ?string $parseMode = null): void
     {
         self::$messages[$chatId][$messageId] = [
             'text' => $text,
