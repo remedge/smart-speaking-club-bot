@@ -178,13 +178,16 @@ class LongmanTelegram implements TelegramInterface
         TelegramRequest::sendMessage($data);
     }
 
-    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = []): void
+    public function editMessageText(int $chatId, int $messageId, string $text, array $replyMarkup = [], ?string $parseMode = null): void
     {
         $data = [
             'chat_id' => $chatId,
             'message_id' => $messageId,
             'text' => $text,
         ];
+        if ($parseMode !== null) {
+            $data['parse_mode'] = $parseMode;
+        }
         if (count($replyMarkup) > 0) {
             /**
              * @psalm-suppress TooManyArguments

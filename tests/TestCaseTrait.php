@@ -53,12 +53,14 @@ trait TestCaseTrait
         UuidInterface $speakingClubId,
         string $userId,
         bool $isPlusOne = false,
+        ?string $plusOneName = null,
     ): Participation {
         $participation = new Participation(
             id: $this->uuidProvider->provide(),
             userId: Uuid::fromString($userId),
             speakingClubId: $speakingClubId,
             isPlusOne: $isPlusOne,
+            plusOneName: $plusOneName,
         );
 
         /** @var ParticipationRepository $participationRepository */

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Shared\Application\Callback\User;
 
-use App\SpeakingClub\Domain\Participation;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\System\DateHelper;
 use App\Tests\Shared\BaseApplicationTest;
@@ -25,27 +24,56 @@ class SignInPlusOneTest extends BaseApplicationTest
         $speakingClub = $this->createSpeakingClub();
 
         $this->sendWebhookCallbackQuery(
-            chatId: 111111,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
-        
+
         $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
         $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
-        self::assertEquals(<<<HEREDOC
-👌 Вы успешно записаны на клуб c +1 человеком
-HEREDOC, $message['text']);
+        self::assertEquals(
+            '📝 Почти готово! Для завершения записи введите данные гостя'
+                . PHP_EOL . PHP_EOL
+                . 'Место для второго участника будет забронировано только после ввода его данных.'
+                . PHP_EOL . PHP_EOL
+                . 'Пожалуйста, укажите Имя Фамилию или @username вашего друга.'
+                . PHP_EOL . PHP_EOL
+                . 'Это нужно, чтобы мы могли внести его в списки участников.',
+            $message['text']
+        );
 
         self::assertEquals([
-            [[
-                'text' => '<< Перейти к списку ваших клубов',
-                'callback_data' => 'back_to_my_list',
-            ]],
+            [
+                [
+                    'text'          => 'Добавить имя участника',
+                    'callback_data' => sprintf('add_plus_one_name:%s', $speakingClub->getId()),
+                ],
+            ],
+            [
+                [
+                    'text'          => '<< Перейти к списку ваших клубов',
+                    'callback_data' => 'back_to_my_list',
+                ],
+            ],
         ], $message['replyMarkup']);
+
+        // Проверяем, что участие создано сразу
+        // Находим участие через созданное участие из SignInPlusOneCommandHandler
+        // Но так как мы не можем получить id напрямую, используем findByUserIdAndSpeakingClubId
+        /** @var ParticipationRepository $participationRepository */
+        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
+        $participation = $participationRepository->findByUserIdAndSpeakingClubId(
+            Uuid::fromString(UserFixtures::USER_ID_JOHN_CONNNOR),
+            $speakingClub->getId()
+        );
+
+        self::assertNotNull($participation);
+        self::assertFalse($participation->isPlusOne());
+        self::assertNull($participation->getPlusOneName());
     }
 
     public function testClubNotFound(): void
@@ -55,22 +83,27 @@ HEREDOC, $message['text']);
             messageId: 123,
             callbackData: 'sign_in_plus_one:00000000-0000-0000-0000-000000000001'
         );
-        
+
         $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
         $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
-        self::assertEquals(<<<HEREDOC
-🤔 Такой клуб не найден
-HEREDOC, $message['text']);
+        self::assertEquals(
+            <<<HEREDOC
+🤔 Разговорный клуб не найден
+HEREDOC,
+            $message['text']
+        );
 
         self::assertEquals([
-            [[
-                'text' => '<< Перейти к списку ближайших клубов',
-                'callback_data' => 'back_to_list',
-            ]],
+            [
+                [
+                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'callback_data' => 'back_to_list',
+                ]
+            ],
         ], $message['replyMarkup']);
     }
 
@@ -87,26 +120,31 @@ HEREDOC, $message['text']);
         );
 
         $this->sendWebhookCallbackQuery(
-            chatId: 111111,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
-        
+
         $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
         $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
-        self::assertEquals(<<<HEREDOC
+        self::assertEquals(
+            <<<HEREDOC
 🤔 Вы уже записаны на этот разговорный клуб
-HEREDOC, $message['text']);
+HEREDOC,
+            $message['text']
+        );
 
         self::assertEquals([
-            [[
-                'text' => '<< Перейти к списку ближайших клубов',
-                'callback_data' => 'back_to_list',
-            ]],
+            [
+                [
+                    'text'          => '<< Перейти к списку ваших клубов',
+                    'callback_data' => 'back_to_my_list',
+                ]
+            ],
         ], $message['replyMarkup']);
     }
 
@@ -117,40 +155,44 @@ HEREDOC, $message['text']);
     {
         $speakingClub = $this->createSpeakingClub(minParticipantsCount: 1, maxParticipantsCount: 1);
 
-        /** @var ParticipationRepository $participationRepository */
-        $participationRepository = self::getContainer()->get(ParticipationRepository::class);
-        $participationRepository->save(new Participation(
-            id: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            userId: Uuid::fromString(UserFixtures::USER_ID_SARAH_CONNOR),
-            speakingClubId: Uuid::fromString('00000000-0000-0000-0000-000000000001'),
-            isPlusOne: false,
-        ));
+        // Занимаем место другим пользователем (проверяем только для одного человека, как в SignIn)
+        $this->createParticipation(
+            $speakingClub->getId(),
+            UserFixtures::USER_ID_SARAH_CONNOR
+        );
 
         $this->sendWebhookCallbackQuery(
-            chatId: 111111,
+            chatId: UserFixtures::USER_CHAT_ID_JOHN_CONNNOR,
             messageId: 123,
             callbackData: 'sign_in_plus_one:' . $speakingClub->getId()
         );
-        
+
         $this->assertArrayHasKey(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, $this->getMessages());
         $messages = $this->getMessagesByChatId(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR);
 
         $this->assertArrayHasKey(self::MESSAGE_ID, $messages);
         $message = $this->getMessage(UserFixtures::USER_CHAT_ID_JOHN_CONNNOR, self::MESSAGE_ID);
 
-        self::assertEquals(<<<HEREDOC
+        self::assertEquals(
+            <<<HEREDOC
 😔 К сожалению, все свободные места на данный клуб заняты
-HEREDOC, $message['text']);
+HEREDOC,
+            $message['text']
+        );
 
         self::assertEquals([
-            [[
-                'text' => 'Встать в лист ожидания',
-                'callback_data' => 'join_waiting_list:' . $speakingClub->getId()
-            ]],
-            [[
-                'text' => '<< Перейти к списку ближайших клубов',
-                'callback_data' => 'back_to_list',
-            ]],
+            [
+                [
+                    'text'          => 'Встать в лист ожидания',
+                    'callback_data' => 'join_waiting_list:' . $speakingClub->getId()
+                ]
+            ],
+            [
+                [
+                    'text'          => '<< Перейти к списку ближайших клубов',
+                    'callback_data' => 'back_to_list',
+                ]
+            ],
         ], $message['replyMarkup']);
     }
 
@@ -336,7 +378,7 @@ HEREDOC, $message['text']);
 
         // Должно быть сообщение об успешной записи, а не об ошибке лимита
         self::assertStringContainsString(
-            '👌 Вы успешно записаны на клуб c +1 человеком',
+            '📝 Почти готово! Для завершения записи введите данные гостя',
             $message['text']
         );
     }
@@ -454,7 +496,7 @@ HEREDOC, $message['text']);
 
         // Должно быть сообщение об успешной записи, а не об ошибке лимита
         self::assertStringContainsString(
-            '👌 Вы успешно записаны на клуб c +1 человеком',
+            '📝 Почти готово! Для завершения записи введите данные гостя',
             $message['text']
         );
     }

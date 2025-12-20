@@ -30,6 +30,10 @@ class ParticipationDoctrineMapping extends DoctrineMapping
 
         $builder->addField('isPlusOne', 'boolean');
 
+        $builder->addField('plusOneName', 'string', [
+            'nullable' => true,
+        ]);
+
         $builder->addIndex(['user_id', 'speaking_club_id'], 'participation_user_id_speaking_club_id');
     }
 }

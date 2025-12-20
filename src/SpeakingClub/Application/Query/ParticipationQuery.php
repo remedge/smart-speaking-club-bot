@@ -30,6 +30,7 @@ class ParticipationQuery
                 lastName: $participation['lastName'],
                 chatId: (int) $participation['chatId'],
                 isPlusOne: $participation['isPlusOne'],
+                plusOneName: $participation['plusOneName'] ?? null,
             );
         }
 

@@ -79,6 +79,10 @@ HEREDOC, $message['text']);
                 'callback_data' => 'show_speaking_club:' . $speakingClub->getId(),
             ]],
         ], $message['replyMarkup']);
+
+        $updatedParticipation = $participationRepository->findById($participation->getId());
+        self::assertFalse($updatedParticipation->isPlusOne());
+        self::assertNull($updatedParticipation->getPlusOneName());
     }
 
     public function testClubNotFound(): void
