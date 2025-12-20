@@ -92,6 +92,7 @@ class RemovePlusOneCommandHandler
         }
 
         $participation->setIsPlusOne(false);
+        $participation->setPlusOneName(null);
         $this->participationRepository->save($participation);
 
         $this->telegram->editMessageText(

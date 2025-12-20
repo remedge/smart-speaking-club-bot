@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SpeakingClub\Application\Command\User\AddPlusOne;
+namespace App\SpeakingClub\Application\Command\User\AddPlusOneName;
 
 use App\Shared\Application\Clock;
 use App\Shared\Domain\TelegramInterface;
@@ -14,19 +14,19 @@ use App\User\Domain\UserStateEnum;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class AddPlusOneCommandHandler
+class AddPlusOneNameCommandHandler
 {
     public function __construct(
         private UserQuery $userQuery,
         private UserRepository $userRepository,
-        private ParticipationRepository $participationRepository,
         private SpeakingClubRepository $speakingClubRepository,
+        private ParticipationRepository $participationRepository,
         private TelegramInterface $telegram,
         private Clock $clock,
     ) {
     }
 
-    public function __invoke(AddPlusOneCommand $command): void
+    public function __invoke(AddPlusOneNameCommand $command): void
     {
         $user = $this->userQuery->getByChatId($command->chatId);
         $speakingClub = $this->speakingClubRepository->findById($command->speakingClubId);
@@ -68,22 +68,7 @@ class AddPlusOneCommandHandler
                 text: '🤔 Вы не записаны на этот клуб',
                 replyMarkup: [[
                     [
-                        'text' => 'Перейти к списку ближайших клубов',
-                        'callback_data' => 'back_to_list',
-                    ],
-                ]]
-            );
-            return;
-        }
-
-        if ($participation->isPlusOne() === true) {
-            $this->telegram->editMessageText(
-                chatId: $command->chatId,
-                messageId: $command->messageId,
-                text: '🤔 Вы уже добавили +1 с собой на этот клуб',
-                replyMarkup: [[
-                    [
-                        'text' => 'Перейти к списку ближайших клубов',
+                        'text' => '<< Перейти к списку ближайших клубов',
                         'callback_data' => 'back_to_list',
                     ],
                 ]]

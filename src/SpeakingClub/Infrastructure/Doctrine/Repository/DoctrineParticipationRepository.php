@@ -77,7 +77,7 @@ class DoctrineParticipationRepository extends ServiceEntityRepository implements
     public function findBySpeakingClubId(UuidInterface $speakingClubId): array
     {
         return $this->createQueryBuilder('p')
-            ->select('p.id, u.username, u.chatId, p.isPlusOne, u.firstName, u.lastName')
+            ->select('p.id, u.username, u.chatId, p.isPlusOne, u.firstName, u.lastName, p.plusOneName')
             ->join(User::class, 'u', 'WITH', 'p.userId = u.id')
             ->where('p.speakingClubId = :speakingClubId')
             ->setParameter('speakingClubId', $speakingClubId)

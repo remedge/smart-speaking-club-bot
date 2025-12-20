@@ -199,6 +199,59 @@ abstract class BaseApplicationTest extends WebTestCase
     }
 
     /**
+     * @throws JsonException
+     */
+    protected function sendWebhookMessage(int $chatId, string $text): void
+    {
+        if ($chatId === UserFixtures::ADMIN_CHAT_ID) {
+            $firstName = 'Kyle';
+            $lastName = 'Reese';
+            $username = 'kyle_reese';
+        } elseif ($chatId === UserFixtures::USER_CHAT_ID_JOHN_CONNNOR) {
+            $firstName = 'John';
+            $lastName = 'Connor';
+            $username = 'john_connor';
+        } else {
+            $firstName = 'Sarah';
+            $lastName = 'Connor';
+            $username = 'sarah_connor';
+        }
+
+        $body = [
+            'update_id' => 476767317,
+            'message'   => [
+                'message_id' => 112,
+                'from'       => [
+                    'id'            => $chatId,
+                    'is_bot'        => false,
+                    'first_name'    => $firstName,
+                    'last_name'     => $lastName,
+                    'username'      => $username,
+                    'language_code' => 'ru',
+                ],
+                'chat'       => [
+                    'id'         => $chatId,
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'username'   => $username,
+                    'type'       => 'private',
+                ],
+                'date'       => 1680272756,
+                'text'       => $text,
+            ],
+        ];
+
+        $this->client->request(
+            method: 'POST',
+            uri: '/webhook',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: json_encode($body, JSON_THROW_ON_ERROR),
+        );
+    }
+
+    /**
      * @return array<mixed>
      */
     public function getMessages(): array

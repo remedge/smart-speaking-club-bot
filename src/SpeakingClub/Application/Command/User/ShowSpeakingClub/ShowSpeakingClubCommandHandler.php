@@ -117,7 +117,7 @@ class ShowSpeakingClubCommandHandler
             $speakingClub->getMaxParticipantsCount(),
             $totalParticipantsCount,
             ($participation === null) ? 'Вы не записаны' : (($participation->isPlusOne() === true)
-                ? 'Вы записаны с +1 человеком'
+                ? 'Вы записаны с +1' . ($participation->getPlusOneName() ? '(' . $participation->getPlusOneName() . ')' : '') . ' человеком'
                 : 'Вы записаны'),
             ($waitingUser === null) ? '' : 'Вы в списке ожидания',
         );

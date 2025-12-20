@@ -1,0 +1,201 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\SpeakingClub\Application\Command\User;
+
+use App\Shared\Application\Clock;
+use App\Shared\Application\UuidProvider;
+use App\Shared\Domain\TelegramInterface;
+use App\SpeakingClub\Domain\Participation;
+use App\SpeakingClub\Domain\ParticipationRepository;
+use App\SpeakingClub\Domain\SpeakingClub;
+use App\SpeakingClub\Domain\SpeakingClubRepository;
+use App\System\DateHelper;
+use App\User\Application\Dto\UserDTO;
+use App\User\Domain\User;
+use App\UserBan\Domain\UserBanRepository;
+use App\WaitList\Domain\WaitingUserRepository;
+
+class SignInHandler
+{
+    public function __construct(
+        private ParticipationRepository $participationRepository,
+        private SpeakingClubRepository $speakingClubRepository,
+        private WaitingUserRepository $waitingUserRepository,
+        private UserBanRepository $userBanRepository,
+        private TelegramInterface $telegram,
+        private UuidProvider $uuidProvider,
+        private Clock $clock,
+    ) {
+    }
+
+    /**
+     * @param User $user
+     * @param int $chatId
+     * @param int $messageId
+     * @param string $successMessage
+     * @param array $replyMarkup
+     * @param SpeakingClub|null $speakingClub
+     * @return void
+     */
+    public function handleSignIn(
+        UserDTO $user,
+        int $chatId,
+        int $messageId,
+        string $successMessage,
+        array $replyMarkup,
+        ?SpeakingClub $speakingClub,
+    ): void {
+        if ($speakingClub === null) {
+            $this->telegram->editMessageText(
+                chatId: $chatId,
+                messageId: $messageId,
+                text: '🤔 Разговорный клуб не найден',
+                replyMarkup: [
+                    [
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]
+                ]
+            );
+            return;
+        }
+
+        if ($this->clock->now() > $speakingClub->getDate()) {
+            $this->telegram->sendMessage(
+                chatId: $chatId,
+                text: '🤔 К сожалению, этот разговорный клуб уже прошел',
+                replyMarkup: [
+                    [
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ],
+                    ]
+                ]
+            );
+            return;
+        }
+
+        $participation = $this->participationRepository->findByUserIdAndSpeakingClubId(
+            $user->id,
+            $speakingClub->getId()
+        );
+        if ($participation !== null) {
+            $this->telegram->editMessageText(
+                chatId: $chatId,
+                messageId: $messageId,
+                text: '🤔 Вы уже записаны на этот разговорный клуб',
+                replyMarkup: [
+                    [
+                        [
+                            'text'          => '<< Перейти к списку ваших клубов',
+                            'callback_data' => 'back_to_my_list',
+                        ],
+                    ]
+                ]
+            );
+            return;
+        }
+
+        $participationCount = $this->participationRepository->countByClubId($speakingClub->getId());
+        if ($participationCount >= $speakingClub->getMaxParticipantsCount()) {
+            $this->telegram->editMessageText(
+                chatId: $chatId,
+                messageId: $messageId,
+                text: '😔 К сожалению, все свободные места на данный клуб заняты',
+                replyMarkup: [
+                    [
+                        [
+                            'text'          => 'Встать в лист ожидания',
+                            'callback_data' => sprintf('join_waiting_list:%s', $speakingClub->getId()->toString()),
+                        ]
+                    ],
+                    [
+                        [
+                            'text'          => '<< Перейти к списку ближайших клубов',
+                            'callback_data' => 'back_to_list',
+                        ]
+                    ],
+                ]
+            );
+            return;
+        }
+
+        $userBan = $this->userBanRepository->findByUserId($user->id, $this->clock->now());
+
+        if ($userBan !== null) {
+            $this->telegram->editMessageText(
+                chatId: $chatId,
+                messageId: $messageId,
+                text: sprintf(
+                    'Здравствуйте! Мы заметили, что недавно вы дважды отменили участие в нашем разговорном клубе менее чем за 24 часа до начала. 
+
+Чтобы гарантировать комфортное общение и планирование для всех участников, мы временно ограничиваем вашу возможность записываться на новые сессии. Это ограничение будет действовать до %s',
+                    $userBan->getEndDate()->format('d.m.Y H:i')
+                )
+            );
+            return;
+        }
+
+        $userClubs = $this->speakingClubRepository->findUserUpcoming($user->id, $this->clock->now());
+        if (count($userClubs) >= 5) {
+            $buttons = [];
+            foreach ($userClubs as $club) {
+                $buttons[] = [
+                    [
+                        'text'          => sprintf(
+                            '%s - %s',
+                            $club->getDate()->format('d.m H:i') . ' ' . DateHelper::getDayOfTheWeek(
+                                $club->getDate()->format('d.m.Y')
+                            ),
+                            $club->getName()
+                        ),
+                        'callback_data' => sprintf('show_my_speaking_club:%s', $club->getId()->toString()),
+                    ],
+                ];
+            }
+
+            $this->telegram->editMessageText(
+                chatId: $chatId,
+                messageId: $messageId,
+                text: "Кажется, ваш календарь переполнен! 📅\n\nВы записаны сразу на 5 клубов вперед. Чтобы добавить шестой, нужно завершить одно из занятий или отменить менее важную бронь.\n\nТак мы даем шанс попасть на практику всем желающим. Спасибо за понимание! ❤️\n\nКакую запись отменим?",
+                replyMarkup: $buttons
+            );
+            return;
+        }
+
+        $this->participationRepository->save(
+            new Participation(
+                id: $this->uuidProvider->provide(),
+                userId: $user->id,
+                speakingClubId: $speakingClub->getId(),
+                isPlusOne: false,
+            )
+        );
+
+        $this->telegram->editMessageText(
+            chatId: $chatId,
+            messageId: $messageId,
+            text: $successMessage,
+            replyMarkup: $replyMarkup
+        );
+
+        $waitUserArray = $this->waitingUserRepository->findOneByUserIdAndSpeakingClubId(
+            userId: $user->id,
+            speakingClubId: $speakingClub->getId(),
+        );
+        if ($waitUserArray !== null) {
+            $waitUser = $this->waitingUserRepository->findById($waitUserArray['id']);
+
+            if ($waitUser !== null) {
+                $this->waitingUserRepository->remove($waitUser);
+            }
+        }
+    }
+}
+
+

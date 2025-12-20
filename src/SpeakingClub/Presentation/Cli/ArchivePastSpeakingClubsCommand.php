@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\SpeakingClub\Presentation\Cli;
 
 use App\Shared\Application\Clock;
+use App\Shared\Infrastructure\GoogleSheets\GoogleSheetsServiceFactory;
 use App\SpeakingClub\Domain\ParticipationRepository;
 use App\SpeakingClub\Domain\SpeakingClubRepository;
 use App\System\DateHelper;
 use App\WaitList\Domain\WaitingUserRepository;
-use Google_Client;
-use Google_Service_Sheets;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,6 +23,7 @@ class ArchivePastSpeakingClubsCommand extends Command
         private ParticipationRepository $participationRepository,
         private WaitingUserRepository $waitingUserRepository,
         private Clock $clock,
+        private GoogleSheetsServiceFactory $googleSheetsServiceFactory,
         private string $spreadsheetId,
         private string $range,
     ) {
@@ -32,14 +32,7 @@ class ArchivePastSpeakingClubsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $client = new Google_Client();
-        $client->setApplicationName('Google Sheets API');
-        $client->setScopes([Google_Service_Sheets::SPREADSHEETS]);
-        $client->setAccessType('offline');
-        $path = __DIR__ . '/../../../../credentials/credentials.json';
-        $client->setAuthConfig($path);
-
-        $service = new Google_Service_Sheets($client);
+        $service = $this->googleSheetsServiceFactory->create();
 
         $speakingClubs = $this->speakingClubRepository->findAllPastNotArchived($this->clock->now());
 
@@ -59,7 +52,15 @@ class ArchivePastSpeakingClubsCommand extends Command
                 $speakingClub->getMinParticipantsCount(),
                 $speakingClub->getMaxParticipantsCount(),
                 $participationsCount,
-                implode(', ', array_map(fn (array $p) => $p['username'] . (($p['isPlusOne'] === true) ? ' (+1)' : ''), $participations)),
+                implode(
+                    ', ',
+                    array_map(function (array $p) {
+                        if ($p['isPlusOne'] === true) {
+                            return $p['username'] . ($p['plusOneName'] ? ' (+1 ' . $p['plusOneName'] . ')' : ' (+1)');
+                        }
+                        return $p['username'];
+                    }, $participations)
+                ),
                 implode(', ', array_map(fn (array $w) => $w['username'], $waitingUsers)),
                 $waitingUsersCount,
             ];

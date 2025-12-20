@@ -50,7 +50,13 @@ class AdminShowSpeakingClubCommandHandler
 
         $participants = '';
         foreach ($participations as $participation) {
-            $participants .= '@' . $participation->username . ' ' . ($participation->isPlusOne ? '(+1)' : '') . PHP_EOL;
+            $plusOneText = '';
+            if ($participation->isPlusOne) {
+                $plusOneText = $participation->plusOneName 
+                    ? sprintf(' (+1 %s)', $participation->plusOneName)
+                    : ' (+1)';
+            }
+            $participants .= '@' . $participation->username . $plusOneText . PHP_EOL;
         }
 
         $waitingUsers = $this->waitingUserRepository->findBySpeakingClubId($speakingClub->getId());

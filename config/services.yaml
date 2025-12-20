@@ -59,8 +59,11 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
+    App\Shared\Infrastructure\GoogleSheets\GoogleSheetsServiceFactory: ~
+
     App\SpeakingClub\Presentation\Cli\ArchivePastSpeakingClubsCommand:
         arguments:
+            $googleSheetsServiceFactory: '@App\Shared\Infrastructure\GoogleSheets\GoogleSheetsServiceFactory'
             $spreadsheetId: '%env(SPREADSHEET_ID)%'
             $range: '%env(SPREADSHEET_RANGE)%'
 
